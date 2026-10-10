@@ -1,0 +1,98 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Test Orbital Forge</title>
+<meta name="description" content="Join the Orbital Forge test on Android in about 2 minutes.">
+<meta property="og:title" content="Test Orbital Forge"><meta property="og:description" content="Join the test on Android in about 2 minutes."><meta property="og:image" content="https://pixelsnapgames.github.io/orbitalforge-site/icon.png"><meta property="og:url" content="https://pixelsnapgames.github.io/orbitalforge-site/test.html">
+<link rel="icon" href="icon.png"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#090e22}body{max-width:540px;margin:0 auto;background:#090e22;font-family:Inter,system-ui,sans-serif;color:#eef2ff;-webkit-font-smoothing:antialiased}
+.wrap{padding:30px 24px 34px;background:radial-gradient(120% 40% at 50% 0%,#1a2a66 0%,#090e22 70%)}
+.hero{display:flex;align-items:center;gap:16px}
+.hero img{width:68px;height:68px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.hero h1{font-size:30px;font-weight:800;letter-spacing:-.01em}
+.hero p{font-size:15px;color:#38e1c6;font-weight:600;margin-top:3px}
+.need{margin-top:18px;font-size:14px;color:#aab6d8;line-height:1.45;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.need b{color:#eef2ff}
+.step{margin-top:28px}
+.sh{display:flex;align-items:center;gap:12px}
+.num{width:32px;height:32px;border-radius:50%;background:#38e1c6;color:#08201c;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.sh h2{font-size:21px;font-weight:700}
+.sd{margin:8px 0 12px 44px;font-size:15px;line-height:1.45;color:#b8c3e3}
+.sd b{color:#fff}
+.sub{margin:16px 0 10px 44px;font-size:15px;line-height:1.45;color:#b8c3e3}
+.sub b{color:#fff}
+.go{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0 0;padding:14px 16px;border-radius:14px;background:#38e1c6;color:#06201c;font-weight:800;font-size:17px;text-decoration:none;box-shadow:0 8px 22px rgba(56,225,198,.25)}.go:active{transform:translateY(1px)}.go.alt{background:#ffd166;box-shadow:0 8px 22px rgba(255,209,102,.22)}.go small{font-weight:600;opacity:.75;font-size:13px}.after{margin:14px 0 10px 44px;font-size:13px;color:#8f9bc0}
+/* phone screen mockups */
+.scr{background:#fff;color:#1f1f1f;border-radius:18px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.06)}
+.bar{height:52px;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid #eceef3;color:#5f6368}
+.bar .ttl{font-size:19px;color:#444;font-weight:500;flex:1;display:flex;align-items:center;gap:8px}
+.av{width:30px;height:30px;border-radius:50%;background:#e8a33d;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+svg.i{width:22px;height:22px;stroke:#5f6368;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gp{padding:20px 18px 22px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gname{font-size:clamp(19px,5.6vw,24px);font-weight:500;color:#202124;white-space:nowrap}.obtn,.tbtn,.fbtn,.badge,.lnk{white-space:nowrap}
+.obtn{border:1px solid #c4c7c5;color:#0b57d0;font-weight:600;font-size:15px;padding:9px 16px;border-radius:20px;background:#fff}
+.fbtn{background:#0b57d0;color:#fff;font-weight:600;font-size:15px;padding:11px 22px;border-radius:22px;display:inline-block}
+.tbtn{color:#0b57d0;font-weight:600;font-size:15px;padding:8px 12px;border-radius:18px}
+.muted{color:#5f6368}
+.empty{margin-top:44px;text-align:center;font-size:14px;color:#80868b}
+.dlg{padding:20px 20px 16px}
+.dlg h3{font-size:19px;font-weight:600;color:#202124;margin-bottom:16px}
+.field{border:1px solid #c4c7c5;border-radius:8px;padding:9px 12px 10px;position:relative;margin-bottom:14px}
+.field .lbl{position:absolute;top:-8px;left:10px;background:#fff;padding:0 4px;font-size:11px;color:#5f6368}
+.field .val{font-size:15px;color:#202124}
+.chk{display:flex;align-items:center;gap:10px;font-size:14px;color:#3c4043;margin-bottom:14px}
+.box{width:18px;height:18px;border-radius:3px;background:#5f6368;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.cap{font-size:11px;letter-spacing:.08em;color:#5f6368;margin-bottom:6px}
+.sel{border:1px solid #c4c7c5;border-radius:8px;padding:10px 12px;font-size:15px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.acts{display:flex;justify-content:flex-end;gap:6px}
+.app{display:flex;flex-direction:column;align-items:center;padding:22px 20px 6px;text-align:center}
+.app img{width:64px;height:64px;border-radius:14px}
+.app .an{font-size:19px;font-weight:500;margin-top:10px;color:#202124}
+.app .ad{font-size:13px;color:#5f6368;margin-top:2px}
+.ptxt{padding:12px 22px 6px;font-size:13.5px;line-height:1.5;color:#3c4043}
+.ptxt p{margin-bottom:8px}
+.ctr{text-align:center;padding:10px 0 22px}
+.badge{display:inline-block;background:#c4eed0;color:#0d652d;font-size:14px;font-weight:600;padding:7px 13px;border-radius:8px}
+.lnk{color:#0b57d0;font-weight:600}
+.gbtn{display:inline-block;border:1px solid #c4c7c5;color:#5f6368;font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px}
+/* clean highlight */
+.obtn,.tbtn,.fbtn,.badge,.lnk{display:inline-block;line-height:1.25}.hl{position:relative;display:inline-flex;vertical-align:middle;border-radius:24px;box-shadow:0 0 0 3px #fff,0 0 0 6px #ff3b5c,0 0 18px 8px rgba(255,59,92,.35)}
+.hl.sq{border-radius:10px}
+.tap{position:absolute;top:50%;transform:translateY(-50%);background:#ff3b5c;color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;padding:4px 8px;border-radius:7px;white-space:nowrap;box-shadow:0 3px 8px rgba(255,59,92,.4)}
+.tap.toL{right:calc(100% + 16px)}.tap.toR{left:calc(100% + 16px)}.tap.below{top:calc(100% + 14px);transform:translateX(-50%);left:50%}
+.ok{position:absolute;left:50%;top:calc(100% + 14px);transform:translateX(-50%);background:#16a34a;color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;padding:4px 8px;border-radius:7px;white-space:nowrap}
+.hl.green{box-shadow:0 0 0 3px #fff,0 0 0 6px #16a34a,0 0 18px 8px rgba(22,163,74,.3)}
+.foot{margin-top:30px;padding:14px 16px;border-radius:14px;border:1.5px solid #ffd166;background:rgba(255,209,102,.07);font-size:15px;line-height:1.5;color:#f4ecd8}
+.foot b{color:#ffd166}.help{margin-top:22px;font-size:14px;line-height:1.5;color:#aab6d8}.help h3{color:#eef2ff;font-size:17px;margin-bottom:8px}.help p{margin-bottom:8px}.help b{color:#eef2ff}.help a{color:#38e1c6}
+</style></head><body><div class="wrap">
+<div class="hero"><img src="icon.png"><div><h1>Orbital Forge</h1><p>How to join the test · about 2 minutes</p></div></div>
+<div class="need">Use your <b>Android phone</b>, signed in with the <b>same Google account</b> you use on that phone.</div>
+
+<div class="step"><div class="sh"><div class="num">1</div><h2>Join the tester group</h2></div>
+<div class="sd">Open the group and tap <b>Join group</b>.<a class="go" href="https://groups.google.com/g/orbital-forge" target="_blank" rel="noopener">Open the tester group ↗</a></div><div class="after">It looks like this:</div>
+<div class="scr"><div class="bar"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg><div class="ttl"><svg class="i" viewBox="0 0 24 24" style="stroke:#1a73e8"><circle cx="9" cy="8" r="3.2"/><circle cx="16.5" cy="9" r="2.6"/><path d="M3.5 19c.6-3.2 3-5 5.5-5s4.9 1.8 5.5 5M14.5 14.6c2.6-.4 5 1.2 5.6 4.4"/></svg>Groups</div><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.3-4.3"/></svg><div class="av">Y</div></div>
+<div class="gp" style="padding:22px 26px 22px 18px"><div class="row"><div class="gname">Orbital Forge</div><span class="hl"><span class="obtn">Join group</span><span class="tap below">▴ TAP</span></span></div><div class="empty">No conversations yet</div></div></div>
+<div class="sub">Then tap <b>Join group</b> again to confirm. Tip: set Subscription to <b>No email</b> so the group never fills your inbox.</div>
+<div class="scr"><div class="dlg"><h3>Join Orbital Forge</h3>
+<div class="field"><span class="lbl">Display name</span><div class="val">Your name</div></div>
+<div class="chk"><span class="box">✓</span>Link to my Google account profile</div>
+<div class="cap">SUBSCRIPTION</div><div class="sel"><span>No email</span><span class="muted">▾</span></div>
+<div class="acts" style="margin-right:8px;margin-bottom:34px"><span class="tbtn muted" style="color:#5f6368">Cancel</span><span class="hl"><span class="tbtn">Join group</span><span class="tap below">▴ TAP</span></span></div></div></div></div>
+
+<div class="step"><div class="sh"><div class="num">2</div><h2>Become a tester</h2></div>
+<div class="sd">Come back here after joining the group, then open the tester page and tap <b>Become a tester</b>.<a class="go" href="https://play.google.com/apps/testing/com.pixelsnapgames.orbitalforge" target="_blank" rel="noopener">Open the tester page ↗</a></div><div class="after">It looks like this:</div>
+<div class="scr"><div class="bar"><div class="ttl" style="color:#5f6368;font-size:18px">Google Play</div><div class="av">Y</div></div>
+<div class="app"><img src="icon.png"><div class="an">Orbital Forge</div><div class="ad">PixelSnapGames</div></div>
+<div class="ptxt"><p><b>PixelSnapGames</b> has invited you to a testing program for an unreleased version of the Orbital Forge app.</p><p class="muted"><b>Note:</b> testing versions may be unstable.</p></div>
+<div class="ctr" style="padding-top:18px"><span class="hl"><span class="fbtn">Become a tester</span><span class="tap toR">◂ TAP</span></span></div></div></div>
+
+<div class="step"><div class="sh"><div class="num">3</div><h2>You're in! Install it</h2></div>
+<div class="sd">You'll see <b>You are a tester.</b> Tap <b>download it on Google Play</b> on that page, or use this button.<a class="go alt" href="https://play.google.com/store/apps/details?id=com.pixelsnapgames.orbitalforge" target="_blank" rel="noopener">Install Orbital Forge ↗</a></div><div class="after">Success looks like this:</div>
+<div class="scr"><div class="bar"><div class="ttl" style="color:#5f6368;font-size:18px">Google Play</div><div class="av">Y</div></div>
+<div class="app"><img src="icon.png"><div class="an">Orbital Forge</div><div class="ad">PixelSnapGames</div></div>
+<div class="ctr" style="padding:18px 0 34px"><span class="hl sq green"><span class="badge">You are a tester.</span><span class="ok">▴ SUCCESS</span></span></div>
+<div class="ptxt" style="padding-top:16px"><p>You'll receive an update to the Orbital Forge app if you already have it installed on your device.</p><p>If you don't have the Orbital Forge app installed,</p><p style="margin-top:10px"><span class="hl sq" style="padding:2px 5px"><span class="lnk">download it on Google Play</span><span class="tap toR">◂ TAP</span></span></p></div>
+<div class="ctr" style="padding-top:8px"><span class="gbtn">Leave the program</span></div></div></div>
+
+<div class="foot">Please keep Orbital Forge <b>installed for at least 14 days</b> and open it now and then. Google needs this before the game can launch for everyone. Thank you!</div>
+<div class="help"><h3>Stuck?</h3><p><b>"App not available"</b> on the tester page: wait a minute after joining the group and open it again, and make sure you're signed in with the same Google account as your phone.</p><p><b>"Content unavailable"</b> on the group page: sign in to Google in your browser first.</p><p><b>iPhone?</b> Sorry, the game is Android only for now.</p><p>Bugs or ideas: <a href="mailto:pixelsnapgames@gmail.com">pixelsnapgames@gmail.com</a></p></div>
+</div></body></html>
