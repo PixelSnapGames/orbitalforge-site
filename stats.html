@@ -1,0 +1,180 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Orbital Forge Stats</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#090e22">
+<link rel="icon" href="icon.png">
+<style>
+:root{--bg:#090e22;--card:#111936;--card2:#0d1430;--line:rgba(255,255,255,.09);--grid:rgba(255,255,255,.07);--tx:#eef2ff;--mu:#aab6d8;--mu2:#7f8bb3;--ac:#38e1c6;--acd:#06201c;--yl:#ffd166;--rd:#ff5c7a}
+*{box-sizing:border-box;margin:0;padding:0}[hidden]{display:none!important}
+html{background:var(--bg)}body{max-width:720px;margin:0 auto;min-height:100vh;background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+header{display:flex;align-items:center;gap:12px;padding:20px 16px 8px}
+header img{width:40px;height:40px;border-radius:10px}
+header h1{font-size:21px;font-weight:800;line-height:1.1}header p{font-size:12.5px;color:var(--mu2)}
+.acct{margin-left:auto}
+main{padding:8px 16px 60px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-radius:11px;border:0;background:var(--ac);color:var(--acd);font-weight:800;font-size:14px;white-space:nowrap}
+.btn.sec{background:rgba(255,255,255,.07);color:var(--tx);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:9px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;font-weight:800}
+.card .sub{font-size:12.5px;color:var(--mu2);margin-top:2px}
+.ph{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.range{display:flex;gap:6px;margin:4px 0 14px}
+.range button{flex:1;padding:8px 4px;border-radius:10px;border:0;background:rgba(255,255,255,.05);color:var(--mu);font-weight:700;font-size:13.5px}
+.range button.on{background:rgba(56,225,198,.14);color:var(--ac)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+@media(min-width:560px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 13px}
+.tile .k{font-size:12px;color:var(--mu2);font-weight:700}
+.tile .v{font-size:26px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.15}
+.tile .d{font-size:12px;color:var(--mu2);margin-top:2px}
+.chart{position:relative;margin-top:12px}
+.chart svg{display:block;width:100%;height:180px;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:#1d2a5c;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:7px 10px;font-size:12.5px;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);transform:translate(-50%,-100%);z-index:3}
+.tip b{display:block;font-size:13px}
+.tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{text-align:right;padding:5px 4px;border-bottom:1px solid var(--line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{color:var(--mu2);font-weight:700;font-size:12px}
+.hb{display:grid;grid-template-columns:76px 1fr 64px;align-items:center;gap:10px;margin-top:9px;font-size:13.5px}
+.hb .lb{color:var(--mu)}
+.hb .tr{height:12px;border-radius:0 4px 4px 0;background:var(--grid);position:relative}
+.hb .tr i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--ac)}
+.hb .n{text-align:right;font-variant-numeric:tabular-nums}
+.fb{border-top:1px solid var(--line);padding-top:11px;margin-top:11px}
+.fbh{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--mu2)}
+.st{color:var(--yl);letter-spacing:1px;font-size:14px}
+.qa{margin-top:6px;font-size:14px}.qa span{display:block;font-size:11.5px;font-weight:800;color:var(--mu2);text-transform:uppercase;letter-spacing:.05em}.qa div{white-space:pre-wrap;overflow-wrap:anywhere}
+.empty,.load{color:var(--mu);padding:18px 4px;text-align:center}
+.note{font-size:12.5px;color:var(--mu2);margin-top:8px}
+.vers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.vers span{font-size:12.5px;padding:4px 9px;border-radius:8px;background:rgba(255,255,255,.06);color:var(--mu)}.vers b{color:var(--tx)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#0f5a4e;color:#fff;padding:10px 14px;border-radius:11px;font-weight:600;font-size:14px;z-index:9}
+</style></head><body>
+<header><img src="icon.png" alt=""><div><h1>Orbital Forge stats</h1><p>Anonymous check-ins and feedback from the game (1.10.2+)</p></div><div class="acct" id="acct"></div></header>
+<main id="main"><div class="load">Loading…</div></main>
+<div id="toast" class="toast" hidden></div>
+<script>
+(function(){
+'use strict';
+var FB_CFG={apiKey:"AIzaSyCnBxh70YWlrOfQJQ9JO33h8zAs_nOfnxE",authDomain:"orbitalforge-81f30.firebaseapp.com",projectId:"orbitalforge-81f30",storageBucket:"orbitalforge-81f30.firebasestorage.app",messagingSenderId:"707228512475"};
+var ADMINS=['pixelsnapgames@gmail.com'],DAY=86400000;
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function dstr(t){return new Date(t).toISOString().slice(0,10)}
+function addDays(d,n){return dstr(Date.parse(d+'T00:00:00Z')+n*DAY)}
+function short(d){var t=new Date(d+'T00:00:00Z');return t.toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})}
+function pct(a,b){return b?Math.round(a/b*100)+'%':'–'}
+function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){t.hidden=true},2500)}
+var S={user:null,admin:false,plays:[],fb:[],range:14,err:null,loaded:false,table:false};
+
+/* ---- data source: Firebase, or ?mock for a preview with made-up numbers ---- */
+function load(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=function(){rej(new Error('Could not load '+src))};document.head.appendChild(s)})}
+var B={
+  init:function(){var v='https://www.gstatic.com/firebasejs/10.14.1/';return load(v+'firebase-app-compat.js').then(function(){return Promise.all([load(v+'firebase-auth-compat.js'),load(v+'firebase-firestore-compat.js')])}).then(function(){var app=firebase.initializeApp(FB_CFG,'stats');B.auth=app.auth();B.db=app.firestore()})},
+  onAuth:function(cb){B.auth.onAuthStateChanged(function(u){cb(u?{email:(u.email||'').toLowerCase(),name:u.displayName||''}:null)})},
+  signIn:function(){var p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});return B.auth.signInWithPopup(p)},
+  signOut:function(){return B.auth.signOut()},
+  fetch:function(){var from=addDays(dstr(Date.now()),-35);return Promise.all([
+    B.db.collection('plays').where('day','>=',from).where('day','<=',dstr(Date.now()+DAY)).get().then(function(q){return q.docs.map(function(d){return d.data()})}),
+    B.db.collection('feedback').orderBy('at','desc').limit(300).get().then(function(q){return q.docs.map(function(d){var x=d.data();x.at=x.at&&x.at.toMillis?x.at.toMillis():0;return x})})])}
+};
+if(/[?&]mock\b/.test(location.search)){
+  B={init:function(){return Promise.resolve()},onAuth:function(cb){setTimeout(function(){cb({email:'pixelsnapgames@gmail.com',name:'Preview'})},0)},signIn:function(){},signOut:function(){},
+    fetch:function(){var plays=[],today=dstr(Date.now()),r=0;function rnd(){r=(r*9301+49297)%233280;return r/233280}
+      for(var i=0;i<40;i++){var d0=addDays(today,-Math.floor(rnd()*30)),lv=1,tot=0;for(var k=0;k<30;k++){var day=addDays(d0,k);if(day>today)break;if(k>0&&rnd()>(k===1?0.45:0.7))continue;var m=Math.floor(4+rnd()*40);tot+=m;lv=Math.min(60,lv+Math.floor(rnd()*4));plays.push({iid:'i'+i,day:day,d0:d0,v:k>3?'1.10.2':'1.10.2',min:m,sess:1+Math.floor(rnd()*3),lv:lv,sys:1+Math.floor(lv/6),tot:tot,acct:rnd()>.6})}}
+      var fb=[{stars:5,like:'Watching the whole production line run itself.',confuse:'Took me a while to find where alloys come from.',other:'',v:'1.10.2',lv:14,tot:95,at:Date.now()-3600e3},{stars:3,like:'Planets look great',confuse:'Research tree is a lot at first',other:'Crash when opening the rover once',v:'1.10.2',lv:6,tot:31,at:Date.now()-86400e3}];
+      return Promise.resolve([plays,fb])}};
+}
+
+/* ---- numbers ---- */
+function compute(){
+  var today=dstr(Date.now()),from=addDays(today,-(S.range-1)),days=[];for(var i=S.range-1;i>=0;i--)days.push(addDays(today,-i));
+  var byDay={},inst={};days.forEach(function(d){byDay[d]={players:0,newp:0,min:0}});
+  S.plays.forEach(function(p){var I=inst[p.iid]||(inst[p.iid]={d0:p.d0,days:{},lv:0,sys:0,acct:false,v:'',last:''});I.days[p.day]=1;if(p.d0<I.d0)I.d0=p.d0;I.lv=Math.max(I.lv,p.lv||0);I.sys=Math.max(I.sys,p.sys||0);if(p.day>=I.last){I.last=p.day;I.v=p.v;I.acct=!!p.acct}
+    var b=byDay[p.day];if(b){b.players++;b.min+=p.min||0;if(p.day===p.d0)b.newp++}});
+  var inRange=Object.keys(inst).filter(function(k){var I=inst[k];return Object.keys(I.days).some(function(d){return d>=from})});
+  var newIn=inRange.filter(function(k){return inst[k].d0>=from});
+  var pd=days.reduce(function(a,d){return a+byDay[d].players},0),mins=days.reduce(function(a,d){return a+byDay[d].min},0);
+  // returning: installs from the last 35 days that are old enough to have had the chance
+  var c1=Object.keys(inst).filter(function(k){return inst[k].d0<=addDays(today,-1)}),r1=c1.filter(function(k){return inst[k].days[addDays(inst[k].d0,1)]});
+  var c7=Object.keys(inst).filter(function(k){return inst[k].d0<=addDays(today,-7)}),r7=c7.filter(function(k){var I=inst[k],lim=addDays(I.d0,7);return Object.keys(I.days).some(function(d){return d>=lim})});
+  var buckets=[['Lv 1–4',1,4],['Lv 5–9',5,9],['Lv 10–19',10,19],['Lv 20–39',20,39],['Lv 40–60+',40,999]].map(function(b){return{n:b[0],c:inRange.filter(function(k){return inst[k].lv>=b[1]&&inst[k].lv<=b[2]}).length}});
+  var vers={};inRange.forEach(function(k){var v=inst[k].v||'?';vers[v]=(vers[v]||0)+1});
+  return{today:today,days:days,byDay:byDay,players:inRange.length,newp:newIn.length,todayP:(byDay[today]||{}).players||0,avg:pd?Math.round(mins/pd):0,c1:c1.length,r1:r1.length,c7:c7.length,r7:r7.length,buckets:buckets,vers:vers,acct:inRange.filter(function(k){return inst[k].acct}).length};
+}
+
+/* ---- render ---- */
+function render(){
+  var u=S.user;$('#acct').innerHTML=u?'<button class="btn sm sec" data-act="out">Sign out</button>':'';
+  var m=$('#main');
+  if(!S.ready){m.innerHTML='<div class="load">Loading…</div>';return}
+  if(S.err&&!u){m.innerHTML='<div class="card"><h2>Could not connect</h2><p class="sub">'+esc(S.err.message||S.err)+'</p></div>';return}
+  if(!u){m.innerHTML='<div class="card"><h2>Organizer only</h2><p class="sub" style="margin:6px 0 12px">Sign in with the Orbital Forge Google account to see who is playing.</p><button class="btn" data-act="in">Sign in with Google</button></div>';return}
+  if(!S.admin){m.innerHTML='<div class="card"><h2>Organizer only</h2><p class="sub">'+esc(u.email)+' can\'t see these stats.</p></div>';return}
+  if(S.err){m.innerHTML='<div class="card"><h2>Could not load the stats</h2><p class="sub">'+esc(S.err.message||S.err)+'</p></div>';return}
+  if(!S.loaded){m.innerHTML='<div class="load">Loading stats…</div>';return}
+  S.cw=Math.max(280,Math.round((m.clientWidth||640)-30));var c=compute(),h='';
+  h+='<div class="range" role="tablist">'+[7,14,30].map(function(n){return '<button class="'+(S.range===n?'on':'')+'" data-range="'+n+'">'+n+' days</button>'}).join('')+'</div>';
+  h+='<div class="tiles">'
+    +tile('Playing today',c.todayP,'unique players, UTC day')
+    +tile('Players',c.players,'in the last '+S.range+' days')
+    +tile('New players',c.newp,'first seen in this range')
+    +tile('Minutes a day',c.avg,'average per player per day')
+    +tile('Came back next day',pct(c.r1,c.c1),c.r1+' of '+c.c1+' players')
+    +tile('Still playing after a week',pct(c.r7,c.c7),c.r7+' of '+c.c7+' players')+'</div>';
+  // daily players column chart
+  h+='<div class="card"><div class="ph"><h2>Players per day</h2><button class="btn sm sec" data-act="tbl">'+(S.table?'Chart':'Table')+'</button></div><div class="sub">Unique players each UTC day. Hover or tap a column for details.</div>';
+  if(S.table){h+='<table class="tbl"><tr><th>Day</th><th>Players</th><th>New</th><th>Minutes</th></tr>'+c.days.slice().reverse().map(function(d){var b=c.byDay[d];return '<tr><td>'+short(d)+'</td><td>'+b.players+'</td><td>'+b.newp+'</td><td>'+b.min+'</td></tr>'}).join('')+'</table>'}
+  else h+='<div class="chart" id="chart">'+columns(c)+'<div class="tip" id="tip" hidden></div></div>';
+  h+='</div>';
+  // how far players get
+  var maxB=Math.max.apply(null,c.buckets.map(function(b){return b.c}).concat([1]));
+  h+='<div class="card"><h2>How far players get</h2><div class="sub">Highest Commander Level reached by each player active in the last '+S.range+' days</div>'
+    +c.buckets.map(function(b){return '<div class="hb"><span class="lb">'+b.n+'</span><span class="tr"><i style="width:'+(b.c/maxB*100)+'%"></i></span><span class="n">'+b.c+' · '+pct(b.c,c.players)+'</span></div>'}).join('')
+    +'<p class="note">'+c.acct+' of '+c.players+' players are signed in to an account.</p>'
+    +'<div class="vers">'+Object.keys(c.vers).sort().reverse().map(function(v){return '<span>v'+esc(v)+' <b>'+c.vers[v]+'</b></span>'}).join('')+'</div></div>';
+  // feedback
+  var fb=S.fb,stars=fb.filter(function(f){return f.stars>0}),avg=stars.length?(stars.reduce(function(a,f){return a+f.stars},0)/stars.length).toFixed(1):'–';
+  h+='<div class="card"><div class="ph"><h2>Feedback · '+fb.length+'</h2>'+(fb.length?'<button class="btn sm sec" data-act="copy">Copy all</button>':'')+'</div><div class="sub">Average rating '+avg+' of 5'+(stars.length?' from '+stars.length+' players':'')+'</div>'
+    +(fb.length?fb.map(function(f){return '<div class="fb"><div class="fbh"><span class="st" aria-label="'+f.stars+' of 5 stars">'+(f.stars?'★'.repeat(f.stars)+'<span style="color:var(--grid)">'+'★'.repeat(5-f.stars)+'</span>':'no rating')+'</span><span>Lv '+esc(f.lv)+' · '+esc(f.tot)+' min played · v'+esc(f.v)+(f.at?' · '+new Date(f.at).toLocaleDateString(undefined,{month:'short',day:'numeric'}):'')+'</span></div>'+qa('Likes most',f.like)+qa('Confusing or annoying',f.confuse)+qa('Anything else',f.other)+'</div>'}).join(''):'<div class="empty">No feedback yet. Players are asked after about 20 minutes of play, and can send it any time from Settings.</div>')+'</div>';
+  h+='<p class="note">Players only appear once their game is on version 1.10.2 or newer. A player who reinstalls counts as a new one.</p>';
+  m.innerHTML=h;bindChart(c);
+}
+function tile(k,v,d){return '<div class="tile"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="d">'+d+'</div></div>'}
+function qa(k,v){return v?'<div class="qa"><span>'+k+'</span><div>'+esc(v)+'</div></div>':''}
+function niceMax(v){if(v<=4)return 4;var p=Math.pow(10,Math.floor(Math.log10(v))),n=v/p;return(n<=2?2:n<=5?5:10)*p}
+function columns(c){
+  var W=S.cw||640,H=180,L=28,R=6,T=10,Bt=22,n=c.days.length,vals=c.days.map(function(d){return c.byDay[d].players}),max=niceMax(Math.max.apply(null,vals.concat([1]))),
+      bw=(W-L-R)/n,cw=Math.min(24,bw-2),s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Players per day">';
+  [0,.5,1].forEach(function(f){var y=T+(H-T-Bt)*(1-f);s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="rgba(255,255,255,.07)" stroke-width="1" vector-effect="non-scaling-stroke"/><text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="#7f8bb3">'+Math.round(max*f)+'</text>'});
+  c.days.forEach(function(d,i){var v=vals[i],h=(H-T-Bt)*v/max,x=L+bw*i+(bw-cw)/2,y=H-Bt-h,r=Math.min(4,h);
+    if(v>0)s+='<path d="M'+x+','+(H-Bt)+'V'+(y+r)+'Q'+x+','+y+' '+(x+r)+','+y+'H'+(x+cw-r)+'Q'+(x+cw)+','+y+' '+(x+cw)+','+(y+r)+'V'+(H-Bt)+'Z" fill="#38e1c6"/>';
+    s+='<rect class="hit" data-i="'+i+'" x="'+(L+bw*i)+'" y="'+T+'" width="'+bw+'" height="'+(H-T)+'" fill="transparent"/>';
+    var every=n>14?5:n>7?2:1;if((n-1-i)%every===0)s+='<text x="'+(i===n-1?L+bw*i+bw:L+bw*i+bw/2)+'" y="'+(H-6)+'" text-anchor="'+(i===n-1?'end':'middle')+'" font-size="11" fill="#7f8bb3">'+short(d)+'</text>'});
+  return s+'</svg>';
+}
+function bindChart(c){var ch=$('#chart');if(!ch)return;var tip=$('#tip');
+  function show(e){var t=e.target.closest('.hit');if(!t){tip.hidden=true;return}var i=+t.dataset.i,d=c.days[i],b=c.byDay[d],r=t.getBoundingClientRect(),cr=ch.getBoundingClientRect();
+    tip.innerHTML='<b>'+short(d)+'</b>'+b.players+' players · '+b.newp+' new<br>'+b.min+' minutes played';tip.hidden=false;
+    var x=r.left-cr.left+r.width/2;x=Math.max(70,Math.min(cr.width-70,x));tip.style.left=x+'px';tip.style.top='6px'}
+  ch.addEventListener('mousemove',show);ch.addEventListener('click',show);ch.addEventListener('mouseleave',function(){tip.hidden=true})}
+
+document.addEventListener('click',function(e){var t=e.target.closest('[data-act],[data-range]');if(!t)return;
+  if(t.dataset.range){S.range=+t.dataset.range;render();return}
+  var a=t.dataset.act;
+  if(a==='in')B.signIn().catch(function(x){var c=x&&x.code||'';if(c!=='auth/popup-closed-by-user'&&c!=='auth/cancelled-popup-request')toast('Sign-in failed: '+(x.message||c))});
+  else if(a==='out')B.signOut();
+  else if(a==='tbl'){S.table=!S.table;render()}
+  else if(a==='copy'){var txt=S.fb.map(function(f){return (f.stars?f.stars+'/5':'no rating')+' · Lv '+f.lv+' · v'+f.v+'\n'+[['Likes most',f.like],['Confusing or annoying',f.confuse],['Anything else',f.other]].filter(function(x){return x[1]}).map(function(x){return x[0]+': '+x[1]}).join('\n')}).join('\n\n');
+    (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){toast('Copied')},function(){toast('Copy failed')})}
+});
+function refresh(){S.loaded=false;render();B.fetch().then(function(r){S.plays=r[0];S.fb=r[1];S.loaded=true;S.err=null;render()},function(e){S.err=e;render()})}
+B.init().then(function(){S.ready=true;B.onAuth(function(u){S.user=u;S.admin=!!(u&&ADMINS.indexOf(u.email)>=0);S.err=null;render();if(S.admin)refresh()})},function(e){S.ready=true;S.err=e;render()});
+render();
+var rz;window.addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(function(){if(S.loaded&&!S.table)render()},200)});
+})();
+</script>
+</body></html>
