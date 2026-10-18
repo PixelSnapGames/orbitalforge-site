@@ -19,7 +19,7 @@ a{color:var(--ac)}
 .i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---- frame ---- */
-.app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "nav" "main";min-height:100vh}
+.app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "nav" "main";grid-template-rows:auto auto 1fr;min-height:100vh}
 .top{grid-area:top;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:12px 16px 10px;background:rgba(9,14,34,.94)}
 .logo{width:34px;height:34px;border-radius:9px;flex:none}
 .brand{min-width:0;flex:1}
@@ -31,8 +31,10 @@ a{color:var(--ac)}
 .acct .em{display:none;font-size:12.5px;color:var(--mu);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pchip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800;color:var(--yl);background:rgba(255,209,102,.1);box-shadow:inset 0 0 0 1px rgba(255,209,102,.4)}
 .pchip::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
-.nav{grid-area:nav;position:sticky;top:0;z-index:20;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding:6px 8px;background:rgba(9,14,34,.96);border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
-.nav button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 1px 6px;border-radius:10px;color:var(--mu2);font-size:11px;font-weight:700;min-width:0}
+.nav{grid-area:nav;position:sticky;top:0;z-index:20;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding:6px 8px;background:rgba(9,14,34,.96);border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
+.nav button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px;border-radius:10px;color:var(--mu2);font-size:11px;font-weight:700;min-width:0;letter-spacing:-.01em}
+@media(max-width:420px){.nav{padding:6px 4px;gap:1px}.nav button{font-size:10.5px}}
+@media(max-width:380px){.nav button{font-size:10px;letter-spacing:-.025em}}
 .nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nav button .i{width:20px;height:20px}
 .nav button:hover{color:var(--tx)}
@@ -200,6 +202,7 @@ details[open]>summary.gh .i{transform:rotate(90deg)}
 @media(min-width:1060px){.comp{grid-template-columns:minmax(0,1fr) 352px;gap:24px}}
 .fs{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
 .fs>h3{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin-bottom:12px}
+.cform{counter-reset:fs}.cform>.fs{counter-increment:fs}.fs>h3 .n{font-size:0!important}.fs>h3 .n::before{content:counter(fs);font-size:11px}
 .fs>h3 .n{width:21px;height:21px;border-radius:6px;background:rgba(56,225,198,.12);color:var(--ac);display:inline-flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:0}
 .fs>h3 .x{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:600;color:var(--mu2)}
 .fs.link{border-color:rgba(255,209,102,.25)}
@@ -299,6 +302,7 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .tores button:hover{background:rgba(255,255,255,.08)}
 .tores button span{color:var(--mu2);font-weight:500;font-size:12px}
 .lsum{margin-top:10px;font-size:13px;color:var(--mu)}
+.lsep{border:0;border-top:1px solid var(--line);margin:14px 0}
 .lsum b{color:var(--tx)}
 .abar{position:sticky;bottom:10px;z-index:6;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px;margin-top:4px;border-radius:14px;background:rgba(17,25,54,.96);box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px var(--line2)}
 .abar .sum{flex:1 1 200px;min-width:0;font-size:12.5px;color:var(--mu);line-height:1.4}
@@ -367,6 +371,40 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .lbt .rk{color:var(--mu2);width:28px}
 .lbt tr.p1 .rk{color:var(--yl);font-weight:800}
 
+/* ---- library ---- */
+.libbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.libbar .srch{margin:0;max-width:440px}
+.pill .pc{font-weight:600;opacity:.6;font-variant-numeric:tabular-nums;margin-left:2px}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.lgrid>.empty{grid-column:1/-1}
+.lcard{display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;min-width:0}
+.lcard:hover{border-color:var(--line2)}
+.lpic{position:relative;width:100%;aspect-ratio:3/4;align-self:start;border-radius:9px;overflow:hidden;background:#0a0f2b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.lpic img{width:100%;height:100%;object-fit:cover;display:block}
+.lpic.ct img{object-fit:contain}
+.lpic.none{display:flex;align-items:center;justify-content:center;color:var(--mc);font-size:30px;background:radial-gradient(120% 90% at 50% 110%,color-mix(in srgb,var(--mc) 45%,transparent),transparent 70%),#0a0f2b}
+.lbody{min-width:0;display:flex;flex-direction:column;gap:6px}
+.lbody h3{font-size:15px;font-weight:800;line-height:1.25}
+.lt{font-size:12.5px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lchips{display:flex;flex-wrap:wrap;gap:5px}
+.lchips .chip{white-space:normal;border-radius:9px}
+.lchips .chip .i{width:12px;height:12px}
+.lwhen{display:flex;gap:6px;align-items:flex-start;font-size:13px;font-weight:700}
+.lwhen .i{width:15px;height:15px;color:var(--mu2);margin-top:2px}
+.llead{font-size:12px;color:var(--mu2);margin-top:-4px;padding-left:21px}
+.ltip{font-size:12.5px;color:var(--mu2);line-height:1.4}
+.lacts{display:flex;gap:6px;margin-top:auto;padding-top:4px}
+.chip.evc{color:var(--sc);background:color-mix(in srgb,var(--sc) 13%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sc) 38%,transparent)}
+.chip.sac{color:var(--pk);background:rgba(255,111,181,.1);box-shadow:inset 0 0 0 1px rgba(255,111,181,.35)}
+.chip.used{color:#86bfff;background:rgba(90,169,255,.1);box-shadow:inset 0 0 0 1px rgba(90,169,255,.3)}
+.chip.warnc{color:#ffd98a;background:rgba(255,209,102,.1)}
+@media(max-width:420px){.lgrid{grid-template-columns:minmax(0,1fr)}.lcard{grid-template-columns:92px minmax(0,1fr);gap:12px}}
+.libempty{text-align:center;padding:30px 18px}.libempty>.i{width:34px;height:34px;color:var(--pu)}.libempty h3{font-size:17px;margin:8px 0 4px}.libempty .btnrow{justify-content:center;margin-top:14px}
+.libline{display:inline-flex;align-items:flex-start;gap:8px;margin-top:8px;padding:6px 10px;border-radius:10px;font-size:13px;color:var(--mu);background:rgba(180,107,255,.08);box-shadow:inset 0 0 0 1px rgba(180,107,255,.3)}
+.libline .i{width:15px;height:15px;color:var(--pu);margin-top:2px}.libline b{color:var(--tx)}
+.lnk{color:var(--ac);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.pvdlg{width:min(400px,100%)}.pvdlg h3{font-size:16px}.pvdlg .phone{margin:14px auto 0}
+
 /* ---- toasts + dialog ---- */
 .toasts{position:fixed;left:50%;top:10px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100;width:min(520px,calc(100vw - 32px));pointer-events:none}
 @media(min-width:900px){.toasts{top:calc(var(--hh) + 12px)}}
@@ -377,8 +415,8 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .toast.err{background:#61182b;color:#ffe3e9}
 .toast.warn{background:#5c4512;color:#fff1cf}
 @keyframes tin{from{opacity:0;transform:translateY(-8px)}}
-.modalw{position:fixed;inset:0;z-index:90;background:rgba(3,6,18,.72);display:flex;align-items:center;justify-content:center;padding:16px}
-.dlg{width:min(460px,100%);background:var(--card);border:1px solid var(--line2);border-radius:16px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.modalw{position:fixed;inset:0;z-index:90;background:rgba(3,6,18,.72);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
+.dlg{margin:auto;width:min(460px,100%);background:var(--card);border:1px solid var(--line2);border-radius:16px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
 .dlg h3{font-size:17px;font-weight:800;line-height:1.3}
 .dlg p{color:var(--mu);margin-top:8px;font-size:14px}
 .dlg p b{color:var(--tx)}
@@ -518,7 +556,7 @@ function ask(o){return new Promise(res=>{const m=$('#modal'),prev=document.activ
 
 /* ---------- icons ---------- */
 const ICP={chart:'<path d="M4 20V11M10 20V4M16 20v-6M21 20H3"/>',msg:'<rect x="3" y="4" width="18" height="14" rx="2.5"/><path d="M7 9h10M7 13h6"/>',comet:'<circle cx="16" cy="8" r="3.5"/><path d="M13.5 10.5 4 20M11 7 5 13M17 13l-6 6"/>',tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/>',users:'<circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.6 2.9-5.6 6.5-5.6s6.5 2 6.5 5.6M16 4.6a3.6 3.6 0 0 1 0 7M21.5 20c0-2.6-1.2-4.4-3.4-5.2"/>',chat:'<path d="M4 5h16v11H9.5L4 20z"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',pause:'<path d="M8 5v14M16 5v14"/>',play:'<path d="M7 4.5l12 7.5-12 7.5z"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',trash:'<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',back:'<path d="M15 5l-7 7 7 7"/>',up:'<path d="M12 16V4M6.5 9.5 12 4l5.5 5.5M4 20h16"/>',gift:'<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8.5h14V12M12 8v12.5M12 8c-1.5-3.5-6-4-6-1.3C6 8.5 12 8 12 8s6 .5 6-1.3C18 4 13.5 4.5 12 8"/>',mega:'<path d="M3 10v4h3.5L15 19V5L6.5 10zM18 9a4 4 0 0 1 0 6"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',userx:'<circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.6 2.9-5.6 6.5-5.6 1.4 0 2.6.3 3.6.8M16 15l5 5M21 15l-5 5"/>',out:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5c0 2.6 1.6 4 3.5 4M16 6h3.5c0 2.6-1.6 4-3.5 4M12 13v4M8 20.5h8"/>',chev:'<path d="M9 5l7 7-7 7"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-6.5 8-6.5s8 2.3 8 6.5"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'};
+  plus:'<path d="M12 5v14M5 12h14"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',pause:'<path d="M8 5v14M16 5v14"/>',play:'<path d="M7 4.5l12 7.5-12 7.5z"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',trash:'<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',back:'<path d="M15 5l-7 7 7 7"/>',up:'<path d="M12 16V4M6.5 9.5 12 4l5.5 5.5M4 20h16"/>',gift:'<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8.5h14V12M12 8v12.5M12 8c-1.5-3.5-6-4-6-1.3C6 8.5 12 8 12 8s6 .5 6-1.3C18 4 13.5 4.5 12 8"/>',mega:'<path d="M3 10v4h3.5L15 19V5L6.5 10zM18 9a4 4 0 0 1 0 6"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',userx:'<circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.6 2.9-5.6 6.5-5.6 1.4 0 2.6.3 3.6.8M16 15l5 5M21 15l-5 5"/>',out:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5c0 2.6 1.6 4 3.5 4M16 6h3.5c0 2.6-1.6 4-3.5 4M12 13v4M8 20.5h8"/>',chev:'<path d="M9 5l7 7-7 7"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-6.5 8-6.5s8 2.3 8 6.5"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',book:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3M8 7h7M8 10.5h5"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'};
 function ic(n,c){return '<svg class="i'+(c?' '+c:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+(ICP[n]||'')+'</svg>'}
 
 /* =====================================================================
@@ -623,8 +661,8 @@ function mockSeed(){const D={},t=Date.now();let r=11;const rnd=()=>{r=(r*9301+49
 /* =====================================================================
    STATE + LOADING
    ===================================================================== */
-const TABS=[['overview','Overview','chart'],['messages','Messages','msg'],['events','Events','comet'],['store','Store','tag'],['players','Players','users'],['feedback','Feedback','chat']];
-const S={ready:false,user:null,admin:false,err:null,tab:'overview',range:14,table:false,plays:[],fb:[],motd:[],stat:{},live:{events:[],sales:[]},dn:[],dnQ:'',dnLimit:40,dnMore:false,blk:[],mail:null,lb:[],lbw:[],imgs:{},loaded:{},errs:{},draft:null,pv:null,evForm:null,saForm:null,busy:false,flash:null,openEnded:false,fallback:''};
+const TABS=[['overview','Overview','chart'],['messages','Messages','msg'],['library','Library','book'],['events','Events','comet'],['store','Store','tag'],['players','Players','users'],['feedback','Feedback','chat']];
+const S={ready:false,user:null,admin:false,err:null,tab:'overview',range:14,table:false,plays:[],fb:[],motd:[],stat:{},live:{events:[],sales:[]},dn:[],dnQ:'',dnLimit:40,dnMore:false,blk:[],mail:null,lib:{st:'loading'},libCat:'all',libQ:'',lb:[],lbw:[],imgs:{},loaded:{},errs:{},draft:null,pv:null,evForm:null,saForm:null,busy:false,flash:null,openEnded:false,fallback:''};
 const WANT_MOCK=/[?&]mock\b/.test(location.search)||!!window.__ccMock;
 let DB=WANT_MOCK?mockDB():fireDB();
 const LBL={plays:'play stats',feedback:'feedback',motd:'messages',stat:'message counters',live:'config/live',dn:'display names',lb:'the all-time board',lbw:'this week\'s board',blk:'blocked names'};
@@ -817,10 +855,10 @@ const TPL={
   blank:{n:'Blank',tag:'news',d:'Start from scratch',fill(){}}};
 const TPL_ORDER=['sale','event','gift','content','update','rank','blank'];
 function blankDraft(){const s=nowMin(),wk=thisWeekend();return {id:newId('m'),isNew:true,mode:'all',to:null,tpl:'blank',tag:'news',k:'',c:'',t:'',b:'',img:{kind:'none'},imgV:0,fit:'cover',go:'',ctaL:'',ctaUrl:'',giftOn:false,gift:emptyGift(),start:s,end:plusDays(s,3),acct:false,minLv:0,maxLv:0,prio:0,pop:true,paused:false,
-  lev:{on:false,mult:5,sys:-1,same:false,start:wk.start,until:wk.until},lsa:{on:false,sec:'boost',val:30,same:true,start:s,until:plusDays(s,3)},dirty:false,tried:false}}
+  lev:{on:false,mult:5,sys:-1,same:false,start:wk.start,until:wk.until,note:''},lsa:{on:false,sec:'boost',val:30,same:true,start:s,until:plusDays(s,3),note:''},dirty:false,tried:false}}
 function applyTpl(d,k){const T=TPL[k]||TPL.blank,s=nowMin(),wk=thisWeekend();
   Object.assign(d,{tpl:k,tag:T.tag,k:'',c:'',t:'',b:'',go:'',ctaL:'',ctaUrl:'',giftOn:false,gift:emptyGift(),start:s,end:plusDays(s,3),prio:0,pop:true,paused:false,acct:false,minLv:0,maxLv:0,
-    lev:{on:false,mult:5,sys:-1,same:false,start:wk.start,until:wk.until},lsa:{on:false,sec:'boost',val:30,same:true,start:s,until:plusDays(s,3)}});
+    lev:{on:false,mult:5,sys:-1,same:false,start:wk.start,until:wk.until,note:''},lsa:{on:false,sec:'boost',val:30,same:true,start:s,until:plusDays(s,3),note:''}});
   T.fill(d,s);d.dirty=false}
 function newDraft(k){const d=blankDraft();applyTpl(d,k||'blank');return d}
 function draftFromMsg(m){const d=blankDraft();
@@ -842,7 +880,12 @@ async function leaveComposer(){if(S.draft&&S.draft.dirty&&!await ask({title:'Dis
 function txtErr(E,k,v,max,req){v=v||'';if(req&&!v.trim())E[k]='Required';else if(v.length>max)E[k]=v.length+' of '+max+' characters: shorten it';else if(HTML_RE.test(v))E[k]='Plain text only: remove the HTML tags'}
 function intErr(E,k,v,lo,hi,what){if(!(Number.isInteger(v)&&v>=lo&&v<=hi))E[k]=(what||'Whole number')+' from '+lo+' to '+hi}
 function winErr(E,ks,ke,s,e,mustFuture){if(!isFinite(s))E[ks]='Pick a start';if(!isFinite(e))E[ke]='Pick an end';else if(isFinite(s)&&e<=s)E[ke]='Must end after it starts';else if(mustFuture&&e<=Date.now())E[ke]='This end time has already passed'}
-function linkOn(d){return d.mode==='all'?(d.tag==='event'&&d.lev.on?'ev':d.tag==='sale'&&d.lsa.on?'sale':''):''}
+/* linked config/live items: a shower block shows for event messages (or library items with an event), a sale block for
+   sale messages (or library items with a sale); both can be on in the same save */
+function showEv(d){return d.mode==='all'&&(d.tag==='event'||!!d.lev.lib)}
+function showSale(d){return d.mode==='all'&&(d.tag==='sale'||!!d.lsa.lib)}
+function evOn(d){return showEv(d)&&!!d.lev.on}
+function saleOn(d){return showSale(d)&&!!d.lsa.on}
 function levWin(d){return d.lev.same?{start:d.start,until:d.end}:{start:d.lev.start,until:d.lev.until}}
 function lsaWin(d){return d.lsa.same?{start:d.start,until:d.end}:{start:d.lsa.start,until:d.lsa.until}}
 function validate(d){const E={};
@@ -857,9 +900,8 @@ function validate(d){const E={};
   winErr(E,'start','end',d.start,d.end,d.isNew||d.mode==='one');
   if(d.mode==='all'){intErr(E,'minLv',d.minLv,0,999);intErr(E,'maxLv',d.maxLv,0,999);if(!E.minLv&&!E.maxLv&&d.maxLv>0&&d.maxLv<d.minLv)E.maxLv='Max level must be 0 (no max) or at least the min level';intErr(E,'prio',d.prio,-99,99)}
   else if(!d.to||!/^[A-Za-z0-9_-]{6,128}$/.test(d.to.uid))E.to='Pick a player (search a name or paste a uid)';
-  const lk=linkOn(d);
-  if(lk==='ev'){if(MULTS.indexOf(d.lev.mult)<0)E['lev.mult']='Pick a strength';if(!(d.lev.sys===-1||(Number.isInteger(d.lev.sys)&&d.lev.sys>=0&&d.lev.sys<SYS.length)))E['lev.sys']='Pick a system';const w=levWin(d);winErr(E,d.lev.same?'end':'lev.start',d.lev.same?'end':'lev.until',w.start,w.until,true)}
-  if(lk==='sale'){const S2=SECS[d.lsa.sec];if(!S2)E['lsa.sec']='Pick a section';else if(S2.kind==='pct')intErr(E,'lsa.val',d.lsa.val,1,90,'Discount');else intErr(E,'lsa.val',d.lsa.val,1,200,'Bonus');const w=lsaWin(d);winErr(E,d.lsa.same?'end':'lsa.start',d.lsa.same?'end':'lsa.until',w.start,w.until,true)}
+  if(evOn(d)){txtErr(E,'lev.note',d.lev.note||'',LIM.note,false);if(MULTS.indexOf(d.lev.mult)<0)E['lev.mult']='Pick a strength';if(!(d.lev.sys===-1||(Number.isInteger(d.lev.sys)&&d.lev.sys>=0&&d.lev.sys<SYS.length)))E['lev.sys']='Pick a system';const w=levWin(d);winErr(E,d.lev.same?'end':'lev.start',d.lev.same?'end':'lev.until',w.start,w.until,true)}
+  if(saleOn(d)){txtErr(E,'lsa.note',d.lsa.note||'',LIM.note,false);const S2=SECS[d.lsa.sec];if(!S2)E['lsa.sec']='Pick a section';else if(S2.kind==='pct')intErr(E,'lsa.val',d.lsa.val,1,90,'Discount');else intErr(E,'lsa.val',d.lsa.val,1,200,'Bonus');const w=lsaWin(d);winErr(E,d.lsa.same?'end':'lsa.start',d.lsa.same?'end':'lsa.until',w.start,w.until,true)}
   return E}
 /* ---- documents written (field names exactly as LIVE_SPEC) ---- */
 function buildMotd(d,prev){const now=Date.now();let img='',imgId='',imgV=prev?(prev.imgV||0):0;
@@ -869,8 +911,8 @@ function buildMotd(d,prev){const now=Date.now();let img='',imgId='',imgV=prev?(p
     cta:d.go?{l:d.ctaL.trim(),go:d.go==='url'?'url:'+d.ctaUrl.trim():d.go}:null,gift:d.giftOn?giftClean(d.gift):null,
     start:d.start,end:d.end,prio:d.prio,aud:{acct:!!d.acct,minLv:d.minLv,maxLv:d.maxLv},on:!d.paused,pop:!!d.pop,created:prev&&prev.created||now,up:now}}
 function buildMail(d){const m=buildMotd(d,null);delete m.prio;delete m.aud;m.on=true;m.got=false;m.seen=false;m.at=m.created;return m}
-function evFromDraft(d){const w=levWin(d),all=d.lev.sys<0;return {id:newId('e'),start:w.start,until:w.until,mult:d.lev.mult,all,sys:all?-1:d.lev.sys,note:d.t.trim().slice(0,LIM.note)}}
-function saleFromDraft(d){const w=lsaWin(d),k=SECS[d.lsa.sec].kind;return {id:newId('s'),sec:d.lsa.sec,pct:k==='pct'?d.lsa.val:0,bonus:k==='bonus'?d.lsa.val:0,start:w.start,until:w.until,note:d.t.trim().slice(0,LIM.note)}}
+function evFromDraft(d){const w=levWin(d),all=d.lev.sys<0;return {id:newId('e'),start:w.start,until:w.until,mult:d.lev.mult,all,sys:all?-1:d.lev.sys,note:((d.lev.note||'').trim()||d.t.trim()).slice(0,LIM.note)}}
+function saleFromDraft(d){const w=lsaWin(d),k=SECS[d.lsa.sec].kind;return {id:newId('s'),sec:d.lsa.sec,pct:k==='pct'?d.lsa.val:0,bonus:k==='bonus'?d.lsa.val:0,start:w.start,until:w.until,note:((d.lsa.note||'').trim()||d.t.trim()).slice(0,LIM.note)}}
 async function saveDraft(){const d=S.draft;if(!d||S.busy)return;d.tried=true;const E=validate(d);updateLive();const n=Object.keys(E).length;
   if(n){toast('Fix '+n+' field'+(n>1?'s':'')+' before saving: '+Object.keys(E).map(k=>E[k]).slice(0,2).join(' · '),'err','fix');const first=$('#comp .bad, #comp .err:not(:empty)');if(first){try{first.scrollIntoView({block:'center'})}catch(e){}const f=first.matches('.inp')?first:first.parentElement&&first.parentElement.querySelector('.inp');if(f)f.focus()}return}
   S.busy=true;setSaving(true);
@@ -881,9 +923,9 @@ async function saveDraft(){const d=S.draft;if(!d||S.busy)return;d.tried=true;con
     if(d.isNew)ops.push({op:'set',path:'motd_stat/'+d.id,data:{seen:0,tap:0,claim:0}});
     if(doc.img==='doc'&&d.img.changed)ops.push({op:'set',path:'motd_img/'+doc.imgId,data:{d:d.img.data}});
     if(prev&&prev.img==='doc'&&prev.imgId&&(doc.img!=='doc'||doc.imgId!==prev.imgId)&&!imgShared(prev.imgId,d.id))ops.push({op:'delete',path:'motd_img/'+prev.imgId});
-    const lk=linkOn(d);let extra='';
-    if(lk){const out=await DB.tx(['config/live'],cur=>{const L=liveNorm(cur['config/live']);if(lk==='ev')addItem(L.events,evFromDraft(d),'events');else addItem(L.sales,saleFromDraft(d),'sales');return ops.concat([{op:'set',path:'config/live',data:liveOut(L)}])});
-      const o=out.find(x=>x.path==='config/live');if(o)S.live=liveNorm(o.data);extra=lk==='ev'?' + shower scheduled':' + sale started'}
+    const lev=evOn(d),lsa=saleOn(d),lk=lev||lsa;let extra='';
+    if(lk){const out=await DB.tx(['config/live'],cur=>{const L=liveNorm(cur['config/live']);if(lev)addItem(L.events,evFromDraft(d),'events');if(lsa)addItem(L.sales,saleFromDraft(d),'sales');return ops.concat([{op:'set',path:'config/live',data:liveOut(L)}])});
+      const o=out.find(x=>x.path==='config/live');if(o)S.live=liveNorm(o.data);extra=(lev?' + shower scheduled':'')+(lsa?' + sale started':'')}
     else await DB.batch(ops);
     const st=mStatus(doc);toast((d.isNew?(st==='live'?'Published':st==='sched'?'Scheduled':'Saved'):'Saved')+': “'+doc.t+'”'+extra);
     if(doc.img==='doc'&&d.img.changed)S.imgs[doc.imgId]={v:doc.imgV,d:d.img.data};
@@ -891,7 +933,7 @@ async function saveDraft(){const d=S.draft;if(!d||S.busy)return;d.tried=true;con
   catch(e){console.warn('[cc] save',e);toast(fsErr(e),'err')}
   finally{S.busy=false;setSaving(false)}}
 function setSaving(on){const b=$('#saveBtn');if(b){b.disabled=on;b.classList.toggle('busy',on);if(on)b.textContent='Saving…';else if(S.draft)b.textContent=saveLabel(S.draft)}}
-function saveLabel(d){if(d.mode==='one')return 'Send to '+(d.to?(d.to.name||shortUid(d.to.uid)):'player');let s=!d.isNew?'Save changes':d.paused?'Save as paused':(isFinite(d.start)&&d.start>Date.now()+MIN)?'Schedule':'Publish now';const lk=linkOn(d);if(lk==='ev')s+=' + shower';if(lk==='sale')s+=' + sale';return s}
+function saveLabel(d){if(d.mode==='one')return 'Send to '+(d.to?(d.to.name||shortUid(d.to.uid)):'player');let s=!d.isNew?'Save changes':d.paused?'Save as paused':(isFinite(d.start)&&d.start>Date.now()+MIN)?'Schedule':'Publish now';if(evOn(d))s+=' + shower';if(saleOn(d))s+=' + sale';return s}
 
 /* ---- composer markup ---- */
 function sec(id,num,title,body,extra){return '<section class="fs'+(extra||'')+'" id="s-'+id+'" aria-labelledby="h-'+id+'"><h3 id="h-'+id+'"><span class="n">'+num+'</span>'+title+'</h3>'+body+'</section>'}
@@ -899,7 +941,7 @@ function fld(id,label,input,errKey,cnt,hint){return '<label class="fld" for="'+i
 function tgl(f,on,label,small){return '<label class="tgl"><span class="sw2"><input type="checkbox" data-f="'+f+'" id="f-'+f.replace('.','-')+'"'+(on?' checked':'')+'><i></i></span><span>'+label+(small?'<small>'+small+'</small>':'')+'</span></label>'}
 function qb(act,v,label,dis,form){return '<button class="qb" data-act="'+act+'" data-v="'+v+'"'+(form?' data-form="'+form+'"':'')+(dis?' disabled title="Already past"':'')+'>'+label+'</button>'}
 const CSECS={
-  tpl:(d)=>d.isNew&&!d.dupOf?sec('tpl','1','Start from a template','<div class="tpls" role="group" aria-label="Templates">'+TPL_ORDER.map(k=>{const T=TPL[k];return '<button class="tpl" style="--pc:'+TAGS[T.tag].c+'" data-act="dTpl" data-v="'+k+'" aria-pressed="'+(d.tpl===k)+'"><b>'+esc(T.n)+'</b><small>'+esc(T.d)+'</small></button>'}).join('')+'</div>'):'<section id="s-tpl" hidden></section>',
+  tpl:(d)=>d.isNew&&!d.dupOf&&!d.fromLib?sec('tpl','1','Start from a template','<div class="tpls" role="group" aria-label="Templates">'+TPL_ORDER.map(k=>{const T=TPL[k];return '<button class="tpl" style="--pc:'+TAGS[T.tag].c+'" data-act="dTpl" data-v="'+k+'" aria-pressed="'+(d.tpl===k)+'"><b>'+esc(T.n)+'</b><small>'+esc(T.d)+'</small></button>'}).join('')+'</div>'):'<section id="s-tpl" hidden></section>',
   to:(d)=>d.isNew?sec('to','2','Send to','<div class="seg" role="group" aria-label="Send to"><button data-act="dMode" data-v="all" aria-pressed="'+(d.mode==='all')+'">'+'Everyone</button><button data-act="dMode" data-v="one" aria-pressed="'+(d.mode==='one')+'">One player</button></div>'+(d.mode==='all'?'<p class="hint">Shown to every player who matches “Who sees it”. Saves motd/'+esc(d.id)+' with fresh counters.</p>':toPicker(d))):'<section id="s-to" hidden></section>',
   look:(d)=>{const T=TAGS[d.tag]||TAGS.news;return sec('look','3','Tag and colour','<div class="fld"><span class="lbl">Tag</span><div class="pills" role="group" aria-label="Tag">'+TAG_KEYS.map(k=>'<button class="pill" style="--pc:'+TAGS[k].c+'" data-act="dTag" data-v="'+k+'" aria-pressed="'+(d.tag===k)+'">'+TAGS[k].l+'</button>').join('')+'</div><div class="err" data-err="tag"></div></div>'
     +fld('f-k','Kicker on the tag chip <small>(empty: “'+esc(T.l)+'”)</small>','<input class="inp" id="f-k" data-f="k" value="'+esc(d.k)+'" placeholder="'+esc(T.l)+'" autocomplete="off">','k','k')
@@ -917,21 +959,22 @@ const CSECS={
   when:(d)=>{const past6=at(Date.now(),0,18)<=Date.now();return sec('when','8','When','<div class="row">'+fld('f-start','Starts','<input class="inp" type="datetime-local" id="f-start" data-f="start" value="'+toInp(d.start)+'">','start')+fld('f-end','Ends','<input class="inp" type="datetime-local" id="f-end" data-f="end" value="'+toInp(d.end)+'">','end')+'</div>'
     +'<div class="qrow"><span class="qk">Start</span>'+qb('qStart','now','Now')+qb('qStart','tonight','Tonight 6pm',past6)+qb('qStart','tom9','Tomorrow 9am')+qb('qStart','sat9','This Saturday 9am')+'</div>'
     +'<div class="qrow"><span class="qk">Run for</span>'+qb('qDur','1d','1 day')+qb('qDur','3d','3 days')+qb('qDur','1w','1 week')+qb('qDur','sun','Until Sunday night')+'</div><p class="hint" id="whenHint"></p>')},
-  link:(d)=>{if(d.mode!=='all'||(d.tag!=='event'&&d.tag!=='sale'))return '<section id="s-link" hidden></section>';
-    if(d.tag==='event'){const L=d.lev;let b=d.fromEv?'<p class="hint" style="margin:0 0 8px">Announcing an event that is already in config/live ('+esc(whereTxt(d.fromEv))+', '+d.fromEv.mult+'×). Leave this off unless you want a second one.</p>':'';
+  link:(d)=>{const se=showEv(d),ss=showSale(d);if(!se&&!ss)return '<section id="s-link" hidden></section>';let b='';
+    if(se){const L=d.lev;b+=d.fromEv?'<p class="hint" style="margin:0 0 8px">Announcing an event that is already in config/live ('+esc(whereTxt(d.fromEv))+', '+esc(d.fromEv.mult)+'×). Leave this off unless you want a second one.</p>':'';
       b+=tgl('lev.on',L.on,'Also schedule the shower','Adds a meteor event to config/live in the same save.');
       if(L.on){b+='<div class="fld" style="margin-top:10px"><span class="lbl">Strength</span><div class="mpick" role="group" aria-label="Shower strength">'+MULTS.map(m=>'<button class="mp'+(m===25?' m25':'')+'" style="--sc:'+MULT_C[m]+'" data-act="levMult" data-v="'+m+'" aria-pressed="'+(L.mult===m)+'"><b>'+m+'×</b><small>'+MULT_N[m]+'</small></button>').join('')+'</div><div class="err" data-err="lev.mult"></div></div>'
         +fld('f-lev-sys','Where','<select class="inp" id="f-lev-sys" data-f="lev.sys"><option value="-1"'+(L.sys<0?' selected':'')+'>All systems</option>'+SYS.map((n,i)=>'<option value="'+i+'"'+(L.sys===i?' selected':'')+'>'+i+' · '+n+'</option>').join('')+'</select>','lev.sys')
+        +fld('f-lev-note','Shower note <small>empty = the title</small>','<input class="inp" id="f-lev-note" data-f="lev.note" value="'+esc(L.note||'')+'" placeholder="'+esc(d.t.slice(0,LIM.note)||'Same as the title')+'" autocomplete="off">','lev.note')
         +tgl('lev.same',L.same,'Same window as the message','Off: the shower has its own start and end (the message can go out earlier).');
         if(!L.same)b+='<div class="row" style="margin-top:8px">'+fld('f-lev-start','Shower starts','<input class="inp" type="datetime-local" id="f-lev-start" data-f="lev.start" value="'+toInp(L.start)+'">','lev.start')+fld('f-lev-until','Shower ends','<input class="inp" type="datetime-local" id="f-lev-until" data-f="lev.until" value="'+toInp(L.until)+'">','lev.until')+'</div><div class="qrow">'+qb('levWk','wk','This weekend (Sat 00:00 → Sun 23:59)')+'</div>';
-        b+='<p class="lsum" id="linkSum"></p>'}
-      return sec('link','9','Also in config/live',b,' link')}
-    const L=d.lsa,k=SECS[L.sec]?SECS[L.sec].kind:'pct';let b=d.fromSale?'<p class="hint" style="margin:0 0 8px">Announcing a sale that is already in config/live. Leave this off unless you want another one.</p>':'';
-    b+=tgl('lsa.on',L.on,'Also start the sale','Adds a store sale to config/live in the same save.');
-    if(L.on){b+='<div class="row" style="margin-top:10px">'+fld('f-lsa-sec','Section',secSelect('f-lsa-sec','lsa.sec',L.sec),'lsa.sec')+fld('f-lsa-val',k==='pct'?'Discount % <small>1–90</small>':'Bonus % <small>1–200</small>','<input class="inp" type="number" id="f-lsa-val" data-f="lsa.val" min="1" max="'+(k==='pct'?90:200)+'" value="'+(isFinite(L.val)?L.val:'')+'">','lsa.val')+'</div>'
-      +tgl('lsa.same',L.same,'Same window as the message','Off: the sale has its own start and end.');
-      if(!L.same)b+='<div class="row" style="margin-top:8px">'+fld('f-lsa-start','Sale starts','<input class="inp" type="datetime-local" id="f-lsa-start" data-f="lsa.start" value="'+toInp(L.start)+'">','lsa.start')+fld('f-lsa-until','Sale ends','<input class="inp" type="datetime-local" id="f-lsa-until" data-f="lsa.until" value="'+toInp(L.until)+'">','lsa.until')+'</div>';
-      b+='<p class="lsum" id="linkSum"></p>'}
+        b+='<p class="lsum" id="linkSumEv"></p>'}}
+    if(ss){const L=d.lsa,k=SECS[L.sec]?SECS[L.sec].kind:'pct';if(se)b+='<hr class="lsep">';b+=d.fromSale?'<p class="hint" style="margin:0 0 8px">Announcing a sale that is already in config/live. Leave this off unless you want another one.</p>':'';
+      b+=tgl('lsa.on',L.on,'Also start the sale','Adds a store sale to config/live in the same save.');
+      if(L.on){b+='<div class="row" style="margin-top:10px">'+fld('f-lsa-sec','Section',secSelect('f-lsa-sec','lsa.sec',L.sec),'lsa.sec')+fld('f-lsa-val',k==='pct'?'Discount % <small>1–90</small>':'Bonus % <small>1–200</small>','<input class="inp" type="number" id="f-lsa-val" data-f="lsa.val" min="1" max="'+(k==='pct'?90:200)+'" value="'+(isFinite(L.val)?L.val:'')+'">','lsa.val')+'</div>'
+        +fld('f-lsa-note','Sale note <small>empty = the title</small>','<input class="inp" id="f-lsa-note" data-f="lsa.note" value="'+esc(L.note||'')+'" placeholder="'+esc(d.t.slice(0,LIM.note)||'Same as the title')+'" autocomplete="off">','lsa.note')
+        +tgl('lsa.same',L.same,'Same window as the message','Off: the sale has its own start and end.');
+        if(!L.same)b+='<div class="row" style="margin-top:8px">'+fld('f-lsa-start','Sale starts','<input class="inp" type="datetime-local" id="f-lsa-start" data-f="lsa.start" value="'+toInp(L.start)+'">','lsa.start')+fld('f-lsa-until','Sale ends','<input class="inp" type="datetime-local" id="f-lsa-until" data-f="lsa.until" value="'+toInp(L.until)+'">','lsa.until')+'</div>';
+        b+='<p class="lsum" id="linkSumSa"></p>'}}
     return sec('link','9','Also in config/live',b,' link')},
   who:(d)=>{if(d.mode==='one')return sec('who','10','How it shows',tgl('pop',d.pop,'Pop up in game','Off: it waits in the player\'s bell inbox.'));
     return sec('who','10','Who sees it','<div class="fld"><span class="lbl">Audience</span><div class="seg" role="group" aria-label="Audience"><button data-act="dAcct" data-v="0" aria-pressed="'+(!d.acct)+'">Everyone</button><button data-act="dAcct" data-v="1" aria-pressed="'+(!!d.acct)+'">Signed-in players only</button></div></div>'
@@ -952,10 +995,10 @@ function imgBody(d){const I=d.img;let h='';
     h+=fitSeg(d)+'<div class="imeta" id="imeta">'+imgMeta(I)+'</div><div class="err" data-err="img"></div><div class="btnrow"><button class="btn sm sec" data-act="imgPick">'+ic('up')+'Replace</button><button class="btn sm danger" data-act="imgRm">'+ic('trash')+'Remove</button></div></div></div>';return h}
   h='<div class="imged"><div><div class="imgbox"><img src="'+esc(I.url)+'" alt="Image from the web" referrerpolicy="no-referrer" id="urlImg"'+(d.fit==='contain'?' class="ct"':'')+'></div></div><div>'+fld('f-imgUrl','Image address (https)','<input class="inp mono" id="f-imgUrl" data-f="imgUrl" value="'+esc(I.url)+'" inputmode="url" autocomplete="off">','img')+fitSeg(d)+'<p class="hint" id="urlNote">The game loads it from this address. Portrait 3:4 looks best.</p><div class="btnrow"><button class="btn sm sec" data-act="imgPick">'+ic('up')+'Upload instead</button><button class="btn sm danger" data-act="imgRm">'+ic('trash')+'Remove</button></div></div></div>';return h}
 function fitSeg(d){return '<div class="fld"><span class="lbl">Fit in the 3:4 frame</span><div class="seg" role="group" aria-label="Fit"><button data-act="dFit" data-v="cover" aria-pressed="'+(d.fit!=='contain')+'">Cover (fill)</button><button data-act="dFit" data-v="contain" aria-pressed="'+(d.fit==='contain')+'">Contain (whole)</button></div></div>'}
-function imgMeta(I){if(!I.data)return I.err?'':'Loading the image…';const n=I.data.length;return (I.w?'<b>'+I.w+'×'+I.h+'</b> · JPEG '+Math.round((I.q||.82)*100)+'% · ':'Saved image · ')+'<b>'+nf(n)+'</b> of 900 000 characters'+(I.changed?' · <span style="color:var(--ac)">new</span>':'')}
+function imgMeta(I){if(!I.data)return I.err?'':I.lib?'Loading the library picture…':'Loading the image…';const n=I.data.length;return (I.w?'<b>'+I.w+'×'+I.h+'</b> · JPEG '+Math.round((I.q||.82)*100)+'% · ':'Saved image · ')+'<b>'+nf(n)+'</b> of 900 000 characters'+(I.changed?' · <span style="color:var(--ac)">new</span>':'')}
 function composerHTML(d){const title=d.isNew?(d.dupOf?'Duplicate message':d.mode==='one'?'Message one player':'New message'):'Edit message';
   const sub=d.dupOf?'Copy of “'+esc(d.dupOf)+'”. Saves as a new message with fresh counters.':d.isNew?'The phone shows your card live, in game order with everything else that is live or scheduled.':'Saving updates motd/'+esc(d.id)+'. Counters are kept.';
-  return '<div id="comp"><div class="chead"><button class="btn sm sec" data-act="dBack">'+ic('back')+'Messages</button><div class="grow"><h2>'+title+'</h2><p class="sub">'+sub+'</p></div></div>'
+  return '<div id="comp"><div class="chead"><button class="btn sm sec" data-act="dBack">'+ic('back')+'Messages</button><div class="grow"><h2>'+title+'</h2><p class="sub">'+sub+'</p>'+(d.fromLib?'<p class="libline">'+ic('book')+'<span>From the library: <b>'+esc(d.fromLib.name)+'</b> · <button class="lnk" data-act="libBack">Back to the library</button></span></p>':'')+'</div></div>'
     +'<div class="comp"><div class="cform">'+CORDER.map(k=>CSECS[k](d)).join('')
     +'<div class="abar" id="abar"><div class="sum" id="abSum"></div><div class="btns"><button class="ib pvjump" data-act="pvJump" aria-label="Jump to the phone preview" title="Phone preview">'+ic('eye')+'</button><button class="btn sec" data-act="dCancel">Cancel</button><button class="btn lg" id="saveBtn" data-act="dSave">'+esc(saveLabel(d))+'</button></div></div></div>'
     +'<aside class="pvcol" aria-label="Phone preview"><div class="pvbar"><div class="t"><b>In-game preview</b><span id="pvInfo"></span></div><button class="ib" data-act="pvDraft" aria-label="Show my draft" title="Show my draft">'+ic('eye')+'</button><button class="ib" data-act="pvStart" aria-label="Replay from the first card" title="Replay from the first card">'+ic('refresh')+'</button></div><div class="phone"><div class="screen" id="pvScreen"></div></div><p class="pvnote" id="pvNote"></p></aside></div></div>'}
@@ -969,7 +1012,8 @@ function updateLive(){const d=S.draft;if(!d||!$('#comp'))return;
   $$('#comp [data-f]').forEach(el=>{el.classList.toggle('bad',!!(d.tried&&E[errKey(el.dataset.f)]))});
   const wh=$('#whenHint');if(wh){const t=Date.now();let s='';if(isFinite(d.start)&&isFinite(d.end)){s=(d.end<=t?'Already over. ':d.start<=t?'Goes live as soon as you save. ':'Goes live '+rel(d.start)+'. ')+'Runs '+dur(d.end-d.start)+', until '+when(d.end)+'.'}wh.textContent=s+(TZ?' Times are your local time ('+TZ+').':'')}
   const gs=$('#giftSum');if(gs){const g=giftClean(d.gift);gs.textContent=giftParts(g).length?(d.mode==='one'?'They get: ':'Each player gets: ')+giftText(g):''}
-  const ls=$('#linkSum');if(ls){const lk=linkOn(d);if(lk==='ev'){const w=levWin(d);ls.innerHTML='Will add: <b>'+d.lev.mult+'× shower · '+esc(d.lev.sys<0?'all systems':SYS[d.lev.sys])+'</b> · '+esc(span(w.start,w.until))}else if(lk==='sale'){const w=lsaWin(d),S2=SECS[d.lsa.sec];ls.innerHTML='Will add: <b>'+esc(S2?S2.n:'')+' '+(S2&&S2.kind==='bonus'?'+'+d.lsa.val+'% bonus':'−'+d.lsa.val+'%')+'</b> · '+esc(span(w.start,w.until))}else ls.textContent=''}
+  const le=$('#linkSumEv');if(le){const w=levWin(d);le.innerHTML=evOn(d)?'Will add: <b>'+esc(d.lev.mult)+'× shower · '+esc(d.lev.sys<0?'all systems':SYS[d.lev.sys]||'')+'</b> · '+esc(span(w.start,w.until)):''}
+  const lsm=$('#linkSumSa');if(lsm){const w=lsaWin(d),S2=SECS[d.lsa.sec];lsm.innerHTML=saleOn(d)?'Will add: <b>'+esc(S2?S2.n:'')+' '+(S2&&S2.kind==='bonus'?'+'+esc(d.lsa.val)+'% bonus':'−'+esc(d.lsa.val)+'%')+'</b> · '+esc(span(w.start,w.until)):''}
   const ab=$('#abSum');if(ab){const who=d.mode==='one'?'<b>'+esc(d.to?(d.to.name||shortUid(d.to.uid)):'No player picked')+'</b> (mail)':'<b>Everyone</b>'+(d.acct?' signed in':'')+(audTxt({minLv:d.minLv,maxLv:d.maxLv})?' · '+esc(audTxt({minLv:d.minLv,maxLv:d.maxLv})):'');
     const n=d.tried?Object.keys(E).length:0;ab.innerHTML=who+' · '+esc(isFinite(d.start)&&isFinite(d.end)?span(d.start,d.end):'pick dates')+' · '+(d.pop?'pop-up':'bell only')+(d.paused&&d.mode==='all'?' · <b>paused</b>':'')+(n?'<br><span style="color:#ff8ea3">'+n+' field'+(n>1?'s':'')+' to fix</span>':'')}
   const sb=$('#saveBtn');if(sb&&!S.busy)sb.textContent=saveLabel(d);
@@ -998,6 +1042,7 @@ function draftInput(el,f,type){const d=S.draft;if(!d)return;const v=el.type==='c
   else if(f==='lev.start'||f==='lev.until'||f==='lsa.start'||f==='lsa.until'){d[f.slice(0,3)][f.slice(4)]=fromInp(v)}
   else if(f==='lsa.sec'){const k0=SECS[d.lsa.sec]&&SECS[d.lsa.sec].kind;d.lsa.sec=v;const k1=SECS[v].kind;if(k0!==k1)d.lsa.val=k1==='pct'?30:50;if(d.go.indexOf('shop:')===0||!d.go){d.go='shop:'+v;if(!d.ctaL)d.ctaL='Open the Shop';paint('cta')}paint('link');return}
   else if(f==='lsa.val')d.lsa.val=v===''?NaN:Number(v);
+  else if(f==='lev.note'||f==='lsa.note')d[f.slice(0,3)].note=v;
   S.pv.follow=true;updateLive()}
 function syncSwatches(){const d=S.draft;$$('#s-look [data-act="dCol"]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.v||'')===(isHex(d.c)?d.c:d.c===''?'':'x'))));const cp=$('#s-look [data-f="cPick"]');if(cp&&isHex(d.c))cp.value=d.c;S.pv.follow=true;updateLive()}
 function searchTo(){const q=nameKey(S.toQ);if(!q){S.toRes=[];const r=$('#toRes');if(r)r.innerHTML='';return}
@@ -1041,10 +1086,11 @@ const PV_CSS='*{box-sizing:border-box}[hidden]{display:none!important}html,body{
   +'.mdBig{font-size:76px;line-height:1;color:var(--mc);text-shadow:0 0 34px var(--mc)}.mdT .ph{opacity:.35}'
   +'.ptoast{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);z-index:9;max-width:330px;overflow:hidden;text-overflow:ellipsis;background:#1d2a5c;color:#eef2ff;padding:10px 14px;border-radius:11px;font-weight:600;font-size:14px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.5)}'
   +'.mdCard{animation:mdIn .2s ease-out}@keyframes mdIn{from{opacity:0;transform:translateY(8px) scale(.98)}}@media (prefers-reduced-motion:reduce){.mdCard{animation:none}}';
+function pvDocHTML(){return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390"><style>'+PV_CSS+CARD_CSS+'</style></head><body><div class="game"><div class="hud"><span class="p">◆ 312</span><span class="p g">$ 4.82M</span><span class="sp"></span><button class="bell" id="bell" aria-label="Messages">🔔<b id="bellN">0</b></button></div><div class="planet"></div><div class="dock"><i></i><i></i><i></i><i></i><i></i></div></div><div class="sbar"><span id="clock"></span><i></i></div><div class="ov" id="ov"></div><div class="closed" id="closed" hidden><div id="closedT">Card closed</div><button class="again" id="again">Open the messages again</button></div><div class="ptoast" id="ptoast" hidden></div></body></html>'}
 function pvDoc(){const f=$('#pvFrame');try{return f&&f.contentDocument}catch(e){return null}}
 function mountPreview(){const host=$('#pvScreen');if(!host)return;host.innerHTML='';const fr=document.createElement('iframe');fr.id='pvFrame';fr.title='Phone preview: the message as players will see it';host.appendChild(fr);
   const doc=pvDoc();if(!doc){host.innerHTML='<div class="empty">Preview unavailable in this browser.</div>';return}
-  doc.open();doc.write('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390"><style>'+PV_CSS+CARD_CSS+'</style></head><body><div class="game"><div class="hud"><span class="p">◆ 312</span><span class="p g">$ 4.82M</span><span class="sp"></span><button class="bell" id="bell" aria-label="Messages">🔔<b id="bellN">0</b></button></div><div class="planet"></div><div class="dock"><i></i><i></i><i></i><i></i><i></i></div></div><div class="sbar"><span id="clock"></span><i></i></div><div class="ov" id="ov"></div><div class="closed" id="closed" hidden><div id="closedT">Card closed</div><button class="again" id="again">Open the messages again</button></div><div class="ptoast" id="ptoast" hidden></div></body></html>');doc.close();
+  doc.open();doc.write(pvDocHTML());doc.close();
   doc.addEventListener('click',pvClick);fitPreview();pvRender()}
 function fitPreview(){const host=$('#pvScreen'),fr=$('#pvFrame');if(!host||!fr)return;const w=host.clientWidth||320,s=w/390;fr.style.transform='scale('+s+')';host.style.height=Math.round(844*s)+'px'}
 function pvItems(){const d=S.draft,t=Date.now();const others=S.motd.filter(m=>m.on!==false&&m.end>t&&m.id!==d.id).map(m=>({id:m.id,tag:m.tag,k:m.k,c:m.c,t:m.t,b:m.b,src:imgSrc(m),fit:m.fit,cta:m.cta,gift:m.gift,prio:m.prio||0,start:m.start}));
@@ -1209,6 +1255,133 @@ async function mailDelete(id){const M=S.mail;if(!M||!M.rows)return;const x=M.row
   const ops=[{op:'delete',path:'mail/'+M.uid+'/m/'+id}];if(m.img==='doc'&&m.imgId&&!imgShared(m.imgId,''))ops.push({op:'delete',path:'motd_img/'+m.imgId});
   try{await DB.batch(ops);toast('Deleted the mail “'+(m.t||id)+'”');await fetchMail()}catch(e){toast(fsErr(e),'err')}}
 
+
+/* =====================================================================
+   MESSAGE LIBRARY — library/library.js sets window.CC_LIBRARY (see LIBRARY_SPEC.md).
+   Nothing here writes to Firestore: "Use" only fills the composer.
+   ===================================================================== */
+const WDL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function loadLibrary(retry){S.lib={st:'loading'};try{delete window.CC_LIBRARY}catch(e){window.CC_LIBRARY=undefined}
+  return loadScript('library/library.js'+(retry?'?r='+Date.now():''),15000).then(()=>{S.lib=libParse(window.CC_LIBRARY)},e=>{S.lib={st:'missing',msg:e&&e.message||String(e)}}).then(()=>{if(S.tab==='library')soonRender()})}
+function libParse(L){if(!L||typeof L!=='object'||!Array.isArray(L.items))return {st:'bad',msg:'library.js loaded, but it has no window.CC_LIBRARY.items list.'};
+  const cats=(Array.isArray(L.cats)?L.cats:[]).filter(c=>c&&typeof c.id==='string'&&typeof c.n==='string'),seen={},items=[];let skipped=0;
+  L.items.forEach(it=>{if(!it||typeof it!=='object'||typeof it.id!=='string'||!/^[a-z0-9-]{3,40}$/.test(it.id)||seen[it.id]||!it.msg||typeof it.msg!=='object'||typeof it.msg.t!=='string'){skipped++;return}seen[it.id]=1;items.push(it)});
+  return {st:'ok',cats,items,skipped}}
+function libItem(id){return S.lib&&S.lib.st==='ok'?S.lib.items.find(x=>x.id===id)||null:null}
+function libImgOk(p){return typeof p==='string'&&/^[A-Za-z0-9_\-./]+\.(jpe?g|png|webp)$/i.test(p)&&p.indexOf('..')<0&&p[0]!=='/'}
+/* ---- date engine: local time; a rule gives the EVENT window [start, start+hours) ---- */
+function easterMD(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),x=h+l-7*m+114;return [Math.floor(x/31),x%31+1]}
+function nthWeekdayDom(y,m,n,day){const last=new Date(y,m,0).getDate();if(n===-1){const ld=new Date(y,m-1,last).getDay();return last-((ld-day+7)%7)}const fd=new Date(y,m-1,1).getDay(),dd=1+((day-fd+7)%7)+(n-1)*7;return dd<=last?dd:null}
+function realDate(y,m,d){const t=new Date(y,m-1,d);return t.getFullYear()===y&&t.getMonth()===m-1&&t.getDate()===d}
+function libWhen(w,now){if(!w||typeof w!=='object')return null;
+  const hours=w.hours,lead=w.leadH==null?0:w.leadH,off=w.offsetDays==null?0:w.offsetDays,int=Number.isInteger;
+  if(!(typeof hours==='number'&&hours>=1&&hours<=336)||!(typeof lead==='number'&&lead>=0&&lead<=240)||!(int(off)&&Math.abs(off)<=366))return null;
+  /* hours are wall-clock hours, so 48 from Sat 00:00 ends Mon 00:00 even across a DST change */
+  const HM=Math.round(hours*60);
+  if(w.rule==='now'){const n=new Date(Math.floor(now/MIN)*MIN);return {start:n.getTime(),end:new Date(n.getFullYear(),n.getMonth(),n.getDate(),n.getHours(),n.getMinutes()+HM).getTime()}}
+  const am=w.at==null?[0,'00','00']:/^([01]\d|2[0-3]):([0-5]\d)$/.exec(w.at);if(!am)return null;
+  const mk=(y,mo,dd,o)=>({start:new Date(y,mo-1,dd+(o||0),+am[1],+am[2],0,0).getTime(),end:new Date(y,mo-1,dd+(o||0),+am[1],+am[2]+HM,0,0).getTime()});
+  const pick=c=>{c.sort((a,b)=>a.start-b.start);for(const x of c)if(x.end>now)return x;return null};
+  const Y=new Date(now).getFullYear(),c=[];
+  switch(w.rule){
+    case 'weekday':case 'weekend':{const day=w.rule==='weekend'?6:w.day;if(!int(day)||day<0||day>6)return null;const t0=new Date(now);
+      for(let k=-16;k<=8;k++){const dt=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+k);if(dt.getDay()===day)c.push(mk(dt.getFullYear(),dt.getMonth()+1,dt.getDate()))}return pick(c)}
+    case 'date':{if(!int(w.m)||!int(w.d)||w.m<1||w.m>12||w.d<1||w.d>31)return null;for(let y=Y-1;y<=Y+8;y++)if(realDate(y,w.m,w.d))c.push(mk(y,w.m,w.d,off));return c.length?pick(c):null}
+    case 'nthWeekday':{if(!int(w.m)||w.m<1||w.m>12||!int(w.day)||w.day<0||w.day>6||!(w.n===-1||(int(w.n)&&w.n>=1&&w.n<=5)))return null;for(let y=Y-1;y<=Y+8;y++){const dd=nthWeekdayDom(y,w.m,w.n,w.day);if(dd)c.push(mk(y,w.m,dd,off))}return pick(c)}
+    case 'easter':{for(let y=Y-1;y<=Y+2;y++){const e=easterMD(y);c.push(mk(y,e[0],e[1],off))}return pick(c)}
+    case 'table':{if(!Array.isArray(w.dates)||!w.dates.length)return null;for(const ds of w.dates){const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(ds);if(!m||!realDate(+m[1],+m[2],+m[3]))return null;c.push(mk(+m[1],+m[2],+m[3],off))}return pick(c)}}
+  return null}
+/* message window = [max(now, event start − leadH), event end); items with neither event nor sale use the event window itself */
+function libWindows(it,now){const ev=libWhen(it&&it.when,now);if(!ev)return null;const lead=(it.event||it.sale)?(it.when.leadH||0)*HOUR:0;return {ev,msg:{start:Math.max(Math.floor(now/MIN)*MIN,ev.start-lead),end:ev.end}}}
+/* ---- placeholders ---- */
+function t12(t){const d=new Date(t);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;return h+':'+pad(d.getMinutes())+' '+ap}
+/* placeholders describe the announced window: the rule's window when the item has an event or a sale, else the message window */
+function libCtx(it,W){const w=(it.event||it.sale)?W.ev:W.msg,s=new Date(w.start),e0=new Date(w.end),eT=e0.getHours()===0&&e0.getMinutes()===0?w.end-MIN:w.end,e=new Date(eT),ev=it.event,sa=it.sale;
+  return {weekday:WDL[s.getDay()],date:MO[s.getMonth()]+' '+s.getDate(),time:t12(w.start),end:WD[e.getDay()]+' '+t12(eT),year:String(s.getFullYear()),
+    mult:ev&&MULTS.indexOf(ev.mult)>=0?ev.mult+'×':null,pct:sa&&typeof sa.pct==='number'&&sa.pct>0?sa.pct+'%':null,bonus:sa&&typeof sa.bonus==='number'&&sa.bonus>0?'+'+sa.bonus+'%':null}}
+function libFill(str,ctx,miss){return String(str==null?'':str).replace(/\{(weekday|date|time|end|year|mult|pct|bonus)\}/g,(m,k)=>{if(ctx[k]==null){if(miss)miss.add(m);return m}return ctx[k]})}
+/* "Used": a motd whose title matches the item's title template (placeholders match anything) */
+function libTitleRe(t){return new RegExp('^'+String(t||'').split(/\{(?:weekday|date|time|end|year|mult|pct|bonus)\}/).map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('.+?')+'$')}
+function libUsed(it){if(!S.loaded.motd||!S.motd.length)return null;let re;try{re=libTitleRe(it.msg.t)}catch(e){return null}const hits=S.motd.filter(m=>typeof m.t==='string'&&re.test(m.t));if(!hits.length)return null;
+  const last=Math.max(...hits.map(m=>m.start||0)),d=new Date(last),txt='Used '+MO[d.getMonth()]+' '+d.getDate()+(d.getFullYear()!==new Date().getFullYear()?', '+d.getFullYear():'');
+  return {txt,title:'Already in Messages '+hits.length+'× (latest starts '+when(last)+')'}}
+/* ---- plain-words windows ---- */
+function dShort(t){const d=new Date(t);return WD[d.getDay()]+' '+MO[d.getMonth()]+' '+d.getDate()+(d.getFullYear()!==new Date().getFullYear()?', '+d.getFullYear():'')}
+function fmtWin(s,e){const a=new Date(s),z=new Date(e),mid=x=>x.getHours()===0&&x.getMinutes()===0;
+  if(mid(a)&&mid(z)){const days=Math.round((new Date(z.getFullYear(),z.getMonth(),z.getDate())-new Date(a.getFullYear(),a.getMonth(),a.getDate()))/DAY);return days<=1?dShort(s)+', all day':dShort(s)+' → '+dShort(e-MIN)}
+  if(new Date(e-1).toDateString()===a.toDateString())return dShort(s)+', '+t12(s)+' → '+t12(e);
+  return dShort(s)+', '+t12(s)+' → '+dShort(e)+', '+t12(e)}
+function libWhenTxt(it,W,now){if(it.when&&it.when.rule==='now')return 'When you publish, for '+dur(W.ev.end-W.ev.start);return fmtWin(W.ev.start,W.ev.end)+(W.ev.start<=now?' · on now':'')}
+function libEvTxt(e){return esc(e.mult)+'× '+(e.all===true||e.sys===-1?'everywhere':'in '+esc(SYS[e.sys]||'system '+e.sys))}
+function libSaleTxt(x){const S2=SECS[x.sec];if(!S2)return 'Sale ('+esc(x.sec)+')';return S2.kind==='pct'?'−'+esc(x.pct)+'% '+S2.n:'+'+esc(x.bonus)+'% '+S2.n}
+/* ---- the tab ---- */
+VIEWS.library=()=>{let h=head('Library','Ready-made messages. Nothing goes live until you press Use, check the composer and publish.');const L=S.lib;
+  if(L.st==='loading')return h+'<div class="load">Loading the library…</div>';
+  if(L.st!=='ok'||!L.items.length)return h+'<div class="card libempty">'+ic('book')+'<h3>'+(L.st==='ok'?'The library is empty':'The message library isn\'t available')+'</h3><p class="sub">'+(L.st==='missing'?'library/library.js could not be loaded.':L.st==='ok'?'library/library.js has no usable items yet.':esc(L.msg))+' Everything else works as usual: write a message from scratch or from a template.</p><div class="btnrow"><button class="btn sm sec" data-act="libReload">'+ic('refresh')+'Try again</button><button class="btn sm" data-act="new" data-v="blank">'+ic('plus')+'New message</button></div></div>';
+  const counts={};L.items.forEach(i=>{counts[i.cat]=(counts[i.cat]||0)+1});
+  h+='<div class="libbar"><div class="pills" role="group" aria-label="Category"><button class="pill" data-act="libCat" data-v="all" aria-pressed="'+(S.libCat==='all')+'">All<span class="pc">'+L.items.length+'</span></button>'+L.cats.filter(c=>counts[c.id]).map(c=>'<button class="pill" data-act="libCat" data-v="'+esc(c.id)+'" aria-pressed="'+(S.libCat===c.id)+'">'+esc(c.n)+'<span class="pc">'+counts[c.id]+'</span></button>').join('')+'</div>'
+    +'<div class="srch">'+ic('search')+'<input class="inp" id="libQ" data-f="libQ" value="'+esc(S.libQ)+'" placeholder="Search name, title or tip" aria-label="Search the library" autocomplete="off"></div></div>';
+  h+='<div class="lgrid" id="libGrid">'+libCardsHTML()+'</div>';
+  if(L.skipped)h+='<p class="note">'+L.skipped+' item'+(L.skipped>1?'s':'')+' in library.js '+(L.skipped>1?'were':'was')+' skipped (bad or duplicate id, or no message).</p>';
+  return h};
+function libCardsHTML(){const L=S.lib,q=S.libQ.trim().toLowerCase(),now=Date.now();
+  const list=L.items.filter(it=>(S.libCat==='all'||it.cat===S.libCat)&&(!q||[it.name,it.msg.t,it.tip].some(x=>String(x||'').toLowerCase().indexOf(q)>=0)));
+  return list.length?list.map(it=>libCard(it,now)).join(''):'<div class="empty">Nothing in the library matches'+(q?' “'+esc(S.libQ)+'”':'')+'.</div>'}
+function libCard(it,now){const L=S.lib,W=libWindows(it,now),m=it.msg,cat=(L.cats.find(c=>c.id===it.cat)||{n:it.cat||'Other'}).n,col=isHex(m.c)?m.c:(TAGS[m.tag]||TAGS.news).c,src=libImgOk(it.img)?it.img:'',used=libUsed(it),id=esc(it.id),nm=esc(it.name||it.id);
+  let chips='';if(it.event&&typeof it.event==='object')chips+='<span class="chip evc" style="--sc:'+(MULT_C[it.event.mult]||'#5aa9ff')+'">'+ic('comet')+'Event: '+libEvTxt(it.event)+'</span>';
+  if(it.sale&&typeof it.sale==='object')chips+='<span class="chip sac">'+ic('tag')+'Sale: '+libSaleTxt(it.sale)+'</span>';
+  if(m.gift&&typeof m.gift==='object'){const gt=giftText(giftClean(m.gift));if(gt)chips+='<span class="chip gold">🎁 Gift: '+esc(gt)+'</span>'}
+  const title=W?libFill(m.t,libCtx(it,W)):m.t,lead=W&&(it.event||it.sale)&&W.msg.start<W.ev.start;
+  return '<article class="lcard" data-lib="'+id+'" style="--mc:'+col+'"><div class="lpic'+(src?'':' none')+(it.fit==='contain'?' ct':'')+'">'+(src?'<img src="'+esc(src)+'" alt="" loading="lazy" decoding="async">':'<span aria-hidden="true">★</span>')+'</div>'
+    +'<div class="lbody"><h3>'+nm+'</h3><div class="lchips"><span class="chip soft">'+esc(cat)+'</span>'+(used?'<span class="chip used" title="'+esc(used.title)+'">'+esc(used.txt)+'</span>':'')+'</div>'
+    +'<p class="lt" title="'+esc(title)+'">“'+esc(title)+'”</p>'
+    +'<div class="lwhen">'+ic('clock')+'<span>'+(W?esc(libWhenTxt(it,W,now)):'<span class="chip warnc">Can\'t work out the dates</span>')+'</span></div>'
+    +(lead?'<div class="llead">Message shows '+(W.msg.start<=now+MIN?'from now':'from '+esc(dShort(W.msg.start)+', '+t12(W.msg.start)))+'</div>':'')
+    +(chips?'<div class="lchips">'+chips+'</div>':'')+(it.tip?'<p class="ltip">'+esc(it.tip)+'</p>':'')
+    +'<div class="lacts"><button class="btn sm sec" data-act="libPv" data-v="'+id+'" aria-label="Preview '+nm+'">'+ic('eye')+'<span>Preview</span></button><button class="btn sm" data-act="libUse" data-v="'+id+'" aria-label="Use '+nm+'">'+ic('plus')+'<span>Use</span></button></div></div></article>'}
+/* ---- Preview: the phone on just this message ---- */
+function libCardData(it,W){const m=it.msg,ctx=W?libCtx(it,W):null,g=m.gift&&typeof m.gift==='object'?giftClean(m.gift):null;
+  return {id:'lib:'+it.id,tag:TAGS[m.tag]?m.tag:'news',k:typeof m.k==='string'?m.k:'',c:isHex(m.c)?m.c:'',t:ctx?libFill(m.t,ctx):m.t,b:ctx?libFill(m.b,ctx):String(m.b||''),src:libImgOk(it.img)?it.img:'',fit:it.fit==='contain'?'contain':'cover',
+    cta:m.cta&&typeof m.cta.go==='string'&&m.cta.go?{l:typeof m.cta.l==='string'?m.cta.l:actDefault(m.cta.go),go:m.cta.go}:null,gift:g&&giftParts(g).length?g:null}}
+function openLibPreview(id){const it=libItem(id);if(!it)return;const now=Date.now(),W=libWindows(it,now),card=libCardData(it,W),claimed={},m=$('#modal'),prev=document.activeElement;
+  m.innerHTML='<div class="dlg pvdlg" role="dialog" aria-modal="true" aria-labelledby="lpvT"><div class="ph"><div><h3 id="lpvT">'+esc(it.name||it.id)+'</h3><p class="sub">'+(W?esc(libWhenTxt(it,W,now)):'Dates can\'t be worked out')+' · placeholders filled</p></div><button class="ib" data-lp="close" aria-label="Close the preview">'+ic('x')+'</button></div><div class="phone"><div class="screen" id="lpScreen"></div></div><div class="acts"><button class="btn sec" data-lp="close">Close</button><button class="btn" data-lp="use">'+ic('plus')+'Use</button></div></div>';
+  m.hidden=false;const key=e=>{if(e.key==='Escape'){e.preventDefault();close()}};
+  function close(){m.hidden=true;m.innerHTML='';document.removeEventListener('keydown',key,true);if(prev&&prev.focus)try{prev.focus()}catch(e){}}
+  document.addEventListener('keydown',key,true);
+  m.onclick=e=>{const b=e.target.closest('[data-lp]');if(b){close();if(b.dataset.lp==='use')useLib(id)}else if(e.target===m)close()};
+  const host=$('#lpScreen'),fr=document.createElement('iframe');fr.id='lpFrame';fr.title='Phone preview: '+(it.name||it.id);host.appendChild(fr);const doc=fr.contentDocument;doc.open();doc.write(pvDocHTML());doc.close();
+  let first=true;const draw=()=>{doc.getElementById('bellN').textContent='1';doc.getElementById('clock').textContent=hm(Date.now());const ov=doc.getElementById('ov');ov.innerHTML=cardHTML(card,0,1,claimed);if(!first&&ov.firstChild)ov.firstChild.style.animation='none';first=false};
+  doc.addEventListener('click',e=>{const t=e.target;if(t.closest('.mdX')||t.closest('.mdNext'))close();else if(t.closest('.mdClaim')){claimed[card.id]=1;draw()}else if(t.closest('.mdCta')){const pt=doc.getElementById('ptoast');pt.textContent='Opens: '+actLabel(card.cta&&card.cta.go);pt.hidden=false;setTimeout(()=>{pt.hidden=true},1600)}});
+  const sc=(host.clientWidth||300)/390;fr.style.transform='scale('+sc+')';host.style.height=Math.round(844*sc)+'px';draw();$('[data-lp="close"]',m).focus()}
+/* ---- Use: fill the composer (nothing is written until Publish) ---- */
+function libDraft(it,now){const warn=[],d=newDraft('blank'),m=it.msg,int=Number.isInteger;d.tpl=null;
+  d.tag=TAGS[m.tag]?m.tag:'news';d.k=typeof m.k==='string'?m.k:'';d.c=isHex(m.c)?m.c:'';d.prio=int(m.prio)?m.prio:0;d.pop=m.pop!==false;
+  const a=m.aud&&typeof m.aud==='object'?m.aud:{};d.acct=a.acct===true;d.minLv=int(a.minLv)?a.minLv:0;d.maxLv=int(a.maxLv)?a.maxLv:0;
+  if(m.cta&&typeof m.cta.go==='string'&&m.cta.go){if(m.cta.go.indexOf('url:')===0){d.go='url';d.ctaUrl=m.cta.go.slice(4)}else d.go=m.cta.go;d.ctaL=typeof m.cta.l==='string'?m.cta.l:actDefault(d.go)}
+  if(m.gift&&typeof m.gift==='object'){d.giftOn=true;d.gift=Object.assign(emptyGift(),clone(m.gift));d.gift.items=Object.assign({},m.gift.items||{})}
+  let W=libWindows(it,now);if(!W){warn.push('its date rule couldn\'t be worked out, so it starts now for 1 day');const s0=Math.floor(now/MIN)*MIN,e0=plusDays(s0,1);W={ev:{start:s0,end:e0},msg:{start:s0,end:e0},bad:true}}
+  d.start=W.msg.start;d.end=W.msg.end;
+  const miss=new Set(),ctx=libCtx(it,W);d.t=libFill(m.t,ctx,miss);d.b=libFill(m.b,ctx,miss).replace(/\r\n?/g,'\n');if(miss.size)warn.push('fill '+Array.from(miss).join(' ')+' by hand');
+  if(it.event&&typeof it.event==='object'){const e=it.event,all=e.all===true||e.sys===-1;d.lev={on:true,lib:true,mult:e.mult,sys:all?-1:e.sys,same:!!W.bad,start:W.ev.start,until:W.ev.end,note:typeof e.note==='string'?e.note:''}}
+  if(it.sale&&typeof it.sale==='object'){const x=it.sale,S2=SECS[x.sec],k=S2?S2.kind:'pct';d.lsa={on:true,lib:true,sec:S2?x.sec:'boost',val:k==='pct'?x.pct:x.bonus,same:!!W.bad,start:W.ev.start,until:W.ev.end,note:typeof x.note==='string'?x.note:''};if(!S2)warn.push('its sale section “'+x.sec+'” is unknown')}
+  d.fit=it.fit==='contain'?'contain':'cover';
+  if(it.img){if(libImgOk(it.img))d.img={kind:'doc',data:'',changed:true,lib:it.img};else warn.push('its picture path isn\'t a library picture')}
+  d.fromLib={id:it.id,name:it.name||it.id};
+  if([['t',LIM.t],['b',LIM.b],['k',LIM.k]].some(x=>(d[x[0]]||'').length>x[1]))d.tried=true;
+  d.dirty=false;return {d,warn}}
+async function useLib(id){const it=libItem(id);if(!it)return;const r=libDraft(it,Date.now()),d=r.d;await openComposer(d);if(S.draft!==d)return;
+  if(r.warn.length)toast('From the library: '+r.warn.join('; ')+'.','warn');if(d.img.lib)loadLibImg(d)}
+/* the picture goes through the same resize/compress path as an upload (→ motd_img, img:'doc') */
+function loadLibImg(d){const src=d.img.lib,im=new Image();
+  const fail=why=>{if(S.draft!==d||d.img.lib!==src)return;d.img={kind:'none'};toast('The library picture '+src+' '+why+'. Add a picture by hand if you want one.','warn');paint('img');pvSoon()};
+  im.onload=()=>{if(S.draft!==d||d.img.lib!==src||d.img.src)return;d.img={kind:'doc',src:im,crop:{mode:d.fit==='contain'?'whole':'crop',z:1,px:.5,py:.5},changed:true,lib:src};
+    let ok=false;try{ok=encodeImg(d)}catch(e){fail('can\'t be read here ('+(e&&e.name||'error')+')');return}
+    if(!ok){fail('is too big to store');return}S.pv.follow=true;paint('img');pvSoon()};
+  im.onerror=()=>fail('could not be loaded');im.src=src}
+/* a missing library picture on a card falls back to the ★ placeholder */
+document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.closest&&t.closest('.lpic')){const p=t.closest('.lpic');p.classList.add('none');p.title='Picture not found: '+t.getAttribute('src');p.innerHTML='<span aria-hidden="true">★</span>'}},true);
+window.__ccLibEngine={when:libWhen,windows:libWindows,ctx:libCtx,fill:libFill,easter:easterMD,fmtWin,titleRe:libTitleRe,draft:(it,now)=>libDraft(it,now)};
+
 /* =====================================================================
    EVENTS (DOM)
    ===================================================================== */
@@ -1262,6 +1435,7 @@ const ACT={
   copyUid:el=>copyText(el.dataset.v).then(()=>toast('Copied uid '+shortUid(el.dataset.v)),()=>toast('Copy failed: '+el.dataset.v,'err')),
   pMsg:el=>msgPlayer(el.dataset.v),pReset:el=>resetName(el.dataset.v),unblock:el=>unblock(el.dataset.v),
   pMail:el=>{const x=S.dn.find(r=>r.id===el.dataset.v);openMail(el.dataset.v,x&&x.data.name||'')},mailClose:()=>{S.mail=null;render()},mailDel:el=>mailDelete(el.dataset.v),
+  libCat:el=>{S.libCat=el.dataset.v;render()},libPv:el=>openLibPreview(el.dataset.v),libUse:el=>useLib(el.dataset.v),libBack:()=>go('library'),libReload:()=>{loadLibrary(true);render()},
   seeMail:()=>{const d=S.draft;if(d&&d.to)openMail(d.to.uid,d.to.name)},
   dnMore:()=>{S.dnLimit+=40;fetchDn().then(paintDn,e=>toast(fsErr(e),'err'))},annTop:announceTop
 };
@@ -1273,6 +1447,7 @@ function onField(e){const el=e.target,f=el.dataset&&el.dataset.f;if(!f)return;
   if(el.closest('#comp'))return draftInput(el,f,e.type);
   if(el.closest('#evForm'))return formInput('ev',el,f);
   if(el.closest('#saForm'))return formInput('sa',el,f);
+  if(f==='libQ'&&e.type==='input'){S.libQ=el.value;clearTimeout(S.libT);S.libT=setTimeout(()=>{const g=$('#libGrid');if(g)g.innerHTML=libCardsHTML()},120);return}
   if(f==='dnQ'&&e.type==='input'){S.dnQ=el.value;S.dnLimit=40;clearTimeout(S.dnT);S.dnT=setTimeout(()=>{fetchDn().then(()=>{S.errs.dn=null;paintDn()},x=>{S.errs.dn=x;paintDn()})},220)}}
 document.addEventListener('input',onField);document.addEventListener('change',onField);
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='f-toUid'){e.preventDefault();useUid()}});
@@ -1292,6 +1467,7 @@ bindCrop();
 /* ---------- boot ---------- */
 (function(){const h=location.hash.slice(1);if(TABS.some(x=>x[0]===h))S.tab=h})();
 render();
+loadLibrary();
 DB.init().catch(e=>{if(DB.mode!=='live')throw e;console.warn('[cc] Firebase unavailable, using preview data',e);S.fallback=e&&e.message||String(e);DB=mockDB();return DB.init()}).then(()=>{
   S.ready=true;if(DB.mode==='mock')window.__cc={get DB(){return DB},S:S,LIM:LIM};
   DB.onAuth(u=>{S.user=u;S.admin=!!(u&&ADMINS.indexOf(u.email)>=0);S.err=null;render();if(S.admin)loadAll()})
