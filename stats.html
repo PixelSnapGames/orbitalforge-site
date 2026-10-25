@@ -42,6 +42,7 @@ a{color:var(--ac)}
 .nav .bd{position:absolute;top:3px;left:calc(50% + 7px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--gn);color:#04210f;font-size:10px;font-weight:800;line-height:16px;text-align:center}
 .nav .bd.dot{min-width:8px;width:8px;height:8px;padding:0;top:6px;left:calc(50% + 9px)}
 .nav .bd.dr{background:var(--yl);color:#2d1f00}
+.nav .bd.rep{background:var(--rd);color:#2a0710}
 .nav .nfoot{display:none}
 .view{grid-area:main;min-width:0;width:100%;max-width:1320px;padding:16px 16px 96px}
 @media(min-width:900px){
@@ -141,7 +142,9 @@ a{color:var(--ac)}
 
 /* ---- overview: live strip + message performance ---- */
 .strip{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:14px}
-@media(min-width:720px){.strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:720px){.strip{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}}
+.lv.rep{border-color:rgba(255,92,122,.45);background:linear-gradient(180deg,rgba(255,92,122,.09),transparent 60%),var(--card)}
+.lv.rep .k{color:#ff8ea3}
 .lv{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--line);text-align:left;min-width:0}
 .lv:hover{border-color:var(--line2)}
 .lv .k{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu2)}
@@ -359,6 +362,13 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .pmeta .u{display:inline-flex;align-items:center;gap:5px}
 .pacts{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 @media(max-width:480px){.pacts .btn.sm{padding:6px 8px;gap:4px;font-size:12.5px}.pacts .btn.sm .i{width:14px;height:14px}}
+.repcard{border-color:rgba(255,92,122,.4)}
+#repList{margin-top:8px}
+.repcard h2 .chip{vertical-align:2px;margin-left:6px;background:var(--rd);color:#2a0710}
+.chip.why{background:rgba(255,92,122,.1);color:#ff8ea3;box-shadow:inset 0 0 0 1px rgba(255,92,122,.3)}
+.chip.why.imp{background:rgba(255,209,102,.1);color:var(--yl);box-shadow:inset 0 0 0 1px rgba(255,209,102,.3)}
+.chip.why.oth{background:rgba(255,255,255,.05);color:var(--mu);box-shadow:inset 0 0 0 1px var(--line2)}
+.rnow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:12.5px;color:var(--mu);margin-top:4px}.rnow b{color:var(--tx)}
 .srch{position:relative;margin:12px 0 4px}
 .srch .i{position:absolute;left:11px;top:11px;color:var(--mu2)}
 .srch .inp{padding-left:36px}
@@ -556,7 +566,7 @@ function ask(o){return new Promise(res=>{const m=$('#modal'),prev=document.activ
 
 /* ---------- icons ---------- */
 const ICP={chart:'<path d="M4 20V11M10 20V4M16 20v-6M21 20H3"/>',msg:'<rect x="3" y="4" width="18" height="14" rx="2.5"/><path d="M7 9h10M7 13h6"/>',comet:'<circle cx="16" cy="8" r="3.5"/><path d="M13.5 10.5 4 20M11 7 5 13M17 13l-6 6"/>',tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/>',users:'<circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.6 2.9-5.6 6.5-5.6s6.5 2 6.5 5.6M16 4.6a3.6 3.6 0 0 1 0 7M21.5 20c0-2.6-1.2-4.4-3.4-5.2"/>',chat:'<path d="M4 5h16v11H9.5L4 20z"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',pause:'<path d="M8 5v14M16 5v14"/>',play:'<path d="M7 4.5l12 7.5-12 7.5z"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',trash:'<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',back:'<path d="M15 5l-7 7 7 7"/>',up:'<path d="M12 16V4M6.5 9.5 12 4l5.5 5.5M4 20h16"/>',gift:'<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8.5h14V12M12 8v12.5M12 8c-1.5-3.5-6-4-6-1.3C6 8.5 12 8 12 8s6 .5 6-1.3C18 4 13.5 4.5 12 8"/>',mega:'<path d="M3 10v4h3.5L15 19V5L6.5 10zM18 9a4 4 0 0 1 0 6"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',userx:'<circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.6 2.9-5.6 6.5-5.6 1.4 0 2.6.3 3.6.8M16 15l5 5M21 15l-5 5"/>',out:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5c0 2.6 1.6 4 3.5 4M16 6h3.5c0 2.6-1.6 4-3.5 4M12 13v4M8 20.5h8"/>',chev:'<path d="M9 5l7 7-7 7"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-6.5 8-6.5s8 2.3 8 6.5"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',book:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3M8 7h7M8 10.5h5"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'};
+  plus:'<path d="M12 5v14M5 12h14"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',pause:'<path d="M8 5v14M16 5v14"/>',play:'<path d="M7 4.5l12 7.5-12 7.5z"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',trash:'<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',back:'<path d="M15 5l-7 7 7 7"/>',up:'<path d="M12 16V4M6.5 9.5 12 4l5.5 5.5M4 20h16"/>',gift:'<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8.5h14V12M12 8v12.5M12 8c-1.5-3.5-6-4-6-1.3C6 8.5 12 8 12 8s6 .5 6-1.3C18 4 13.5 4.5 12 8"/>',mega:'<path d="M3 10v4h3.5L15 19V5L6.5 10zM18 9a4 4 0 0 1 0 6"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',userx:'<circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.6 2.9-5.6 6.5-5.6 1.4 0 2.6.3 3.6.8M16 15l5 5M21 15l-5 5"/>',out:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5c0 2.6 1.6 4 3.5 4M16 6h3.5c0 2.6-1.6 4-3.5 4M12 13v4M8 20.5h8"/>',chev:'<path d="M9 5l7 7-7 7"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-6.5 8-6.5s8 2.3 8 6.5"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',book:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3M8 7h7M8 10.5h5"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',flag:'<path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/>',link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'};
 function ic(n,c){return '<svg class="i'+(c?' '+c:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+(ICP[n]||'')+'</svg>'}
 
 /* =====================================================================
@@ -584,7 +594,7 @@ function fireDB(){let auth=null,db=null;
   }}
 function mockDB(){const KEY='cc_mock_db';let docs={},gen={},user=null,authCb=null,warned=false;
   const wait=()=>new Promise(r=>setTimeout(r,30+Math.random()*60));
-  function save(){try{localStorage.setItem(KEY,JSON.stringify({v:1,docs}))}catch(e){if(!warned){warned=true;toast('Preview storage is full: changes last until you reload','warn')}}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify({v:2,docs}))}catch(e){if(!warned){warned=true;toast('Preview storage is full: changes last until you reload','warn')}}}
   function fail(code,msg){const e=new Error(msg);e.code=code;return e}
   function applyOp(o){if(o.op==='set')docs[o.path]=clone(o.data);else if(o.op==='update'){if(!docs[o.path])throw fail('not-found','No document to update: '+o.path);Object.assign(docs[o.path],clone(o.data))}else if(o.op==='delete')delete docs[o.path]}
   /* failNext: tests can make the next write fail with a Firestore error code, e.g. 'permission-denied' */
@@ -592,7 +602,7 @@ function mockDB(){const KEY='cc_mock_db';let docs={},gen={},user=null,authCb=nul
   function cmp(a,op,b){if(a==null)return false;switch(op){case '==':return a===b;case '!=':return a!==b;case '>':return a>b;case '>=':return a>=b;case '<':return a<b;case '<=':return a<=b}return false}
   const me={email:'pixelsnapgames@gmail.com',name:'Preview'};
   const api={mode:'mock',failNext:null,
-    init(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(d&&d.v===1&&d.docs)docs=d.docs;else{docs=mockSeed();save()}gen=mockStats();user=me;return Promise.resolve()},
+    init(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(d&&d.v===2&&d.docs)docs=d.docs;else{docs=mockSeed();save()}gen=mockStats();user=me;return Promise.resolve()},
     onAuth(cb){authCb=cb;setTimeout(()=>cb(user),0)},
     signIn(){user=me;setTimeout(()=>authCb&&authCb(user),0);return Promise.resolve()},
     signOut(){user=null;setTimeout(()=>authCb&&authCb(null),0);return Promise.resolve()},
@@ -649,23 +659,26 @@ function mockSeed(){const D={},t=Date.now();let r=11;const rnd=()=>{r=(r*9301+49
   D['config/live']={events:[{id:'ev_wknd5',start:sat,until:sunEnd,mult:5,all:true,sys:-1,note:'Weekend 5× everywhere'},{id:'ev_cobalt10',start:t-4*DAY-2*HOUR,until:t-4*DAY,mult:10,all:false,sys:2,note:'Cobalt Reach storm night'}],
     sales:[{id:'sa_boost30',sec:'boost',pct:30,bonus:0,start:saleStart,until:saleEnd,note:'Weekend booster sale'}],up:saleStart};
   const NAMES=['StarHauler','Mira Vex','ore_baron','Kestrel.9','NovaQueen','jt-forge','Lumen Drifter','Captain Ash','Pip42','Zed 42','astro.nat','Rustbucket'];
-  const wk=weekId(t),lw=weekId(t-7*DAY);
-  for(let i=0;i<22;i++){const u=uid(),c1=Math.floor(rnd()*40),c2=Math.floor(rnd()*40),n=Math.floor(rnd()*100),name=NAMES[i]||'';
+  const wk=weekId(t),lw=weekId(t-7*DAY),U=[];
+  for(let i=0;i<22;i++){const u=uid();U.push(u);const c1=Math.floor(rnd()*40),c2=Math.floor(rnd()*40),n=Math.floor(rnd()*100),name=NAMES[i]||'';
     if(name){const key=nameKey(name),w=t-Math.floor((i*1.6+rnd())*DAY);D['dn/'+u]={name,key,at:w,n:1+(i%3===0?1:0)+(i%5===0?1:0)};D['names/'+key]={uid:u,at:w}}
     const xp=Math.round(Math.pow(1-i/24,2.2)*140000+rnd()*900),lv=Math.max(1,Math.min(60,Math.round(xp/2400)+1));
     D['lb/'+u]={c1,c2,n,lv,xp,cr:Math.round(xp*37*(.6+rnd())),pr:xp>90000?1:0,ch:i<3?1:0,up:t-Math.floor(rnd()*DAY),dn:name};
     if(i!==4)D['lbw_'+wk+'/'+u]={c1,c2,n,lv,wg:Math.round(Math.pow(10,6+rnd()*3.2)),ch:i<3?1:0,up:t-Math.floor(rnd()*DAY),dn:name};
     D['lbw_'+lw+'/'+u]={c1,c2,n,lv:Math.max(1,lv-1),wg:Math.round(Math.pow(10,6+rnd()*3.4)),ch:0,up:t-7*DAY,dn:name}}
+  /* 2 reported players, 3 reports (ore_baron twice, Zed 42 once) */
+  const R=(by,hold,name,why,ago)=>{D['reports/'+by+'_'+hold]={uid:hold,name,why,by,at:t-ago}};
+  R(U[14],U[2],'ore_baron','offensive',2*HOUR);R(U[15],U[2],'ore_baron','offensive',26*HOUR);R(U[16],U[9],'Zed 42','impersonation',5*HOUR);
   return D}
 
 /* =====================================================================
    STATE + LOADING
    ===================================================================== */
 const TABS=[['overview','Overview','chart'],['messages','Messages','msg'],['library','Library','book'],['events','Events','comet'],['store','Store','tag'],['players','Players','users'],['feedback','Feedback','chat']];
-const S={ready:false,user:null,admin:false,err:null,tab:'overview',range:14,table:false,plays:[],fb:[],motd:[],stat:{},live:{events:[],sales:[]},dn:[],dnQ:'',dnLimit:40,dnMore:false,blk:[],mail:null,lib:{st:'loading'},libCat:'all',libQ:'',lb:[],lbw:[],imgs:{},loaded:{},errs:{},draft:null,pv:null,evForm:null,saForm:null,busy:false,flash:null,openEnded:false,fallback:''};
+const S={ready:false,user:null,admin:false,err:null,tab:'overview',range:14,table:false,plays:[],fb:[],motd:[],stat:{},live:{events:[],sales:[]},dn:[],dnQ:'',dnLimit:40,dnMore:false,blk:[],mail:null,rep:[],repDn:{},lib:{st:'loading'},libCat:'all',libQ:'',lb:[],lbw:[],imgs:{},loaded:{},errs:{},draft:null,pv:null,evForm:null,saForm:null,busy:false,flash:null,openEnded:false,fallback:''};
 const WANT_MOCK=/[?&]mock\b/.test(location.search)||!!window.__ccMock;
 let DB=WANT_MOCK?mockDB():fireDB();
-const LBL={plays:'play stats',feedback:'feedback',motd:'messages',stat:'message counters',live:'config/live',dn:'display names',lb:'the all-time board',lbw:'this week\'s board',blk:'blocked names'};
+const LBL={plays:'play stats',feedback:'feedback',motd:'messages',stat:'message counters',live:'config/live',dn:'display names',lb:'the all-time board',lbw:'this week\'s board',blk:'blocked names',rep:'reports'};
 const LOAD={
   plays:()=>DB.query('plays',{where:[['day','>=',addDays(dstr(Date.now()),-35)],['day','<=',dstr(Date.now()+DAY)]]}).then(r=>{S.plays=r.map(x=>x.data)}),
   feedback:()=>DB.query('feedback',{order:['at','desc'],limit:300}).then(r=>{S.fb=r.map(x=>x.data)}),
@@ -675,6 +688,9 @@ const LOAD={
   dn:()=>fetchDn(),
   /* equality filter only (no composite index needed); newest first is sorted here */
   blk:()=>DB.query('names',{where:[['uid','==','blocked']],limit:300}).then(r=>{S.blk=r.sort((a,b)=>(b.data.at||0)-(a.data.at||0))}),
+  /* player reports (game 1.13.1): newest 200, plus each reported player's current dn/{uid} */
+  rep:()=>DB.query('reports',{order:['at','desc'],limit:200}).then(r=>{S.rep=r;const uids=Array.from(new Set(r.map(x=>x.data&&x.data.uid).filter(repUidOk)));
+    return Promise.all(uids.map(u=>DB.get('dn/'+u).then(d=>[u,d||{}],()=>[u,null]))).then(a=>{const o={};a.forEach(x=>{o[x[0]]=x[1]});S.repDn=o})}),
   lb:()=>DB.query('lb',{order:['xp','desc'],limit:10}).then(r=>{S.lb=r}),
   lbw:()=>DB.query('lbw_'+weekId(),{order:['wg','desc'],limit:10}).then(r=>{S.lbw=r})
 };
@@ -714,7 +730,7 @@ function renderHead(){const u=S.user;let h='';
   if(u)h+='<button class="btn sm sec" data-act="out">'+ic('out')+'Sign out</button>';
   $('#acct').innerHTML=h;$('#who').textContent=u?u.email:''}
 function renderNav(){const t=Date.now(),live=S.motd.filter(m=>mStatus(m,t)==='live').length,ev=S.live.events.some(e=>itemSt(e,t)==='live'),sa=S.live.sales.some(s=>itemSt(s,t)==='live');
-  $('#nav').innerHTML=TABS.map(x=>{let b='';if(x[0]==='messages')b=S.draft?'<span class="bd dr" title="Draft in progress">✎</span>':live?'<span class="bd" title="'+live+' live">'+live+'</span>':'';if(x[0]==='events'&&ev)b='<span class="bd dot" title="Event live"></span>';if(x[0]==='store'&&sa)b='<span class="bd dot" title="Sale live"></span>';
+  $('#nav').innerHTML=TABS.map(x=>{let b='';if(x[0]==='messages')b=S.draft?'<span class="bd dr" title="Draft in progress">✎</span>':live?'<span class="bd" title="'+live+' live">'+live+'</span>':'';if(x[0]==='events'&&ev)b='<span class="bd dot" title="Event live"></span>';if(x[0]==='store'&&sa)b='<span class="bd dot" title="Sale live"></span>';if(x[0]==='players'&&S.rep.length)b='<span class="bd rep" title="'+S.rep.length+' open report'+(S.rep.length===1?'':'s')+'">'+(S.rep.length>99?'99+':S.rep.length)+'</span>';
     return '<button data-tab="'+x[0]+'"'+(S.tab===x[0]?' aria-current="page"':'')+'>'+ic(x[2])+'<span>'+x[1]+'</span>'+b+'</button>'}).join('')+'<div class="nfoot">'+(DB.mode==='mock'?'Preview data · nothing reaches players':'Firestore · orbitalforge-81f30')+'</div>'}
 function head(t,s,a){return '<div class="pagehead"><div class="grow"><h2>'+t+'</h2>'+(s?'<p class="sub">'+s+'</p>':'')+'</div>'+(a||'')+'</div>'}
 function secState(k){if(S.errs[k])return '<div class="card errc"><b>Couldn\'t load '+esc(LBL[k]||k)+'</b><p class="sub">'+esc(fsErr(S.errs[k]))+'</p></div>';if(!S.loaded[k])return '<div class="load">Loading '+esc(LBL[k]||k)+'…</div>';return ''}
@@ -731,6 +747,7 @@ function liveStrip(){if(!S.loaded.motd||!S.loaded.live)return '<div class="load"
   const evL=S.live.events.filter(e=>itemSt(e,t)==='live').sort((a,b)=>b.mult-a.mult),evN=S.live.events.filter(e=>itemSt(e,t)==='up').sort((a,b)=>a.start-b.start);
   const saL=S.live.sales.filter(s=>itemSt(s,t)==='live'),saN=S.live.sales.filter(s=>itemSt(s,t)==='up').sort((a,b)=>a.start-b.start);
   let h='<div class="strip">';
+  if(S.rep.length){const G=repGroups();h+='<button class="lv rep" data-tab="players"><span class="k">'+ic('flag')+'Open reports</span><span class="v"><span class="tx">'+S.rep.length+(S.rep.length>=200?'+':'')+' open report'+(S.rep.length===1?'':'s')+'</span></span><span class="d">About '+G.slice(0,3).map(g=>'<b>'+esc(g.names[0]||shortUid(g.uid))+'</b>').join(', ')+(G.length>3?' and '+(G.length-3)+' more':'')+' · newest '+esc(rel(G[0].last))+'</span></button>'}
   h+='<button class="lv'+(live.length?' on':'')+'" data-tab="messages"><span class="k">'+ic('msg')+'Messages live</span><span class="v"><span class="tx">'+live.length+' live</span>'+(sch.length?'<span class="chip st sched">'+sch.length+' scheduled</span>':'')+'</span><span class="d">'+(live.length?live.slice(0,2).map(m=>'<b>'+esc(m.t)+'</b>').join(' · '):'Nothing is showing in game.')+'</span></button>';
   const e=evL[0]||evN[0];
   h+='<button class="lv'+(evL.length?' on':'')+'" data-tab="events"><span class="k">'+ic('comet')+'Meteor event</span>'+(e?'<span class="v">'+multBadge(e.mult)+'<span class="tx">'+esc(whereTxt(e))+'</span>'+(evL.length?'<span class="chip st live">Live</span>':'<span class="chip st sched">Next</span>')+'</span><span class="d">'+(evL.length?'Ends <b>'+when(e.until)+'</b> ('+rel(e.until)+')':'Starts <b>'+when(e.start)+'</b> ('+rel(e.start)+')')+(e.note?' · '+esc(e.note):'')+'</span>':'<span class="v"><span class="tx">None scheduled</span></span><span class="d">Plan a shower in Events.</span>')+'</button>';
@@ -1207,7 +1224,8 @@ function announceSale(id){const s=S.live.sales.find(x=>x.id===id);if(!s)return;c
   d.go='shop:'+s.sec;d.ctaL='Open the Shop';d.start=nowMin();d.end=Math.max(s.until,d.start+HOUR);d.lsa.on=false;d.fromSale=s;d.dirty=false;openComposer(d)}
 
 /* ---------- PLAYERS (dn, names, lb, lbw) ---------- */
-VIEWS.players=()=>{let h=head('Players','Display names, personal mail and the leaderboards. Names are moderated here.');
+VIEWS.players=()=>{let h=head('Players','Reports, display names, personal mail and the leaderboards. Names are moderated here.');
+  h+=repCardHTML();
   if(S.mail)h+=mailPanelHTML();
   h+='<div class="card"><div class="ph"><div><h2>Display names</h2><div class="sub">Newest first. Search matches the start of the name (spaces, _ . - ignored).</div></div></div><div class="srch">'+ic('search')+'<input class="inp" id="dnQ" data-f="dnQ" value="'+esc(S.dnQ)+'" placeholder="Search names, e.g. star" aria-label="Search display names" autocomplete="off"></div><div id="dnList">'+dnListHTML()+'</div></div>';
   h+='<div class="card" id="blkCard"><div class="ph"><div><h2>Blocked names</h2><div class="sub">Names taken away by a reset (names/{key} with uid “blocked”). Nobody can pick them, including the player who had it. Newest first.</div></div></div><div id="blkList">'+blockedHTML()+'</div></div>';
@@ -1222,8 +1240,8 @@ function lbTable(k){const st=secState(k);if(st)return st;const rows=S[k];if(!row
   return '<div class="tw"><table class="tbl lbt"><thead><tr><th>#</th><th style="text-align:left">Name</th><th>Lv</th><th>'+(k==='lb'?'XP':'Value')+'</th></tr></thead><tbody>'+rows.map((x,i)=>{const d=x.data;return '<tr class="'+(i===0?'p1':'')+'"><td class="rk">'+(i+1)+'</td><td class="nm" style="text-align:left" title="'+esc(x.id)+'">'+(d.dn?esc(d.dn):'<span class="cs">'+esc(csName(d.c1,d.c2,d.n)||'Commander')+'</span>')+(d.ch>0?' <span title="Weekly champion">👑</span>':'')+'</td><td>'+esc(d.lv||'')+'</td><td>'+(k==='lb'?nf(d.xp):'$'+fmtBig(d.wg))+'</td></tr>'}).join('')+'</tbody></table></div>'}
 function paintDn(){const el=$('#dnList');if(el)el.innerHTML=dnListHTML()}
 /* reset + block, in a transaction: dn/{uid} is read inside it, so a rename in between can't leave a claim behind */
-async function resetName(uid){const row=S.dn.find(x=>x.id===uid),nm=row&&row.data.name||'',k0=row&&row.data.key||'';
-  if(!await ask({title:'Reset and block “'+(nm||uid)+'”?',body:'Their name is cleared: they show as their callsign until they pick a new one, which they can do right away. The name '+(k0?'<b>'+esc(k0)+'</b> ':'')+'is also <b>blocked</b>, so nobody can take it again, including this player (you can unblock it under Blocked names). It is cleared from the all-time board and this week\'s board too.',ok:'Reset and block',danger:true}))return;
+async function resetName(uid,opt){opt=opt||{};const row=S.dn.find(x=>x.id===uid),cur0=row?row.data:(S.repDn[uid]||{}),nm=cur0.name||'',k0=cur0.key||'';
+  if(!await ask({title:'Reset and block “'+(nm||uid)+'”?',body:'Their name is cleared: they show as their callsign until they pick a new one, which they can do right away. The name '+(k0?'<b>'+esc(k0)+'</b> ':'')+'is also <b>blocked</b>, so nobody can take it again, including this player (you can unblock it under Blocked names). It is cleared from the all-time board and this week\'s board too.'+(opt.reports?' Then their '+opt.reports+' report'+(opt.reports===1?' is':'s are')+' deleted.':''),ok:'Reset and block',danger:true}))return false;
   const wk='lbw_'+weekId();let info=null;
   try{await DB.tx(['dn/'+uid,'lb/'+uid,wk+'/'+uid],cur=>{const dn=cur['dn/'+uid];if(!dn)throw new Error('No display name document for this player');const key=dn.key||'';
       info={name:dn.name||'',key,boards:!!(cur['lb/'+uid]||cur[wk+'/'+uid])};
@@ -1233,10 +1251,36 @@ async function resetName(uid){const row=S.dn.find(x=>x.id===uid),nm=row&&row.dat
       if(cur[wk+'/'+uid])ops.push({op:'update',path:wk+'/'+uid,data:{dn:''}});
       return ops});
     toast('Name reset'+(info.name?': “'+info.name+'”':'')+(info.key?', “'+info.key+'” is blocked':'')+(info.boards?', cleared from the boards':''));
-    await load(['dn','lb','lbw','blk'])}catch(e){toast(fsErr(e),'err')}}
+    if(!opt.reports)await load(['dn','lb','lbw','blk','rep']);return true}catch(e){toast(fsErr(e),'err');return false}}
 async function unblock(key){if(!await ask({title:'Unblock “'+key+'”?',body:'Anyone, including the player who had it, can pick this name again.',ok:'Unblock'}))return;
   try{await DB.del('names/'+key);toast('Unblocked “'+key+'”');await load(['blk'])}catch(e){toast(fsErr(e),'err')}}
-function msgPlayer(uid){const x=S.dn.find(r=>r.id===uid),name=(x&&x.data.name)||(S.mail&&S.mail.uid===uid?S.mail.name:'')||'';const d=newDraft('gift');d.mode='one';d.to={uid,name};d.t=('A gift for you'+(name?', '+name:'')).slice(0,LIM.t);d.b='Thanks for playing Orbital Forge! Here is a little something from the developer.';d.prio=0;d.dirty=false;openComposer(d)}
+function msgPlayer(uid){const x=S.dn.find(r=>r.id===uid),name=(x&&x.data.name)||(S.mail&&S.mail.uid===uid?S.mail.name:'')||(S.repDn[uid]&&S.repDn[uid].name)||'';const d=newDraft('gift');d.mode='one';d.to={uid,name};d.t=('A gift for you'+(name?', '+name:'')).slice(0,LIM.t);d.b='Thanks for playing Orbital Forge! Here is a little something from the developer.';d.prio=0;d.dirty=false;openComposer(d)}
+/* ---- reports: reports/{reporterUid}_{holderUid} = {uid, name, why, by, at}; developer reads + deletes only ---- */
+const WHY={offensive:['Offensive',''],impersonation:['Pretending',' imp'],other:['Other',' oth']};
+function repUidOk(u){return typeof u==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(u)}
+function repGroups(){const g={},order=[];S.rep.forEach(x=>{const d=x.data||{},u=d.uid;if(!repUidOk(u))return;let G=g[u];if(!G){G=g[u]={uid:u,ids:[],names:[],why:{},last:0};order.push(G)}
+    G.ids.push(x.id);const nm=typeof d.name==='string'?d.name.slice(0,40):'';if(nm&&G.names.indexOf(nm)<0)G.names.push(nm);const w=WHY[d.why]?d.why:'other';G.why[w]=(G.why[w]||0)+1;G.last=Math.max(G.last,typeof d.at==='number'?d.at:0)});
+  return order.sort((a,b)=>b.last-a.last)}
+function repGroup(uid){return repGroups().find(G=>G.uid===uid)||null}
+function repCardHTML(){const st=secState('rep'),G=st?[]:repGroups();
+  let h='<div class="card'+(G.length?' repcard':'')+'" id="repCard"><div class="ph"><div><h2>Reports'+(S.rep.length?'<span class="chip">'+S.rep.length+'</span>':'')+'</h2><div class="sub">Display names reported from the leaderboards, newest first. Reset &amp; block removes the name everywhere; Dismiss keeps it. Either way the reports are deleted.</div></div></div><div id="repList">';
+  if(st)h+=st;else if(!G.length)h+='<div class="empty">No reports. Players can report a display name from the leaderboards (⋯ next to the name).</div>';
+  else h+=G.map(g=>{const u=esc(g.uid),dn=S.repDn[g.uid],now=dn&&typeof dn.name==='string'?dn.name:'',n=g.ids.length;
+    const nowTxt=dn==null?'<span class="noname">couldn\'t read dn</span>':now?'<b>'+esc(now)+'</b>':'<span class="noname">(no name)</span>'+(dn.rs===true?'<span class="chip paused">reset</span>':'');
+    return '<div class="prow" data-ruid="'+u+'"><div class="pmain"><div class="pn">'+(g.names.length?g.names.map(x=>'“'+esc(x)+'”').join(', '):'<span class="noname">(no name given)</span>')+'<span class="chip soft">'+n+' report'+(n===1?'':'s')+'</span></div>'
+      +'<div class="pmeta">'+Object.keys(WHY).filter(w=>g.why[w]).map(w=>'<span class="chip why'+WHY[w][1]+'">'+WHY[w][0]+' ×'+g.why[w]+'</span>').join('')+'<span>newest '+esc(rel(g.last))+'</span></div>'
+      +'<div class="rnow"><span>Name now: '+nowTxt+'</span><span class="u"><span class="mono" title="'+u+'">'+esc(shortUid(g.uid))+'</span><button class="ib xs" data-act="copyUid" data-v="'+u+'" aria-label="Copy uid" title="Copy uid">'+ic('copy')+'</button></span></div></div>'
+      +'<div class="pacts"><button class="btn sm sec" data-act="pMsg" data-v="'+u+'">'+ic('gift')+'<span>Message</span></button><button class="btn sm sec" data-act="repDismiss" data-v="'+u+'">'+ic('x')+'<span>Dismiss</span></button><button class="btn sm danger" data-act="repReset" data-v="'+u+'"'+(now?'':' disabled title="The name is already empty"')+'>'+ic('userx')+'<span>Reset &amp; block name</span></button></div></div>'}).join('');
+  return h+'</div></div>'}
+/* delete every report about a player: the loaded ones plus any others (equality query, no index needed) */
+async function clearReports(uid,known){const ids=new Set(known||[]);try{(await DB.query('reports',{where:[['uid','==',uid]],limit:500})).forEach(x=>ids.add(x.id))}catch(e){console.warn('[cc] reports query',e)}
+  const all=Array.from(ids);for(let i=0;i<all.length;i+=450)await DB.batch(all.slice(i,i+450).map(id=>({op:'delete',path:'reports/'+id})));return all.length}
+async function repReset(uid){const G=repGroup(uid);if(!G)return;if(!await resetName(uid,{reports:G.ids.length}))return;
+  try{const n=await clearReports(uid,G.ids);toast(n+' report'+(n===1?'':'s')+' cleared')}catch(e){toast('The name was reset, but the reports could not be deleted: '+fsErr(e),'err')}
+  await load(['rep','dn','lb','lbw','blk'])}
+async function repDismiss(uid){const G=repGroup(uid);if(!G)return;const nm=G.names[0]||shortUid(uid),n=G.ids.length;
+  if(!await ask({title:'Dismiss '+n+' report'+(n===1?'':'s')+' about “'+nm+'”?',body:'The name stays as it is. The reports are deleted.',ok:'Dismiss'}))return;
+  try{const k=await clearReports(uid,G.ids);toast('Dismissed '+k+' report'+(k===1?'':'s')+' about “'+nm+'”');await load(['rep'])}catch(e){toast(fsErr(e),'err')}}
 /* last week's top 3: names come from dn/{uid} (never the dn copied onto the lbw doc); absurd values are skipped */
 async function announceTop(){const wk=weekId(Date.now()-7*DAY);try{const r=(await DB.query('lbw_'+wk,{order:['wg','desc'],limit:20})).filter(x=>typeof x.data.wg==='number'&&isFinite(x.data.wg)&&x.data.wg<1e30).slice(0,3);
   if(!r.length){toast('Nobody is on last week\'s board (lbw_'+wk+')','warn');return}
@@ -1433,7 +1477,7 @@ const ACT={
   saClose:()=>{S.saForm=null;render()},saSave:saveSale,
   saEnd:el=>liveItem('sa',el.dataset.id,'end'),saDel:el=>liveItem('sa',el.dataset.id,'del'),saAnn:el=>announceSale(el.dataset.id),
   copyUid:el=>copyText(el.dataset.v).then(()=>toast('Copied uid '+shortUid(el.dataset.v)),()=>toast('Copy failed: '+el.dataset.v,'err')),
-  pMsg:el=>msgPlayer(el.dataset.v),pReset:el=>resetName(el.dataset.v),unblock:el=>unblock(el.dataset.v),
+  pMsg:el=>msgPlayer(el.dataset.v),pReset:el=>resetName(el.dataset.v),unblock:el=>unblock(el.dataset.v),repReset:el=>repReset(el.dataset.v),repDismiss:el=>repDismiss(el.dataset.v),
   pMail:el=>{const x=S.dn.find(r=>r.id===el.dataset.v);openMail(el.dataset.v,x&&x.data.name||'')},mailClose:()=>{S.mail=null;render()},mailDel:el=>mailDelete(el.dataset.v),
   libCat:el=>{S.libCat=el.dataset.v;render()},libPv:el=>openLibPreview(el.dataset.v),libUse:el=>useLib(el.dataset.v),libBack:()=>go('library'),libReload:()=>{loadLibrary(true);render()},
   seeMail:()=>{const d=S.draft;if(d&&d.to)openMail(d.to.uid,d.to.name)},
