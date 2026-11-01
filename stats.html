@@ -455,6 +455,7 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
    Orbital Forge · Command Center
    Live ops (messages of the day, gifts, meteor events, store sales, display names) + play stats.
    Data contract: LIVE_SPEC (motd, motd_img, motd_stat, mail/{uid}/m, config/live, dn, names, lb, lbw_<week>).
+   config/live.sales may hold one {sec:'ladder',step,top} entry: the Skip-ahead video ladder (game 1.20+), see liveNorm.
    One backend adapter (DB): Firestore, or an in-memory preview store with ?mock.
    ===================================================================== */
 const FB_CFG={apiKey:"AIzaSyCnBxh70YWlrOfQJQ9JO33h8zAs_nOfnxE",authDomain:"orbitalforge-81f30.firebaseapp.com",projectId:"orbitalforge-81f30",storageBucket:"orbitalforge-81f30.firebasestorage.app",messagingSenderId:"707228512475"};
@@ -547,8 +548,18 @@ function mStatus(m,t){t=t||Date.now();if(m.end<=t)return 'ended';if(m.on===false
 const ST_L={live:'Live',sched:'Scheduled',paused:'Paused',ended:'Ended'};
 function gameOrder(a,b){return (b.prio||0)-(a.prio||0)||(b.start||0)-(a.start||0)}
 function itemSt(x,t){t=t||Date.now();return x.until<=t?'past':x.start>t?'up':'live'}
-function liveNorm(d){d=d||{};return {events:Array.isArray(d.events)?clone(d.events):[],sales:Array.isArray(d.sales)?clone(d.sales):[]}}
-function liveOut(L){return {events:L.events,sales:L.sales,up:Date.now()}}
+/* the Skip-ahead video ladder (game 1.20+) rides in config/live.sales as one entry {sec:'ladder',step,top}: the rules only take
+   events, sales and up, and older games drop it (it is not a store section). Here it lives apart in L.ladder (null = the
+   game's default, 1 hour a step up to 20) and is put back into the list on every write. */
+const LADDER_DEF={step:1,top:20},LADDER_UNTIL=4102444800000;
+function ladInt(v,lo,hi,d){v=Math.floor(+v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
+function ladOk(F){return F&&Number.isInteger(F.step)&&F.step>=1&&F.step<=6&&Number.isInteger(F.top)&&F.top>=1&&F.top<=24}
+function liveNorm(d){d=d||{};const all=Array.isArray(d.sales)?clone(d.sales):[];const lad=all.find(x=>x&&x.sec==='ladder');
+  return {events:Array.isArray(d.events)?clone(d.events):[],sales:all.filter(x=>!(x&&x.sec==='ladder')),ladder:lad?{step:ladInt(lad.step,1,6,1),top:ladInt(lad.top,1,24,20)}:null}}
+function liveOut(L){let sales=L.sales.slice();if(L.ladder){if(sales.length>=LIM.list){const t=Date.now();const ended=sales.filter(x=>x.until<=t).sort((a,b)=>a.until-b.until);while(sales.length>=LIM.list&&ended.length)sales.splice(sales.indexOf(ended.shift()),1)}
+    if(sales.length>=LIM.list)throw new Error('config/live already holds '+LIM.list+' sales that are live or upcoming. Delete one to keep the video ladder.');
+    sales.push({id:'ladder',sec:'ladder',step:L.ladder.step,top:L.ladder.top,start:0,until:LADDER_UNTIL,note:'Skip-ahead video ladder'})}
+  return {events:L.events,sales,up:Date.now()}}
 /* keep config/live lists at 30: drop the oldest ended entries first */
 function addItem(list,item,what){list.push(item);if(list.length>LIM.list){const t=Date.now();const ended=list.filter(x=>x!==item&&x.until<=t).sort((a,b)=>a.until-b.until);while(list.length>LIM.list&&ended.length){list.splice(list.indexOf(ended.shift()),1)}
   if(list.length>LIM.list){const e=new Error('config/live already holds '+LIM.list+' '+what+' that are live or upcoming. Delete one first.');throw e}}}
@@ -1197,11 +1208,27 @@ function announceEvent(id){const e=S.live.events.find(x=>x.id===id);if(!e)return
 
 /* ---------- STORE (config/live.sales) ---------- */
 VIEWS.store=()=>{let h=head('Store sales','Discounts (% off the gem price) and bonuses (% more contents; Google Play sets the real-money price). Saved in config/live.','<button class="btn lg" data-act="saNew">'+ic('plus')+'New sale</button>');
-  const st=secState('live');if(st)return h+st;if(S.saForm)h+=saFormHTML(S.saForm);
+  const st=secState('live');if(st)return h+st;h+=ladderCardHTML();if(S.saForm)h+=saFormHTML(S.saForm);
   const t=Date.now(),sa=S.live.sales,L=sa.filter(s=>itemSt(s,t)==='live').sort((a,b)=>a.until-b.until),U=sa.filter(s=>itemSt(s,t)==='up').sort((a,b)=>a.start-b.start),P=sa.filter(s=>itemSt(s,t)==='past'&&s.until>t-7*DAY).sort((a,b)=>b.until-a.until);
   const grp=(arr,k,label)=>'<section class="mgroup"><h3 class="gh"><span class="chip st '+k+'">'+label+'</span><span class="n">'+arr.length+'</span></h3>'+(arr.length?arr.map(saRow).join(''):'<div class="empty sm">'+(k==='live'?'No sale is running.':k==='sched'?'Nothing planned.':'No sales in the last 7 days.')+'</div>')+'</section>';
   h+=grp(L,'live','Live')+grp(U,'sched','Upcoming')+grp(P,'ended','Past 7 days');
   h+='<p class="note">config/live holds '+sa.length+' of '+LIM.list+' sales. When it is full, the oldest ended ones are dropped first.</p>';return h};
+/* the Skip-ahead video ladder (game 1.20+) */
+function ladderCardHTML(){const cur=S.live.ladder||LADDER_DEF;const F=S.ladF||(S.ladF={step:cur.step,top:cur.top});const same=F.step===cur.step&&F.top===cur.top;
+  return '<section class="card" id="ladCard" aria-labelledby="ladT"><div class="ph"><h2 id="ladT">Skip-ahead videos</h2><span class="chip st '+(S.live.ladder?'live">Your settings':'sched">Default')+'</span></div>'
+  +'<p class="hint" style="margin-top:0">A free video skips time, and each video skips more than the last (game 1.20 and newer). The game offers one when a player\'s upgrades stall. Skips count toward the 20 free videos a day and start over at midnight.</p>'
+  +'<div class="row">'+fld('lad-step','Hours added per video <small>1–6</small>','<input class="inp" type="number" inputmode="numeric" id="lad-step" data-f="ladStep" min="1" max="6" step="1" value="'+(isFinite(F.step)?F.step:'')+'">','ladStep')
+  +fld('lad-top','Longest skip, in hours <small>1–24</small>','<input class="inp" type="number" inputmode="numeric" id="lad-top" data-f="ladTop" min="1" max="24" step="1" value="'+(isFinite(F.top)?F.top:'')+'">','ladTop')+'</div>'
+  +'<p class="hint" id="ladPv">'+esc(ladPreview(F))+'</p>'
+  +'<div class="facts">'+(S.live.ladder?'<button class="btn sec" data-act="ladReset">Back to default</button>':'')+'<button class="btn lg" data-act="ladSave" id="ladSaveBtn"'+(same||!ladOk(F)?' disabled':'')+'>Save</button></div></section>'}
+function ladPreview(F){if(!ladOk(F))return 'Hours per video: a whole number from 1 to 6. Longest skip: 1 to 24 hours.';const hs=[];let tot=0;for(let i=1;i<=20;i++){const h=Math.min(F.top,i*F.step);hs.push(h);tot+=h}
+  return 'Video 1 skips '+hs[0]+'h, video 2 '+hs[1]+'h, video 3 '+hs[2]+'h … video 20 '+hs[19]+'h. A player who watches all 20 in one day skips '+tot+' hours.'}
+function ladField(el,f){const cur=S.live.ladder||LADDER_DEF;const F=S.ladF||(S.ladF={step:cur.step,top:cur.top});const v=el.value===''?NaN:Number(el.value);F[f==='ladStep'?'step':'top']=Number.isInteger(v)?v:NaN;
+  const pv=$('#ladPv');if(pv)pv.textContent=ladPreview(F);el.classList.toggle('bad',!(f==='ladStep'?Number.isInteger(F.step)&&F.step>=1&&F.step<=6:Number.isInteger(F.top)&&F.top>=1&&F.top<=24));
+  const b=$('#ladSaveBtn');if(b)b.disabled=!ladOk(F)||(F.step===cur.step&&F.top===cur.top)}
+async function ladSave(def){const F=def?Object.assign({},LADDER_DEF):S.ladF;if(!ladOk(F)||S.busy){if(!def)toast('Fix the ladder: hours per video 1–6, longest skip 1–24','err');return}
+  S.busy=true;try{await liveTx(L=>{L.ladder=F.step===LADDER_DEF.step&&F.top===LADDER_DEF.top?null:{step:F.step,top:F.top}});S.ladF=null;
+    toast(def||!S.live.ladder?'Skip-ahead videos: back to 1 hour a step, up to 20 hours':'Skip-ahead videos saved: '+F.step+'h a step, up to '+F.top+'h');render()}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
 function saRow(s){const t=Date.now(),st=itemSt(s,t),id=esc(s.id),S2=SECS[s.sec];let a='';
   if(st!=='past')a+='<button class="btn sm sec" data-act="saEdit" data-id="'+id+'">'+ic('edit')+'<span>Edit</span></button>';
   if(st==='live')a+='<button class="btn sm sec" data-act="saEnd" data-id="'+id+'">'+ic('stop')+'<span>End now</span></button>';
@@ -1475,6 +1502,7 @@ const ACT={
   saNew:()=>{const s=nowMin();openForm('sa',{id:null,sec:'boost',val:30,start:s,until:untilSun(s),note:'',tried:false})},
   saEdit:el=>{const s=S.live.sales.find(x=>x.id===el.dataset.id);if(s)openForm('sa',{id:s.id,sec:s.sec,val:SECS[s.sec]&&SECS[s.sec].kind==='bonus'?s.bonus:s.pct,start:s.start,until:s.until,note:s.note||'',tried:false})},
   saClose:()=>{S.saForm=null;render()},saSave:saveSale,
+  ladSave:()=>ladSave(false),ladReset:()=>ladSave(true),
   saEnd:el=>liveItem('sa',el.dataset.id,'end'),saDel:el=>liveItem('sa',el.dataset.id,'del'),saAnn:el=>announceSale(el.dataset.id),
   copyUid:el=>copyText(el.dataset.v).then(()=>toast('Copied uid '+shortUid(el.dataset.v)),()=>toast('Copy failed: '+el.dataset.v,'err')),
   pMsg:el=>msgPlayer(el.dataset.v),pReset:el=>resetName(el.dataset.v),unblock:el=>unblock(el.dataset.v),repReset:el=>repReset(el.dataset.v),repDismiss:el=>repDismiss(el.dataset.v),
@@ -1488,6 +1516,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act],[data
   if(t.dataset.range){S.range=+t.dataset.range;render();return}
   const f=ACT[t.dataset.act];if(f){e.preventDefault();Promise.resolve().then(()=>f(t)).catch(x=>{console.error(x);toast(fsErr(x),'err')})}});
 function onField(e){const el=e.target,f=el.dataset&&el.dataset.f;if(!f)return;
+  if(f==='ladStep'||f==='ladTop')return ladField(el,f);
   if(el.closest('#comp'))return draftInput(el,f,e.type);
   if(el.closest('#evForm'))return formInput('ev',el,f);
   if(el.closest('#saForm'))return formInput('sa',el,f);
