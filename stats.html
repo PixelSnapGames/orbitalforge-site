@@ -167,6 +167,9 @@ a{color:var(--ac)}
 
 /* ---- message list ---- */
 .tplrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 18px}
+#urCard .urst{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 10px}
+#urCard .facts{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px}
+#urCard textarea.inp{resize:vertical;min-height:120px}
 .tplrow .k{font-size:12px;font-weight:800;color:var(--mu2);text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
 .mgroup{margin-bottom:20px}
 .gh{display:flex;align-items:center;gap:8px;margin:0 2px 8px;font-size:13px;font-weight:700;color:var(--mu2);list-style:none;cursor:default}
@@ -619,7 +622,8 @@ function fireDB(){let auth=null,db=null;
     update(path,data){return db.doc(path).update(data)},
     del(path){return db.doc(path).delete()},
     batch(ops){const b=db.batch();ops.forEach(o=>apply(b,o));return b.commit()},
-    query(col,o){o=o||{};let q=db.collection(col);(o.where||[]).forEach(w=>{q=q.where(w[0],w[1],w[2])});if(o.order)q=q.orderBy(o.order[0],o.order[1]||'asc');if(o.limit)q=q.limit(o.limit);return q.get().then(s=>s.docs.map(d=>({id:d.id,data:norm(d.data())})))},
+    /* o.byId: in document-id order, o.after: the id to continue after (reading a whole collection page by page) */
+    query(col,o){o=o||{};let q=db.collection(col);(o.where||[]).forEach(w=>{q=q.where(w[0],w[1],w[2])});if(o.byId){q=q.orderBy(firebase.firestore.FieldPath.documentId());if(o.after!=null)q=q.startAfter(o.after)}else if(o.order)q=q.orderBy(o.order[0],o.order[1]||'asc');if(o.limit)q=q.limit(o.limit);return q.get().then(s=>s.docs.map(d=>({id:d.id,data:norm(d.data())})))},
     /* read the listed docs, let fn turn them into writes, commit atomically (Firestore retries fn on contention) */
     tx(paths,fn){return db.runTransaction(t=>Promise.all(paths.map(p=>t.get(db.doc(p)))).then(snaps=>{const cur={};snaps.forEach((s,i)=>{cur[paths[i]]=s.exists?norm(s.data()):null});const ops=fn(cur);ops.forEach(o=>apply(t,o));return ops}))}
   }}
@@ -645,7 +649,8 @@ function mockDB(){const KEY='cc_mock_db';let docs={},gen={},user=null,authCb=nul
     batch(ops){return wait().then(()=>commit(ops))},
     query(col,o){return wait().then(()=>{o=o||{};const pre=col+'/',all=Object.assign({},gen,docs);let rows=Object.keys(all).filter(k=>k.indexOf(pre)===0&&k.slice(pre.length).indexOf('/')<0).map(k=>({id:k.slice(pre.length),data:clone(all[k])}));
       (o.where||[]).forEach(w=>{rows=rows.filter(r=>cmp(r.data[w[0]],w[1],w[2]))});
-      if(o.order){const f=o.order[0],dir=o.order[1]==='desc'?-1:1;rows=rows.filter(r=>r.data[f]!=null).sort((a,b)=>a.data[f]<b.data[f]?-dir:a.data[f]>b.data[f]?dir:0)}
+      if(o.byId){rows.sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);if(o.after!=null)rows=rows.filter(r=>r.id>o.after)}
+      else if(o.order){const f=o.order[0],dir=o.order[1]==='desc'?-1:1;rows=rows.filter(r=>r.data[f]!=null).sort((a,b)=>a.data[f]<b.data[f]?-dir:a.data[f]>b.data[f]?dir:0)}
       if(o.limit)rows=rows.slice(0,o.limit);return rows})},
     tx(paths,fn){return wait().then(()=>{const cur={};paths.forEach(p=>{cur[p]=clone(docs[p]||null)});const ops=fn(cur);commit(ops);return ops})},
     reset(){docs=mockSeed();save()},
@@ -680,10 +685,12 @@ function mockUsers(D,t,rnd){const uids=Object.keys(D).filter(k=>k.indexOf('dn/')
     const dm=i===4?48000:Math.round(30+rnd()*400),sh=Math.round(rnd()*60);const ev=[];let et=seen-play*1000;const add=(c,d)=>{et+=Math.round(rnd()*900e3);ev.push([Math.min(et,seen),c,d])};
     add('open','1.21.0');add('shop','bundles');add('tab','gems');add('iap+','of_commander_license');add('iap×','of_commander_license');add('ad+','gems');add('ad✓','gems');add('daily','day 2');add('level_up','{"lv":'+lv+'}');add('ad+','skip');add('ad×','skip');
     if(i===0){add('iap+','of_bundle_galaxy');add('iap✓','of_bundle_galaxy')}if(i===4)add('clock','45 min back');
-    const g={appVer:i===5?'1.20.0':'1.21.0',createdAt:seen-(lv+2)*DAY,lastSave:seen,cash:Math.pow(10,2+lv/4)*(1+rnd()),dm,shards:sh,credits:Math.round(lv*40*rnd()),cmd:{xp,asc:lv>30?2:0},maxSys:Math.min(10,Math.floor(lv/5)),
+    // the last guest started on 1.21 (its save began moments before its play record): an update reward skips it
+    const first=seen-play*1000;
+    const g={appVer:i===5?'1.20.0':'1.21.0',createdAt:i===7?first-20e3:seen-(lv+2)*DAY,lastSave:seen,cash:Math.pow(10,2+lv/4)*(1+rnd()),dm,shards:sh,credits:Math.round(lv*40*rnd()),cmd:{xp,asc:lv>30?2:0},maxSys:Math.min(10,Math.floor(lv/5)),
       planets:new Array(Math.min(40,lv+3)).fill(0).map((_,k)=>({g:k})),items:{mine_rare:2+i,trade_epic:i%2,warp_common:3,dm_common:1},inv:{crate_key:i},stats:{playSec:play,ads:4+i*3,purchases:i===0?2:0,used:5+i},
       adDay:{d:new Date(t).getFullYear()+'-'+(new Date(t).getMonth()+1)+'-'+new Date(t).getDate(),c:{gems:2,skip:1},n:3},cal:{step:i%7,lap:0,last:new Date(seen).toISOString().slice(0,10)},wkGift:'',bought:i===0?{lic:1,b4:1}:{},lb:{c1:i*3,c2:i*5,n:i*7},
-      pf:{v:1,first:seen-play*1000,last:seen,iid:'',sess:{n:3+i*2},c:{shop:2+i,shopAt:seen-3*HOUR,tabs:{bundles:2,gems:1+i},iapStart:{of_commander_license:1+i%2},iapCancel:{of_commander_license:1+i%2},adStart:{gems:3,skip:2},adDone:{gems:3,skip:1},adQuit:{skip:1},daily:2+i,gifts:i%3,needDm:i%2},
+      pf:{v:1,first,last:seen,iid:'',sess:{n:3+i*2},c:{shop:2+i,shopAt:seen-3*HOUR,tabs:{bundles:2,gems:1+i},iapStart:{of_commander_license:1+i%2},iapCancel:{of_commander_license:1+i%2},adStart:{gems:3,skip:2},adDone:{gems:3,skip:1},adQuit:{skip:1},daily:2+i,gifts:i%3,needDm:i%2},
         dm:{in:{ad:30,daily:60,gift:50,other:i===4?47000:15},out:{pack:20}},sh:{in:{daily:5},out:{}},big:i===4?[[seen-2*DAY,'dm',45000,47900]]:[],clock:i===4?1:0,ev,gifts:[[seen-DAY,'daily','Day 2 of the supply calendar'],[seen-2*HOUR,'message','A gift for every commander · 50 DM']],adm:{}}};
     if(i===0)g.active={trade:{until:t+20*MIN,mult:5}};
     D['users/'+uid]={save:JSON.stringify(g),updatedAt:seen,version:g.appVer,dm,shards:sh,gv:Math.round(Math.pow(10,3+lv/3)),income:Math.round(Math.pow(10,1+lv/5)),sys:g.maxSys,created:g.createdAt};
@@ -883,6 +890,7 @@ function audTxt(a){if(!a)return '';const p=[];if(a.acct)p.push('Signed-in only')
 VIEWS.messages=()=>{let h=head('Messages','The cards players see when they open the game. Order in game: priority, then newest start.','<button class="btn lg" data-act="new" data-v="blank">'+ic('plus')+'New message</button>');
   h+='<div class="tplrow" role="group" aria-label="Start from a template"><span class="k">Quick start</span>'+TPL_ORDER.filter(k=>k!=='blank').map(k=>'<button class="pill" style="--pc:'+TAGS[TPL[k].tag].c+'" data-act="new" data-v="'+k+'">'+esc(TPL[k].n)+'</button>').join('')+'</div>';
   const st=secState('motd');if(st)return h+st;
+  h+=urCardHTML();
   const t=Date.now(),G={live:[],sched:[],paused:[],ended:[]};S.motd.forEach(m=>G[mStatus(m,t)].push(m));
   G.live.sort(gameOrder);G.sched.sort((a,b)=>a.start-b.start);G.paused.sort((a,b)=>(b.up||0)-(a.up||0));G.ended.sort((a,b)=>b.end-a.end);
   const grp=(k,label,note)=>G[k].length?'<section class="mgroup" aria-label="'+label+'"><h3 class="gh"><span class="chip st '+k+'">'+label+'</span><span class="n">'+G[k].length+'</span><span class="gl">'+note+'</span></h3>'+G[k].map(m=>msgRow(m,k)).join('')+'</section>':'';
@@ -906,6 +914,61 @@ async function msgDelete(id){const m=S.motd.find(x=>x.id===id);if(!m)return;
   const ops=[{op:'delete',path:'motd/'+id},{op:'delete',path:'motd_stat/'+id}];if(m.img==='doc'&&m.imgId&&!imgShared(m.imgId,id))ops.push({op:'delete',path:'motd_img/'+m.imgId});
   try{await DB.batch(ops);toast('Deleted “'+m.t+'”');await load(['motd','stat'])}catch(e){toast(fsErr(e),'err')}}
 function imgShared(imgId,exceptId){return S.motd.some(x=>x.id!==exceptId&&x.img==='doc'&&x.imgId===imgId)}
+
+/* ---------- UPDATE REWARD (game 1.21+) ----------
+   Players on an older version see a message to update (aud.below: game 1.21+ hides it, older games show it). The reward
+   waits for every player who started before that version as a Command Center change, adm/{uid}/ops/{campaign id}, which
+   only game 1.21+ applies (once, with the thank-you note), so updating is the way to get it. A player who started on the
+   new version gets nothing: it is a thank-you for updating. The message doc carries camp:{v,item,n,note,sent,at}. */
+const UR_DEF={t:'Update now for a free reward',b:'Version 1.21 is out! Update from Google Play and a free 4-hour Time Warp will be waiting for you.\n\nWhat\'s new:\n• Money keeps coming after the Smelter\n• Faster first levels\n• License boost days with up to ×25 ore\n• Self-upgrade works top to bottom',note:'Thanks for updating! Here\'s a free 4-hour Time Warp. It\'s in your Boosters.'};
+const UR_VER=/^\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+function urId(v){return 'upd_'+String(v).trim().replace(/\./g,'_')}
+function urF(){return S.ur||(S.ur={open:false,v:GAME_VER,item:'warp_rare',n:'1',t:UR_DEF.t,b:UR_DEF.b,note:UR_DEF.note,busy:false,prog:'',cnt:null})}
+function urErr(F){if(!UR_VER.test(F.v.trim()))return 'Version: a number like 1.21.0';if(!BMAP2[F.item])return 'Pick a reward';const n=+F.n;if(!(Number.isInteger(n)&&n>=1&&n<=50))return 'How many: 1 to 50';
+  if(!F.t.trim())return 'The message needs a title';if(F.t.trim().length>LIM.t)return 'Title: at most '+LIM.t+' characters';if(F.b.trim().length>LIM.b)return 'Message: at most '+LIM.b+' characters';
+  if(!F.note.trim())return 'Write the thank-you note';if(F.note.trim().length>80)return 'Thank-you note: at most 80 characters';if(HTML_RE.test(F.t+F.b+F.note))return 'Plain text only: remove the HTML tags';return ''}
+function urCardHTML(){const F=urF(),v=F.v.trim(),m=UR_VER.test(v)?S.motd.find(x=>x.id===urId(v)):null;
+  let h='<div class="card" id="urCard"><div class="ph"><div><h2>Update reward</h2><div class="sub">Players on an older version see a message to update. The reward waits for them: the game gives it, with your thank-you note, the first time they open the new version. Players who start on the new version don\'t get it.</div></div>'+(!m&&!F.open?'<button class="btn sm sec" data-act="urOpen">'+ic('gift')+'<span>Set up</span></button>':'')+'</div>';
+  if(m){const c=m.camp||{},st=mStatus(m),s=S.stat[m.id]||{},K=F.cnt&&F.cnt.v===v?F.cnt:null;
+    h+='<div class="urst"><span class="chip st '+st+'">'+ST_L[st]+'</span><b>Version '+esc(v)+'</b><span class="sub">message '+(st==='ended'?'ended '+esc(rel(m.end)):st==='sched'?'starts '+esc(rel(m.start)):'ends '+esc(rel(m.end)))+'</span></div>'
+      +pRow('Reward',esc(bName(c.item))+(c.n>1?' ×'+nf(c.n):''))+pRow('Waiting for',nf(K?K.all:c.sent||0)+' players')+pRow('Got it',K?nf(K.done)+' of '+nf(K.all):'tap Refresh')
+      +pRow('Saw the message',nf(s.seen||0))+pRow('Tapped “Get the update”',nf(s.tap||0))
+      +'<p class="sub">Thank-you note: “'+esc(c.note||'')+'”</p>'
+      +'<div class="facts"><button class="btn sm sec" data-act="urRun" data-v="0"'+(F.busy?' disabled':'')+'>'+ic('refresh')+'<span>Refresh</span></button><span class="sub" id="urProg">'+esc(F.prog||'Refresh counts who got it, and adds the reward for any older player who doesn\'t have it yet.')+'</span></div>'}
+  else if(F.open){h+='<div class="row">'+fld('ur-v','New version','<input class="inp" id="ur-v" data-f="urV" value="'+esc(F.v)+'" inputmode="decimal">')+fld('ur-item','Reward','<select class="inp" id="ur-item" data-f="urItem">'+BOOST_ALL.map(b=>'<option value="'+b.id+'"'+(F.item===b.id?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select>')+fld('ur-n','How many','<input class="inp" id="ur-n" data-f="urN" inputmode="numeric" value="'+esc(F.n)+'">')+'</div>'
+      +fld('ur-t','Message to older versions: title','<input class="inp" id="ur-t" data-f="urT" maxlength="'+LIM.t+'" value="'+esc(F.t)+'">')
+      +fld('ur-b','Message text <small>it gets a “Get the update” button to Google Play</small>','<textarea class="inp" id="ur-b" data-f="urB" rows="7" maxlength="'+LIM.b+'">'+esc(F.b)+'</textarea>')
+      +fld('ur-note','Thank-you note <small>shown when the reward arrives, 80 characters</small>','<input class="inp" id="ur-note" data-f="urNote" maxlength="80" value="'+esc(F.note)+'">')
+      +'<div class="facts"><button class="btn lg" data-act="urRun" data-v="1"'+(F.busy?' disabled':'')+'>'+ic('gift')+'<span>Start update reward</span></button><span class="sub" id="urProg">'+esc(F.prog||(UR_VER.test(v)?'Start it once version '+v+' is live on Google Play.':''))+'</span></div>'}
+  return h+'</div>'}
+function urProg(t){const F=urF();F.prog=t;const el=$('#urProg');if(el)el.textContent=t}
+function urField(el,f,type){const F=urF(),k={urV:'v',urItem:'item',urN:'n',urT:'t',urB:'b',urNote:'note'}[f];if(!k)return;F[k]=el.value;if(f==='urV'&&type==='change')render()}
+/* a save that started before the new version: no play record yet (older game), or a record that began well after the
+   save did (the player updated). A save that began with its play record started on 1.21+. */
+function urOld(doc){const g=parseSave(doc);if(!g)return false;const p=g.pf;if(!p||typeof p!=='object'||!(+p.first))return true;const c=+g.createdAt||+doc.created||0;return !(c>0&&+p.first-c<5*60e3)}
+async function urRun(el){const F=urF();if(F.busy||S.busy)return;const start=el.dataset.v==='1',v=F.v.trim(),id=urId(v);const m=S.motd.find(x=>x.id===id)||null;
+  if(start){const e=urErr(F);if(e){toast(e,'err');return}if(m){render();return}}else if(!m)return;
+  const c=start?{v,item:F.item,n:+F.n,note:F.note.trim()}:Object.assign({v},m.camp||{});
+  if(!c.item||!BMAP2[c.item]||!(c.n>=1)){toast('This update reward has no reward set','err');return}
+  F.busy=true;render();
+  try{const users=[];let after=null;
+    for(;;){const r=await DB.query('users',{byId:true,after,limit:200});users.push(...r);urProg('Reading player saves… '+nf(users.length));if(r.length<200)break;after=r[r.length-1].id}
+    const old=users.filter(u=>urOld(u.data)),need=[];let have=0,done=0;
+    for(let i=0;i<old.length;i+=25){const ch=old.slice(i,i+25);const got=await Promise.all(ch.map(u=>DB.get('adm/'+u.id+'/ops/'+id)));
+      ch.forEach((u,k)=>{const o=got[k];if(o){have++;if(o.done&&!(o.res&&o.res.error))done++}else need.push(u.id)});urProg('Checking who has it… '+nf(Math.min(i+25,old.length))+' / '+nf(old.length))}
+    if(start&&!await ask({title:'Start the update reward for '+v+'?',body:'Players on a version older than <b>'+esc(v)+'</b> see “'+esc(F.t.trim())+'” for 14 days, with a button to Google Play.<br><br><b>'+nf(need.length+have)+' players</b> who started before '+esc(v)+' get <b>'+esc(bName(c.item))+(c.n>1?' ×'+c.n:'')+'</b> waiting for them. The game gives it the first time they open '+esc(v)+' or newer.<br><br>Only start once '+esc(v)+' is live on Google Play.',ok:'Start'})){F.prog='';return}
+    const now=Date.now(),op={k:'item',b:c.item,mode:'add',n:c.n,msg:String(c.note||'').slice(0,80),note:'Update reward '+v,at:now,by:S.user&&S.user.email||'',done:false,camp:id};
+    for(let i=0;i<need.length;i+=400){await DB.batch(need.slice(i,i+400).map(u=>({op:'set',path:'adm/'+u+'/ops/'+id,data:op})));urProg('Adding the reward… '+nf(Math.min(i+400,need.length))+' / '+nf(need.length))}
+    const all=have+need.length;
+    if(start){const doc={t:F.t.trim(),b:F.b.replace(/\r\n?/g,'\n').trim(),k:'',tag:'update',c:'',img:'',imgId:'',imgV:0,fit:'cover',cta:{l:'Get the update',go:'url:'+PLAY_URL},gift:null,start:now,end:plusDays(now,14),prio:6,
+        aud:{acct:false,minLv:0,maxLv:0,below:v},on:true,pop:true,created:now,up:now,camp:{v,item:c.item,n:c.n,note:c.note,sent:all,at:now}};
+      await DB.batch([{op:'set',path:'motd/'+id,data:doc},{op:'set',path:'motd_stat/'+id,data:{seen:0,tap:0,claim:0}}])}
+    else await DB.update('motd/'+id,{camp:Object.assign({},m.camp,{sent:all}),up:now});
+    F.cnt={v,all,done,at:now};F.prog='';F.open=false;
+    toast(start?'Update reward started: '+nf(all)+' players have it waiting':'Refreshed: '+nf(done)+' of '+nf(all)+' got it'+(need.length?' · added '+nf(need.length):''));
+    await load(['motd','stat'])}
+  catch(e){console.warn('[cc] update reward',e);F.prog='';toast(fsErr(e),'err')}
+  finally{F.busy=false;render()}}
 
 /* =====================================================================
    COMPOSER
@@ -974,7 +1037,9 @@ function buildMotd(d,prev){const now=Date.now();let img='',imgId='',imgV=prev?(p
   else if(d.img.kind==='url'){img=d.img.url.trim();if(!prev||prev.img!==img)imgV++}
   return {t:d.t.trim(),b:d.b.replace(/\r\n?/g,'\n').trim(),k:d.k.trim(),tag:d.tag,c:d.c,img,imgId,imgV,fit:d.fit==='contain'?'contain':'cover',
     cta:d.go?{l:d.ctaL.trim(),go:d.go==='url'?'url:'+d.ctaUrl.trim():d.go}:null,gift:d.giftOn?giftClean(d.gift):null,
-    start:d.start,end:d.end,prio:d.prio,aud:Object.assign({acct:!!d.acct,minLv:d.minLv,maxLv:d.maxLv},d.below&&d.below.trim()?{below:d.below.trim()}:{}),on:!d.paused,pop:!!d.pop,created:prev&&prev.created||now,up:now}}
+    start:d.start,end:d.end,prio:d.prio,aud:Object.assign({acct:!!d.acct,minLv:d.minLv,maxLv:d.maxLv},d.below&&d.below.trim()?{below:d.below.trim()}:{}),on:!d.paused,pop:!!d.pop,created:prev&&prev.created||now,up:now,
+    // an update reward's message keeps its reward details when it is edited
+    ...(prev&&prev.camp&&d.id===prev.id?{camp:prev.camp}:{})}}
 function buildMail(d){const m=buildMotd(d,null);delete m.prio;delete m.aud;m.on=true;m.got=false;m.seen=false;m.at=m.created;return m}
 function evFromDraft(d){const w=levWin(d),all=d.lev.sys<0;return {id:newId('e'),start:w.start,until:w.until,mult:d.lev.mult,all,sys:all?-1:d.lev.sys,note:((d.lev.note||'').trim()||d.t.trim()).slice(0,LIM.note)}}
 function saleFromDraft(d){const w=lsaWin(d),k=SECS[d.lsa.sec].kind;return {id:newId('s'),sec:d.lsa.sec,pct:k==='pct'?d.lsa.val:0,bonus:k==='bonus'?d.lsa.val:0,start:w.start,until:w.until,note:((d.lsa.note||'').trim()||d.t.trim()).slice(0,LIM.note)}}
@@ -1688,6 +1753,7 @@ const ACT={
   profOpen:el=>profOpen(el.dataset.v),profClose:()=>{S.prof=null;render()},profRefresh:()=>{if(S.prof){S.prof.loading=true;render();profFetch(S.prof.uid)}},
   profMail:()=>{const P=S.prof;if(P)openMail(P.uid,P.dn&&P.dn.name||'')},pfSend:()=>pfSend(),pfCancel:el=>pfCancel(el.dataset.v),pfQuick:el=>pfQuick(el.dataset.v),pfEvAll:()=>{S.pfEvAll=true;render()},
   plMore:()=>{S.plLim=(S.plLim||40)+40;load(['pl'])},
+  urOpen:()=>{urF().open=true;render()},urRun:el=>urRun(el),
   pMsg:el=>msgPlayer(el.dataset.v),pReset:el=>resetName(el.dataset.v),unblock:el=>unblock(el.dataset.v),repReset:el=>repReset(el.dataset.v),repDismiss:el=>repDismiss(el.dataset.v),
   pMail:el=>{const x=S.dn.find(r=>r.id===el.dataset.v);openMail(el.dataset.v,x&&x.data.name||'')},mailClose:()=>{S.mail=null;render()},mailDel:el=>mailDelete(el.dataset.v),
   libCat:el=>{S.libCat=el.dataset.v;render()},libPv:el=>openLibPreview(el.dataset.v),libUse:el=>useLib(el.dataset.v),libBack:()=>go('library'),libReload:()=>{loadLibrary(true);render()},
@@ -1703,6 +1769,7 @@ function onField(e){const el=e.target,f=el.dataset&&el.dataset.f;if(!f)return;
   if(f==='plQ'&&e.type==='input'){S.plQ=el.value;const L=$('#plList');if(L)L.innerHTML=plListHTML();return}
   if(['pfK','pfMode','pfN','pfId','pfMsg','pfNote'].indexOf(f)>=0){if(f==='pfK'&&e.type!=='change')return;return pfField(el,f)}
   if(f==='lbMult'||f==='lbStart'||f==='lbUntil'||f==='lbNote')return lbField(el,f);
+  if(/^ur[A-Z]/.test(f))return urField(el,f,e.type);
   if(el.closest('#comp'))return draftInput(el,f,e.type);
   if(el.closest('#evForm'))return formInput('ev',el,f);
   if(el.closest('#saForm'))return formInput('sa',el,f);
