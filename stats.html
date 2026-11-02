@@ -434,6 +434,7 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .gatec{max-width:520px;margin:40px auto;padding:24px}
 .gatec .sub{margin:6px 0 16px;font-size:14px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.lbList{display:flex;flex-direction:column;gap:6px}.lbRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}.lbRow b{font-size:15px;color:#c084fc}.lbRow .sub{flex:1;min-width:140px}
 </style></head><body>
 <div class="app" id="app">
   <header class="top">
@@ -462,6 +463,7 @@ const FB_CFG={apiKey:"AIzaSyCnBxh70YWlrOfQJQ9JO33h8zAs_nOfnxE",authDomain:"orbit
 const ADMINS=['pixelsnapgames@gmail.com'];
 const MIN=6e4,HOUR=36e5,DAY=864e5;
 const PLAY_URL='https://play.google.com/store/apps/details?id=com.pixelsnapgames.orbitalforge';
+const GAME_VER='1.21.0';// the newest game version: an update message goes only to players older than this (game 1.21+ checks it)
 
 /* ---------- small helpers ---------- */
 const $=(s,r)=>(r||document).querySelector(s);
@@ -554,11 +556,16 @@ function itemSt(x,t){t=t||Date.now();return x.until<=t?'past':x.start>t?'up':'li
 const LADDER_DEF={step:1,top:20},LADDER_UNTIL=4102444800000;
 function ladInt(v,lo,hi,d){v=Math.floor(+v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
 function ladOk(F){return F&&Number.isInteger(F.step)&&F.step>=1&&F.step<=6&&Number.isInteger(F.top)&&F.top>=1&&F.top<=24}
+/* License boost days (game 1.21+) ride in config/live.sales too, as {sec:'licboost',mult,start,until,note}: older games drop them. */
+function lbNorm(x){const start=+x.start||0,until=+x.until||0,mult=ladInt(x.mult,3,50,0);return mult&&until>start?{id:String(x.id||('lb'+start)),sec:'licboost',mult,start,until,note:typeof x.note==='string'?x.note.slice(0,60):''}:null}
 function liveNorm(d){d=d||{};const all=Array.isArray(d.sales)?clone(d.sales):[];const lad=all.find(x=>x&&x.sec==='ladder');
-  return {events:Array.isArray(d.events)?clone(d.events):[],sales:all.filter(x=>!(x&&x.sec==='ladder')),ladder:lad?{step:ladInt(lad.step,1,6,1),top:ladInt(lad.top,1,24,20)}:null}}
+  return {events:Array.isArray(d.events)?clone(d.events):[],sales:all.filter(x=>!(x&&(x.sec==='ladder'||x.sec==='licboost'))),ladder:lad?{step:ladInt(lad.step,1,6,1),top:ladInt(lad.top,1,24,20)}:null,
+    licb:all.filter(x=>x&&x.sec==='licboost').map(lbNorm).filter(Boolean)}}
 function liveOut(L){let sales=L.sales.slice();if(L.ladder){if(sales.length>=LIM.list){const t=Date.now();const ended=sales.filter(x=>x.until<=t).sort((a,b)=>a.until-b.until);while(sales.length>=LIM.list&&ended.length)sales.splice(sales.indexOf(ended.shift()),1)}
     if(sales.length>=LIM.list)throw new Error('config/live already holds '+LIM.list+' sales that are live or upcoming. Delete one to keep the video ladder.');
     sales.push({id:'ladder',sec:'ladder',step:L.ladder.step,top:L.ladder.top,start:0,until:LADDER_UNTIL,note:'Skip-ahead video ladder'})}
+  // License boosts: ended ones more than a week old are dropped
+  const t=Date.now();const lb=(L.licb||[]).filter(x=>x.until>t-7*DAY);for(const x of lb){if(sales.length>=LIM.list)throw new Error('config/live already holds '+LIM.list+' sales and boosts. Delete one first.');sales.push(x)}
   return {events:L.events,sales,up:Date.now()}}
 /* keep config/live lists at 30: drop the oldest ended entries first */
 function addItem(list,item,what){list.push(item);if(list.length>LIM.list){const t=Date.now();const ended=list.filter(x=>x!==item&&x.until<=t).sort((a,b)=>a.until-b.until);while(list.length>LIM.list&&ended.length){list.splice(list.indexOf(ended.shift()),1)}
@@ -842,7 +849,7 @@ function copyFeedback(){const txt=S.fb.map(f=>(f.stars?f.stars+'/5':'no rating')
 function mcol(m){return isHex(m.c)?m.c:(TAGS[m.tag]||TAGS.news).c}
 function thumbHTML(m,cls){const src=imgSrc(m),col=mcol(m);return '<div class="thumb'+(src?'':' none')+(cls?' '+cls:'')+'" data-thumb="'+esc(m.imgId||m.id)+'" style="--mc:'+col+'">'+(src?'<img src="'+esc(src)+'" alt=""'+(m.fit==='contain'?' class="ct"':'')+' referrerpolicy="no-referrer">':'<span aria-hidden="true">★</span>')+'</div>'}
 function tagChip(m){const T=TAGS[m.tag]||TAGS.news;return '<span class="chip tagc" style="--mc:'+mcol(m)+'">'+esc(m.k||T.l)+'</span>'}
-function audTxt(a){if(!a)return '';const p=[];if(a.acct)p.push('Signed-in only');if(a.minLv>0||a.maxLv>0)p.push(a.maxLv>0?'Lv '+(a.minLv||1)+'–'+a.maxLv:'Lv '+a.minLv+'+');return p.join(' · ')}
+function audTxt(a){if(!a)return '';const p=[];if(a.acct)p.push('Signed-in only');if(a.minLv>0||a.maxLv>0)p.push(a.maxLv>0?'Lv '+(a.minLv||1)+'–'+a.maxLv:'Lv '+a.minLv+'+');if(a.below)p.push('Older than '+a.below);return p.join(' · ')}
 VIEWS.messages=()=>{let h=head('Messages','The cards players see when they open the game. Order in game: priority, then newest start.','<button class="btn lg" data-act="new" data-v="blank">'+ic('plus')+'New message</button>');
   h+='<div class="tplrow" role="group" aria-label="Start from a template"><span class="k">Quick start</span>'+TPL_ORDER.filter(k=>k!=='blank').map(k=>'<button class="pill" style="--pc:'+TAGS[TPL[k].tag].c+'" data-act="new" data-v="'+k+'">'+esc(TPL[k].n)+'</button>').join('')+'</div>';
   const st=secState('motd');if(st)return h+st;
@@ -878,20 +885,20 @@ const TPL={
   event:{n:'Meteor shower event',tag:'event',d:'Announce a shower',fill(d,s){const w=thisWeekend();Object.assign(d,{t:'5× meteor showers this weekend',b:'Every star system gets a 5× meteor shower from Saturday until Sunday night. Tap meteors for free upgrade levels and watch for lucky upgrades!',go:'shower',ctaL:'See the forecast',end:Math.max(w.until,s+HOUR),prio:4});Object.assign(d.lev,{on:true,mult:5,sys:-1,same:false,start:w.start,until:w.until})}},
   gift:{n:'Gift for everyone',tag:'gift',d:'Free items to claim',fill(d,s){Object.assign(d,{t:'A gift for every commander',b:'Thanks for flying with us! Claim your gift before it is gone.',giftOn:true,gift:Object.assign(emptyGift(),{dm:50,uk:2}),end:plusDays(s,3),prio:4})}},
   content:{n:'New content',tag:'system',d:'New system or items',fill(d,s){Object.assign(d,{t:'A new star system is open',b:'Chart a course on the galaxy map: new planets, new ores and new shower routes.',go:'map',ctaL:'Open the galaxy map',end:plusDays(s,7),prio:2})}},
-  update:{n:'Version update',tag:'update',d:'What\'s new + Play link',fill(d,s){Object.assign(d,{t:'A new version of Orbital Forge is out',b:'What\'s new:\n• New: …\n• Better: …\n• Fixed: …\nUpdate from Google Play to get it.',go:'url',ctaUrl:PLAY_URL,ctaL:'Get the update',end:plusDays(s,7),prio:3})}},
+  update:{n:'Version update',tag:'update',d:'What\'s new + Play link',fill(d,s){Object.assign(d,{t:'A new version of Orbital Forge is out',b:'What\'s new:\n• New: …\n• Better: …\n• Fixed: …\nUpdate from Google Play to get it.',go:'url',ctaUrl:PLAY_URL,ctaL:'Get the update',below:GAME_VER,end:plusDays(s,7),prio:3})}},
   rank:{n:'Rankings',tag:'rank',d:'Celebrate top players',fill(d,s){Object.assign(d,{t:'Last week\'s top commanders',b:'The top 10 earn a golden name plate. Can you make the board this week?',go:'leaders',ctaL:'See the rankings',end:plusDays(s,3),prio:3})}},
   blank:{n:'Blank',tag:'news',d:'Start from scratch',fill(){}}};
 const TPL_ORDER=['sale','event','gift','content','update','rank','blank'];
-function blankDraft(){const s=nowMin(),wk=thisWeekend();return {id:newId('m'),isNew:true,mode:'all',to:null,tpl:'blank',tag:'news',k:'',c:'',t:'',b:'',img:{kind:'none'},imgV:0,fit:'cover',go:'',ctaL:'',ctaUrl:'',giftOn:false,gift:emptyGift(),start:s,end:plusDays(s,3),acct:false,minLv:0,maxLv:0,prio:0,pop:true,paused:false,
+function blankDraft(){const s=nowMin(),wk=thisWeekend();return {id:newId('m'),isNew:true,mode:'all',to:null,tpl:'blank',tag:'news',k:'',c:'',t:'',b:'',img:{kind:'none'},imgV:0,fit:'cover',go:'',ctaL:'',ctaUrl:'',giftOn:false,gift:emptyGift(),start:s,end:plusDays(s,3),acct:false,minLv:0,maxLv:0,below:'',prio:0,pop:true,paused:false,
   lev:{on:false,mult:5,sys:-1,same:false,start:wk.start,until:wk.until,note:''},lsa:{on:false,sec:'boost',val:30,same:true,start:s,until:plusDays(s,3),note:''},dirty:false,tried:false}}
 function applyTpl(d,k){const T=TPL[k]||TPL.blank,s=nowMin(),wk=thisWeekend();
-  Object.assign(d,{tpl:k,tag:T.tag,k:'',c:'',t:'',b:'',go:'',ctaL:'',ctaUrl:'',giftOn:false,gift:emptyGift(),start:s,end:plusDays(s,3),prio:0,pop:true,paused:false,acct:false,minLv:0,maxLv:0,
+  Object.assign(d,{tpl:k,tag:T.tag,k:'',c:'',t:'',b:'',go:'',ctaL:'',ctaUrl:'',giftOn:false,gift:emptyGift(),start:s,end:plusDays(s,3),prio:0,pop:true,paused:false,acct:false,minLv:0,maxLv:0,below:'',
     lev:{on:false,mult:5,sys:-1,same:false,start:wk.start,until:wk.until,note:''},lsa:{on:false,sec:'boost',val:30,same:true,start:s,until:plusDays(s,3),note:''}});
   T.fill(d,s);d.dirty=false}
 function newDraft(k){const d=blankDraft();applyTpl(d,k||'blank');return d}
 function draftFromMsg(m){const d=blankDraft();
   Object.assign(d,{id:m.id,isNew:false,tpl:null,tag:TAGS[m.tag]?m.tag:'news',k:m.k||'',c:isHex(m.c)?m.c:'',t:m.t||'',b:m.b||'',fit:m.fit==='contain'?'contain':'cover',start:m.start,end:m.end,prio:m.prio||0,pop:m.pop!==false,paused:m.on===false,
-    acct:!!(m.aud&&m.aud.acct),minLv:m.aud&&m.aud.minLv||0,maxLv:m.aud&&m.aud.maxLv||0,imgV:m.imgV||0,prevImgId:m.imgId||''});
+    acct:!!(m.aud&&m.aud.acct),minLv:m.aud&&m.aud.minLv||0,maxLv:m.aud&&m.aud.maxLv||0,below:m.aud&&typeof m.aud.below==='string'?m.aud.below:'',imgV:m.imgV||0,prevImgId:m.imgId||''});
   if(m.cta&&m.cta.go){if(m.cta.go.indexOf('url:')===0){d.go='url';d.ctaUrl=m.cta.go.slice(4)}else d.go=m.cta.go;d.ctaL=m.cta.l||''}
   if(m.gift){d.giftOn=true;d.gift=Object.assign(emptyGift(),clone(m.gift));d.gift.items=Object.assign({},m.gift.items||{})}
   if(m.img==='doc'&&m.imgId){d.img={kind:'doc',data:imgSrc(m),changed:false,srcId:m.imgId};if(!d.img.data)fetchImgInto(d,m)}
@@ -926,7 +933,7 @@ function validate(d){const E={};
     const ids=Object.keys(g.items);if(ids.length>GIFT_KINDS_MAX)E.items='At most '+GIFT_KINDS_MAX+' kinds of booster';ids.forEach(id=>{if(!BOOSTMAP[id])E.items='Unknown booster '+id;else if(!(Number.isInteger(g.items[id])&&g.items[id]>=1&&g.items[id]<=GIFT_ITEM_MAX))E.items='Each booster count: 1 to '+GIFT_ITEM_MAX});
     if(!Object.keys(E).some(k=>k.indexOf('g.')===0)&&!E.items&&!giftParts(giftClean(g)).length)E.gift='The gift is empty: add something or turn the gift off'}
   winErr(E,'start','end',d.start,d.end,d.isNew||d.mode==='one');
-  if(d.mode==='all'){intErr(E,'minLv',d.minLv,0,999);intErr(E,'maxLv',d.maxLv,0,999);if(!E.minLv&&!E.maxLv&&d.maxLv>0&&d.maxLv<d.minLv)E.maxLv='Max level must be 0 (no max) or at least the min level';intErr(E,'prio',d.prio,-99,99)}
+  if(d.mode==='all'){intErr(E,'minLv',d.minLv,0,999);intErr(E,'maxLv',d.maxLv,0,999);if(!E.minLv&&!E.maxLv&&d.maxLv>0&&d.maxLv<d.minLv)E.maxLv='Max level must be 0 (no max) or at least the min level';intErr(E,'prio',d.prio,-99,99);if(d.below&&!/^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(d.below.trim()))E.below='A version like 1.22.0, or blank'}
   else if(!d.to||!/^[A-Za-z0-9_-]{6,128}$/.test(d.to.uid))E.to='Pick a player (search a name or paste a uid)';
   if(evOn(d)){txtErr(E,'lev.note',d.lev.note||'',LIM.note,false);if(MULTS.indexOf(d.lev.mult)<0)E['lev.mult']='Pick a strength';if(!(d.lev.sys===-1||(Number.isInteger(d.lev.sys)&&d.lev.sys>=0&&d.lev.sys<SYS.length)))E['lev.sys']='Pick a system';const w=levWin(d);winErr(E,d.lev.same?'end':'lev.start',d.lev.same?'end':'lev.until',w.start,w.until,true)}
   if(saleOn(d)){txtErr(E,'lsa.note',d.lsa.note||'',LIM.note,false);const S2=SECS[d.lsa.sec];if(!S2)E['lsa.sec']='Pick a section';else if(S2.kind==='pct')intErr(E,'lsa.val',d.lsa.val,1,90,'Discount');else intErr(E,'lsa.val',d.lsa.val,1,200,'Bonus');const w=lsaWin(d);winErr(E,d.lsa.same?'end':'lsa.start',d.lsa.same?'end':'lsa.until',w.start,w.until,true)}
@@ -937,7 +944,7 @@ function buildMotd(d,prev){const now=Date.now();let img='',imgId='',imgV=prev?(p
   else if(d.img.kind==='url'){img=d.img.url.trim();if(!prev||prev.img!==img)imgV++}
   return {t:d.t.trim(),b:d.b.replace(/\r\n?/g,'\n').trim(),k:d.k.trim(),tag:d.tag,c:d.c,img,imgId,imgV,fit:d.fit==='contain'?'contain':'cover',
     cta:d.go?{l:d.ctaL.trim(),go:d.go==='url'?'url:'+d.ctaUrl.trim():d.go}:null,gift:d.giftOn?giftClean(d.gift):null,
-    start:d.start,end:d.end,prio:d.prio,aud:{acct:!!d.acct,minLv:d.minLv,maxLv:d.maxLv},on:!d.paused,pop:!!d.pop,created:prev&&prev.created||now,up:now}}
+    start:d.start,end:d.end,prio:d.prio,aud:Object.assign({acct:!!d.acct,minLv:d.minLv,maxLv:d.maxLv},d.below&&d.below.trim()?{below:d.below.trim()}:{}),on:!d.paused,pop:!!d.pop,created:prev&&prev.created||now,up:now}}
 function buildMail(d){const m=buildMotd(d,null);delete m.prio;delete m.aud;m.on=true;m.got=false;m.seen=false;m.at=m.created;return m}
 function evFromDraft(d){const w=levWin(d),all=d.lev.sys<0;return {id:newId('e'),start:w.start,until:w.until,mult:d.lev.mult,all,sys:all?-1:d.lev.sys,note:((d.lev.note||'').trim()||d.t.trim()).slice(0,LIM.note)}}
 function saleFromDraft(d){const w=lsaWin(d),k=SECS[d.lsa.sec].kind;return {id:newId('s'),sec:d.lsa.sec,pct:k==='pct'?d.lsa.val:0,bonus:k==='bonus'?d.lsa.val:0,start:w.start,until:w.until,note:((d.lsa.note||'').trim()||d.t.trim()).slice(0,LIM.note)}}
@@ -1007,6 +1014,7 @@ const CSECS={
   who:(d)=>{if(d.mode==='one')return sec('who','10','How it shows',tgl('pop',d.pop,'Pop up in game','Off: it waits in the player\'s bell inbox.'));
     return sec('who','10','Who sees it','<div class="fld"><span class="lbl">Audience</span><div class="seg" role="group" aria-label="Audience"><button data-act="dAcct" data-v="0" aria-pressed="'+(!d.acct)+'">Everyone</button><button data-act="dAcct" data-v="1" aria-pressed="'+(!!d.acct)+'">Signed-in players only</button></div></div>'
       +'<div class="row">'+fld('f-minLv','Min level','<input class="inp" type="number" min="0" max="999" id="f-minLv" data-f="minLv" value="'+d.minLv+'">','minLv')+fld('f-maxLv','Max level <small>0 = no max</small>','<input class="inp" type="number" min="0" max="999" id="f-maxLv" data-f="maxLv" value="'+d.maxLv+'">','maxLv')+fld('f-prio','Priority <small>higher first</small>','<input class="inp" type="number" min="-99" max="99" id="f-prio" data-f="prio" value="'+d.prio+'">','prio')+'</div>'
+      +fld('f-below','Only players older than version <small>e.g. 1.22.0 · game 1.21+ hides it once updated; blank = everyone</small>','<input class="inp" id="f-below" data-f="below" inputmode="decimal" placeholder="1.22.0" value="'+esc(d.below||'')+'">','below')
       +tgl('pop',d.pop,'Pop up in game','On open, or right away if it goes live while they play. Off: bell inbox only.')+tgl('paused',d.paused,'Paused','Saved but hidden in game until you resume it.'))}
 };
 const CORDER=['tpl','to','look','words','img','cta','gift','when','link','who'];
@@ -1054,7 +1062,7 @@ function draftInput(el,f,type){const d=S.draft;if(!d)return;const v=el.type==='c
   if(f==='toUid')return;
   if(f==='zoom'){d.img.crop.z=+v;drawCrop();encodeSoon();return}
   d.dirty=true;
-  if(['t','b','k','ctaL','ctaUrl'].indexOf(f)>=0)d[f]=v;
+  if(['t','b','k','ctaL','ctaUrl','below'].indexOf(f)>=0)d[f]=v;
   else if(f==='c'){d.c=v.trim().toLowerCase();syncSwatches()}
   else if(f==='cPick'){d.c=v.toLowerCase();const hx=$('#f-c');if(hx)hx.value=d.c;syncSwatches()}
   else if(f==='go'){if(type!=='change')return;const old=d.go;d.go=v;if(!d.ctaL||d.ctaL===actDefault(old))d.ctaL=actDefault(v);paint('cta');return}
@@ -1208,11 +1216,31 @@ function announceEvent(id){const e=S.live.events.find(x=>x.id===id);if(!e)return
 
 /* ---------- STORE (config/live.sales) ---------- */
 VIEWS.store=()=>{let h=head('Store sales','Discounts (% off the gem price) and bonuses (% more contents; Google Play sets the real-money price). Saved in config/live.','<button class="btn lg" data-act="saNew">'+ic('plus')+'New sale</button>');
-  const st=secState('live');if(st)return h+st;h+=ladderCardHTML();if(S.saForm)h+=saFormHTML(S.saForm);
+  const st=secState('live');if(st)return h+st;h+=ladderCardHTML()+lbCardHTML();if(S.saForm)h+=saFormHTML(S.saForm);
   const t=Date.now(),sa=S.live.sales,L=sa.filter(s=>itemSt(s,t)==='live').sort((a,b)=>a.until-b.until),U=sa.filter(s=>itemSt(s,t)==='up').sort((a,b)=>a.start-b.start),P=sa.filter(s=>itemSt(s,t)==='past'&&s.until>t-7*DAY).sort((a,b)=>b.until-a.until);
   const grp=(arr,k,label)=>'<section class="mgroup"><h3 class="gh"><span class="chip st '+k+'">'+label+'</span><span class="n">'+arr.length+'</span></h3>'+(arr.length?arr.map(saRow).join(''):'<div class="empty sm">'+(k==='live'?'No sale is running.':k==='sched'?'Nothing planned.':'No sales in the last 7 days.')+'</div>')+'</section>';
   h+=grp(L,'live','Live')+grp(U,'sched','Upcoming')+grp(P,'ended','Past 7 days');
   h+='<p class="note">config/live holds '+sa.length+' of '+LIM.list+' sales. When it is full, the oldest ended ones are dropped first.</p>';return h};
+/* License boost days (game 1.21+): while one runs, Commander License holders get this many times the ore instead of ×2 */
+function lbF(){return S.lbF||(S.lbF={mult:10,start:nowMin(),until:nowMin()+DAY,note:''})}
+function lbOk(F){return Number.isInteger(F.mult)&&F.mult>=3&&F.mult<=50&&isFinite(F.start)&&isFinite(F.until)&&F.until>F.start&&F.until>Date.now()}
+function lbWhen(x){const f=t=>new Date(t).toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});return f(x.start)+' – '+f(x.until)}
+function lbCardHTML(){const F=lbF(),t=Date.now();const L=(S.live.licb||[]).slice().sort((a,b)=>a.start-b.start);
+  const row=x=>{const st=x.until<=t?'ended':x.start<=t?'live':'sched';return '<div class="lbRow"><span class="chip st '+st+'">'+(st==='live'?'Live':st==='sched'?'Upcoming':'Ended')+'</span><b>×'+x.mult+'</b><span class="sub">'+esc(lbWhen(x))+(x.note?' · '+esc(x.note):'')+'</span>'
+    +(st==='live'?'<button class="btn sm sec" data-act="lbEnd" data-id="'+esc(x.id)+'">End now</button>':'')+'<button class="btn sm sec" data-act="lbDel" data-id="'+esc(x.id)+'">Delete</button></div>'};
+  return '<section class="card" id="lbCard" aria-labelledby="lbT"><div class="ph"><h2 id="lbT">License boost days</h2>'+(L.some(x=>x.start<=t&&t<x.until)?'<span class="chip st live">Boost on</span>':'')+'</div>'
+  +'<p class="hint" style="margin-top:0">While a boost runs, Commander License holders get this many times the ore instead of ×2, and their money pill turns purple (game 1.21 and newer). Players without the License see what they would get, and a strip announces it once.</p>'
+  +(L.length?'<div class="lbList">'+L.map(row).join('')+'</div>':'<div class="empty sm">No boost planned.</div>')
+  +'<div class="row" style="margin-top:10px">'+fld('lb-mult','Multiplier <small>×2 is normal</small>','<select class="inp" id="lb-mult" data-f="lbMult">'+[5,10,25].map(m=>'<option value="'+m+'"'+(F.mult===m?' selected':'')+'>×'+m+'</option>').join('')+'</select>','lbMult')
+  +fld('lb-start','Starts','<input class="inp" type="datetime-local" id="lb-start" data-f="lbStart" value="'+toInp(F.start)+'">','lbStart')+fld('lb-until','Ends','<input class="inp" type="datetime-local" id="lb-until" data-f="lbUntil" value="'+toInp(F.until)+'">','lbUntil')+'</div>'
+  +fld('lb-note','Note <small>for you, optional</small>','<input class="inp" id="lb-note" data-f="lbNote" maxlength="60" value="'+esc(F.note)+'">','lbNote')
+  +'<p class="hint" id="lbPv">'+esc(lbPreview(F))+'</p><div class="facts"><button class="btn lg" data-act="lbSave" id="lbSaveBtn"'+(lbOk(F)?'':' disabled')+'>Schedule boost</button></div></section>'}
+function lbPreview(F){if(!lbOk(F))return 'Pick a multiplier, and an end after the start that is still to come.';const h=Math.round((F.until-F.start)/HOUR*10)/10;return 'License holders get ×'+F.mult+' ore for '+h+' hours ('+lbWhen(F)+').'}
+function lbField(el,f){const F=lbF();const v=el.value;if(f==='lbMult')F.mult=Math.floor(+v);else if(f==='lbStart')F.start=fromInp(v);else if(f==='lbUntil')F.until=fromInp(v);else if(f==='lbNote')F.note=v.slice(0,60);
+  const pv=$('#lbPv');if(pv)pv.textContent=lbPreview(F);const b=$('#lbSaveBtn');if(b)b.disabled=!lbOk(F)}
+async function lbSave(){const F=lbF();if(!lbOk(F)||S.busy){toast('Pick a multiplier, and an end after the start that is still to come','err');return}
+  S.busy=true;try{const x={id:'lb'+Date.now().toString(36),sec:'licboost',mult:F.mult,start:F.start,until:F.until,note:F.note.trim()};await liveTx(L=>{L.licb=(L.licb||[]).concat([x])});S.lbF=null;toast('License boost scheduled: ×'+x.mult);render()}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
+async function lbEdit(id,end){if(S.busy)return;S.busy=true;try{await liveTx(L=>{L.licb=(L.licb||[]).map(x=>x.id!==id?x:end?Object.assign({},x,{until:Math.max(x.start+1,Date.now())}):null).filter(Boolean)});toast(end?'License boost ended':'License boost deleted');render()}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
 /* the Skip-ahead video ladder (game 1.20+) */
 function ladderCardHTML(){const cur=S.live.ladder||LADDER_DEF;const F=S.ladF||(S.ladF={step:cur.step,top:cur.top});const same=F.step===cur.step&&F.top===cur.top;
   return '<section class="card" id="ladCard" aria-labelledby="ladT"><div class="ph"><h2 id="ladT">Skip-ahead videos</h2><span class="chip st '+(S.live.ladder?'live">Your settings':'sched">Default')+'</span></div>'
@@ -1427,7 +1455,7 @@ function openLibPreview(id){const it=libItem(id);if(!it)return;const now=Date.no
 /* ---- Use: fill the composer (nothing is written until Publish) ---- */
 function libDraft(it,now){const warn=[],d=newDraft('blank'),m=it.msg,int=Number.isInteger;d.tpl=null;
   d.tag=TAGS[m.tag]?m.tag:'news';d.k=typeof m.k==='string'?m.k:'';d.c=isHex(m.c)?m.c:'';d.prio=int(m.prio)?m.prio:0;d.pop=m.pop!==false;
-  const a=m.aud&&typeof m.aud==='object'?m.aud:{};d.acct=a.acct===true;d.minLv=int(a.minLv)?a.minLv:0;d.maxLv=int(a.maxLv)?a.maxLv:0;
+  const a=m.aud&&typeof m.aud==='object'?m.aud:{};d.acct=a.acct===true;d.minLv=int(a.minLv)?a.minLv:0;d.maxLv=int(a.maxLv)?a.maxLv:0;d.below=typeof a.below==='string'?a.below:'';
   if(m.cta&&typeof m.cta.go==='string'&&m.cta.go){if(m.cta.go.indexOf('url:')===0){d.go='url';d.ctaUrl=m.cta.go.slice(4)}else d.go=m.cta.go;d.ctaL=typeof m.cta.l==='string'?m.cta.l:actDefault(d.go)}
   if(m.gift&&typeof m.gift==='object'){d.giftOn=true;d.gift=Object.assign(emptyGift(),clone(m.gift));d.gift.items=Object.assign({},m.gift.items||{})}
   let W=libWindows(it,now);if(!W){warn.push('its date rule couldn\'t be worked out, so it starts now for 1 day');const s0=Math.floor(now/MIN)*MIN,e0=plusDays(s0,1);W={ev:{start:s0,end:e0},msg:{start:s0,end:e0},bad:true}}
@@ -1503,6 +1531,7 @@ const ACT={
   saEdit:el=>{const s=S.live.sales.find(x=>x.id===el.dataset.id);if(s)openForm('sa',{id:s.id,sec:s.sec,val:SECS[s.sec]&&SECS[s.sec].kind==='bonus'?s.bonus:s.pct,start:s.start,until:s.until,note:s.note||'',tried:false})},
   saClose:()=>{S.saForm=null;render()},saSave:saveSale,
   ladSave:()=>ladSave(false),ladReset:()=>ladSave(true),
+  lbSave:()=>lbSave(),lbDel:el=>lbEdit(el.dataset.id,false),lbEnd:el=>lbEdit(el.dataset.id,true),
   saEnd:el=>liveItem('sa',el.dataset.id,'end'),saDel:el=>liveItem('sa',el.dataset.id,'del'),saAnn:el=>announceSale(el.dataset.id),
   copyUid:el=>copyText(el.dataset.v).then(()=>toast('Copied uid '+shortUid(el.dataset.v)),()=>toast('Copy failed: '+el.dataset.v,'err')),
   pMsg:el=>msgPlayer(el.dataset.v),pReset:el=>resetName(el.dataset.v),unblock:el=>unblock(el.dataset.v),repReset:el=>repReset(el.dataset.v),repDismiss:el=>repDismiss(el.dataset.v),
@@ -1517,6 +1546,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act],[data
   const f=ACT[t.dataset.act];if(f){e.preventDefault();Promise.resolve().then(()=>f(t)).catch(x=>{console.error(x);toast(fsErr(x),'err')})}});
 function onField(e){const el=e.target,f=el.dataset&&el.dataset.f;if(!f)return;
   if(f==='ladStep'||f==='ladTop')return ladField(el,f);
+  if(f==='lbMult'||f==='lbStart'||f==='lbUntil'||f==='lbNote')return lbField(el,f);
   if(el.closest('#comp'))return draftInput(el,f,e.type);
   if(el.closest('#evForm'))return formInput('ev',el,f);
   if(el.closest('#saForm'))return formInput('sa',el,f);
