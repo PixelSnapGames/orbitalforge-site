@@ -435,6 +435,19 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .gatec .sub{margin:6px 0 16px;font-size:14px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .lbList{display:flex;flex-direction:column;gap:6px}.lbRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}.lbRow b{font-size:15px;color:#c084fc}.lbRow .sub{flex:1;min-width:140px}
+.plrow{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;text-align:left;padding:10px 4px;border:0;border-top:1px solid var(--line);background:none;color:inherit;cursor:pointer;font:inherit}
+.plrow:hover{background:rgba(255,255,255,.03)}.plrow .plm{font-size:12.5px;color:var(--muted)}.plrow .cs,.phero .cs{font-style:italic;font-weight:600}
+.chip.lic{background:rgba(255,210,122,.15);color:#ffd27a;border:1px solid rgba(255,210,122,.4)}.chip.flag{background:rgba(255,99,99,.14);color:#ff9a9a;border:1px solid rgba(255,99,99,.4)}
+.prof .phero{margin-bottom:12px}.prof .pnm{font-size:20px;font-weight:700}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.pcard{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}.pcard.wide{grid-column:1/-1}.pcard.bad{border-color:rgba(255,99,99,.55);background:rgba(255,99,99,.05)}
+.pcard h3{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:14px}.pcard .ok{color:#7ee2a8}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.06);font-size:13.5px}.kv span{color:var(--muted)}.kv b{text-align:right}
+.flags{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:13.5px;color:#ffc2c2}
+.minis{display:flex;gap:4px;align-items:flex-end;height:74px;margin-top:10px}.minis span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;min-width:0;font-size:9.5px;color:var(--muted)}
+.minis i{display:block;width:70%;min-height:2px;background:var(--accent,#38e1c6);border-radius:3px 3px 0 0}.minis b{font-size:9.5px;font-weight:600}
+.evl{display:flex;flex-direction:column;max-height:380px;overflow:auto}.evl>div{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}.evl span{flex:0 0 120px;color:var(--muted)}.evl b{font-weight:500}
+td.num,th.num{text-align:right}
 </style></head><body>
 <div class="app" id="app">
   <header class="top">
@@ -661,6 +674,21 @@ function mockArt(kind){const W=900,H=1200,cv=document.createElement('canvas');cv
   g.textAlign='center';g.fillStyle='#fff';g.shadowColor=P[0];g.shadowBlur=50;g.font='800 '+(kind==='update'?230:290)+'px Inter, system-ui, sans-serif';g.fillText(big,W/2,kind==='update'?H*.66:H*.55);
   g.shadowBlur=20;g.font='800 62px Inter, system-ui, sans-serif';g.fillStyle='rgba(255,255,255,.92)';g.fillText(small,W/2,(kind==='update'?H*.66:H*.55)+96);g.shadowBlur=0;
   return cv.toDataURL('image/jpeg',.82)}
+/* preview players with cloud saves (game 1.21 profiles): the named ones from dn/, plus two guests */
+function mockUsers(D,t,rnd){const uids=Object.keys(D).filter(k=>k.indexOf('dn/')===0).map(k=>k.slice(3)).slice(0,6).concat(['GuestOnlyPreviewUid0000000001','GuestOnlyPreviewUid0000000002']);
+  uids.forEach((uid,i)=>{const lv=[38,12,5,3,22,8,2,1][i]||4;const xp=lv*lv*60;const play=Math.round((lv*900+rnd()*3600));const seen=t-Math.round(rnd()*(i<3?6:60))*HOUR;
+    const dm=i===4?48000:Math.round(30+rnd()*400),sh=Math.round(rnd()*60);const ev=[];let et=seen-play*1000;const add=(c,d)=>{et+=Math.round(rnd()*900e3);ev.push([Math.min(et,seen),c,d])};
+    add('open','1.21.0');add('shop','bundles');add('tab','gems');add('iap+','of_commander_license');add('iap×','of_commander_license');add('ad+','gems');add('ad✓','gems');add('daily','day 2');add('level_up','{"lv":'+lv+'}');add('ad+','skip');add('ad×','skip');
+    if(i===0){add('iap+','of_bundle_galaxy');add('iap✓','of_bundle_galaxy')}if(i===4)add('clock','45 min back');
+    const g={appVer:i===5?'1.20.0':'1.21.0',createdAt:seen-(lv+2)*DAY,lastSave:seen,cash:Math.pow(10,2+lv/4)*(1+rnd()),dm,shards:sh,credits:Math.round(lv*40*rnd()),cmd:{xp,asc:lv>30?2:0},maxSys:Math.min(10,Math.floor(lv/5)),
+      planets:new Array(Math.min(40,lv+3)).fill(0).map((_,k)=>({g:k})),items:{mine_rare:2+i,trade_epic:i%2,warp_common:3,dm_common:1},inv:{crate_key:i},stats:{playSec:play,ads:4+i*3,purchases:i===0?2:0,used:5+i},
+      adDay:{d:new Date(t).getFullYear()+'-'+(new Date(t).getMonth()+1)+'-'+new Date(t).getDate(),c:{gems:2,skip:1},n:3},cal:{step:i%7,lap:0,last:new Date(seen).toISOString().slice(0,10)},wkGift:'',bought:i===0?{lic:1,b4:1}:{},lb:{c1:i*3,c2:i*5,n:i*7},
+      pf:{v:1,first:seen-play*1000,last:seen,iid:'',sess:{n:3+i*2},c:{shop:2+i,shopAt:seen-3*HOUR,tabs:{bundles:2,gems:1+i},iapStart:{of_commander_license:1+i%2},iapCancel:{of_commander_license:1+i%2},adStart:{gems:3,skip:2},adDone:{gems:3,skip:1},adQuit:{skip:1},daily:2+i,gifts:i%3,needDm:i%2},
+        dm:{in:{ad:30,daily:60,gift:50,other:i===4?47000:15},out:{pack:20}},sh:{in:{daily:5},out:{}},big:i===4?[[seen-2*DAY,'dm',45000,47900]]:[],clock:i===4?1:0,ev,gifts:[[seen-DAY,'daily','Day 2 of the supply calendar'],[seen-2*HOUR,'message','A gift for every commander · 50 DM']],adm:{}}};
+    if(i===0)g.active={trade:{until:t+20*MIN,mult:5}};
+    D['users/'+uid]={save:JSON.stringify(g),updatedAt:seen,version:g.appVer,dm,shards:sh,gv:Math.round(Math.pow(10,3+lv/3)),income:Math.round(Math.pow(10,1+lv/5)),sys:g.maxSys,created:g.createdAt};
+    if(i===0){D['users/'+uid+'/purchases/p1']={sku:'of_commander_license',pack:'of_commander_license',at:seen-5*DAY,orderId:'GPA.3312-0000-1111-22222'};D['users/'+uid+'/purchases/p2']={sku:'of_bundle_galaxy',pack:'of_bundle_galaxy',at:seen-DAY,orderId:'GPA.3312-0000-1111-33333'};
+      D['adm/'+uid+'/ops/opdone1']={k:'dm',mode:'add',n:250,at:seen-3*DAY,by:'pixelsnapgames@gmail.com',note:'Purchase did not arrive',done:true,doneAt:seen-3*DAY+60e3,res:{before:120,after:370}}}})}
 function mockSeed(){const D={},t=Date.now();let r=11;const rnd=()=>{r=(r*9301+49297)%233280;return r/233280};
   const A='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',uid=()=>{let s='';for(let i=0;i<28;i++)s+=A[Math.floor(rnd()*A.length)];return s};
   let sat=at(t,(6-new Date(t).getDay()+7)%7,0,0);if(sat-t<36*HOUR)sat=at(sat,7,0,0);const sunEnd=at(sat,1,23,59);
@@ -687,6 +715,7 @@ function mockSeed(){const D={},t=Date.now();let r=11;const rnd=()=>{r=(r*9301+49
   /* 2 reported players, 3 reports (ore_baron twice, Zed 42 once) */
   const R=(by,hold,name,why,ago)=>{D['reports/'+by+'_'+hold]={uid:hold,name,why,by,at:t-ago}};
   R(U[14],U[2],'ore_baron','offensive',2*HOUR);R(U[15],U[2],'ore_baron','offensive',26*HOUR);R(U[16],U[9],'Zed 42','impersonation',5*HOUR);
+  mockUsers(D,t,rnd);
   return D}
 
 /* =====================================================================
@@ -696,8 +725,9 @@ const TABS=[['overview','Overview','chart'],['messages','Messages','msg'],['libr
 const S={ready:false,user:null,admin:false,err:null,tab:'overview',range:14,table:false,plays:[],fb:[],motd:[],stat:{},live:{events:[],sales:[]},dn:[],dnQ:'',dnLimit:40,dnMore:false,blk:[],mail:null,rep:[],repDn:{},lib:{st:'loading'},libCat:'all',libQ:'',lb:[],lbw:[],imgs:{},loaded:{},errs:{},draft:null,pv:null,evForm:null,saForm:null,busy:false,flash:null,openEnded:false,fallback:''};
 const WANT_MOCK=/[?&]mock\b/.test(location.search)||!!window.__ccMock;
 let DB=WANT_MOCK?mockDB():fireDB();
-const LBL={plays:'play stats',feedback:'feedback',motd:'messages',stat:'message counters',live:'config/live',dn:'display names',lb:'the all-time board',lbw:'this week\'s board',blk:'blocked names',rep:'reports'};
+const LBL={pl:'player saves',plays:'play stats',feedback:'feedback',motd:'messages',stat:'message counters',live:'config/live',dn:'display names',lb:'the all-time board',lbw:'this week\'s board',blk:'blocked names',rep:'reports'};
 const LOAD={
+  pl:()=>plLoad(),
   plays:()=>DB.query('plays',{where:[['day','>=',addDays(dstr(Date.now()),-35)],['day','<=',dstr(Date.now()+DAY)]]}).then(r=>{S.plays=r.map(x=>x.data)}),
   feedback:()=>DB.query('feedback',{order:['at','desc'],limit:300}).then(r=>{S.fb=r.map(x=>x.data)}),
   motd:()=>DB.query('motd',{order:['start','desc'],limit:200}).then(r=>{S.motd=r.map(x=>Object.assign({},x.data,{id:x.id}))}),
@@ -1281,19 +1311,140 @@ function announceSale(id){const s=S.live.sales.find(x=>x.id===id);if(!s)return;c
 /* ---------- PLAYERS (dn, names, lb, lbw) ---------- */
 VIEWS.players=()=>{let h=head('Players','Reports, display names, personal mail and the leaderboards. Names are moderated here.');
   h+=repCardHTML();
+  h+=profHTML();
   if(S.mail)h+=mailPanelHTML();
+  h+=plCardHTML();
   h+='<div class="card"><div class="ph"><div><h2>Display names</h2><div class="sub">Newest first. Search matches the start of the name (spaces, _ . - ignored).</div></div></div><div class="srch">'+ic('search')+'<input class="inp" id="dnQ" data-f="dnQ" value="'+esc(S.dnQ)+'" placeholder="Search names, e.g. star" aria-label="Search display names" autocomplete="off"></div><div id="dnList">'+dnListHTML()+'</div></div>';
   h+='<div class="card" id="blkCard"><div class="ph"><div><h2>Blocked names</h2><div class="sub">Names taken away by a reset (names/{key} with uid “blocked”). Nobody can pick them, including the player who had it. Newest first.</div></div></div><div id="blkList">'+blockedHTML()+'</div></div>';
   h+='<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div></div></div>';
   return h};
 function dnListHTML(){const st=secState('dn');if(st)return st;if(!S.dn.length)return '<div class="empty">'+(S.dnQ?'No display name starts with “'+esc(S.dnQ)+'”.':'No display names yet.')+'</div>';
-  return S.dn.map(x=>{const d=x.data,uid=x.id,u=esc(uid),nm=d.name||'';return '<div class="prow" data-uid="'+u+'"><div class="pmain"><div class="pn">'+(nm?esc(nm):'<span class="noname">(no name)</span>')+(d.rs===true?'<span class="chip paused">reset</span>':'')+(d.key?'<span class="pk mono">'+esc(d.key)+'</span>':'')+'</div><div class="pmeta"><span class="u"><span class="mono" title="'+u+'">'+esc(shortUid(uid))+'</span><button class="ib xs" data-act="copyUid" data-v="'+u+'" aria-label="Copy uid" title="Copy uid">'+ic('copy')+'</button></span><span>set '+esc(d.n||0)+'×</span>'+(d.at?'<span>changed '+esc(rel(d.at))+'</span>':'')+'</div></div><div class="pacts"><button class="btn sm sec" data-act="pMail" data-v="'+u+'">'+ic('msg')+'<span>Mail</span></button><button class="btn sm sec" data-act="pMsg" data-v="'+u+'">'+ic('gift')+'<span>Message / gift</span></button><button class="btn sm danger" data-act="pReset" data-v="'+u+'"'+(nm?'':' disabled')+'>'+ic('userx')+'<span>Reset name</span></button></div></div>'}).join('')
+  return S.dn.map(x=>{const d=x.data,uid=x.id,u=esc(uid),nm=d.name||'';return '<div class="prow" data-uid="'+u+'"><div class="pmain"><div class="pn">'+(nm?esc(nm):'<span class="noname">(no name)</span>')+(d.rs===true?'<span class="chip paused">reset</span>':'')+(d.key?'<span class="pk mono">'+esc(d.key)+'</span>':'')+'</div><div class="pmeta"><span class="u"><span class="mono" title="'+u+'">'+esc(shortUid(uid))+'</span><button class="ib xs" data-act="copyUid" data-v="'+u+'" aria-label="Copy uid" title="Copy uid">'+ic('copy')+'</button></span><span>set '+esc(d.n||0)+'×</span>'+(d.at?'<span>changed '+esc(rel(d.at))+'</span>':'')+'</div></div><div class="pacts"><button class="btn sm" data-act="profOpen" data-v="'+u+'">'+ic('users')+'<span>Profile</span></button><button class="btn sm sec" data-act="pMail" data-v="'+u+'">'+ic('msg')+'<span>Mail</span></button><button class="btn sm sec" data-act="pMsg" data-v="'+u+'">'+ic('gift')+'<span>Message / gift</span></button><button class="btn sm danger" data-act="pReset" data-v="'+u+'"'+(nm?'':' disabled')+'>'+ic('userx')+'<span>Reset name</span></button></div></div>'}).join('')
     +(S.dnMore?'<div style="text-align:center;margin-top:10px"><button class="btn sm sec" data-act="dnMore">Show more</button></div>':'')}
 function blockedHTML(){const st=secState('blk');if(st)return st;if(!S.blk.length)return '<div class="empty sm">No blocked names.</div>';
   return S.blk.map(x=>{const k=esc(x.id);return '<div class="prow" data-key="'+k+'"><div class="pmain"><div class="pn mono">'+k+'</div><div class="pmeta">'+(x.data.at?'<span>blocked '+esc(rel(x.data.at))+'</span>':'<span>blocked</span>')+'</div></div><div class="pacts"><button class="btn sm sec" data-act="unblock" data-v="'+k+'" aria-label="Unblock '+k+'">'+ic('x')+'<span>Unblock</span></button></div></div>'}).join('')}
 function lbTable(k){const st=secState(k);if(st)return st;const rows=S[k];if(!rows.length)return '<div class="empty sm">Nobody on this board yet.</div>';
   return '<div class="tw"><table class="tbl lbt"><thead><tr><th>#</th><th style="text-align:left">Name</th><th>Lv</th><th>'+(k==='lb'?'XP':'Value')+'</th></tr></thead><tbody>'+rows.map((x,i)=>{const d=x.data;return '<tr class="'+(i===0?'p1':'')+'"><td class="rk">'+(i+1)+'</td><td class="nm" style="text-align:left" title="'+esc(x.id)+'">'+(d.dn?esc(d.dn):'<span class="cs">'+esc(csName(d.c1,d.c2,d.n)||'Commander')+'</span>')+(d.ch>0?' <span title="Weekly champion">👑</span>':'')+'</td><td>'+esc(d.lv||'')+'</td><td>'+(k==='lb'?nf(d.xp):'$'+fmtBig(d.wg))+'</td></tr>'}).join('')+'</tbody></table></div>'}
 function paintDn(){const el=$('#dnList');if(el)el.innerHTML=dnListHTML()}
+/* ---------- PLAYER PROFILES (game 1.21+) ----------
+   Every cloud save (users/{uid}.save, the game's whole state as JSON) is read here, developer only. From game 1.21 the
+   save also carries G.pf: sessions, the Shop (opened, purchases started / done / cancelled), videos, gifts and daily
+   rewards, where Dark Matter and Star Shards came from, odd jumps and clock changes, and the last 200 events.
+   Changes go to adm/{uid}/ops/{id} = {k, mode:'add'|'set', n, b (booster id), msg, note, at, by, done}; the game applies each one once the next time it runs (1.21+) and marks it done. */
+const PK={cash:'Cash',dm:'Dark Matter',sh:'Star Shards',cr:'Credits',key:'Crate keys',item:'A booster',items0:'Remove all boosters',lic:'Commander License'};
+const SKU_N={of_commander_license:'Commander License',of_weekly_deal:'Weekly Supply Deal',of_gems_100:'100 Dark Matter',of_gems_550:'550 Dark Matter',of_gems_1200:'1,200 Dark Matter',of_gems_2600:'2,600 Dark Matter',of_gems_7000:'7,000 Dark Matter',
+  of_shards_20:'20 Star Shards',of_shards_110:'110 Star Shards',of_shards_300:'300 Star Shards',of_shards_700:'700 Star Shards',of_starter_pack:'Starter Pack',of_bundle_miner:'Miner Bundle',of_bundle_foundry:'Foundry Bundle',of_bundle_galaxy:'Galaxy Bundle',of_bundle_ultra:'Ultra Bundle'};
+const BOOST_ALL=BOOST.concat([['common',10],['rare',50],['epic',200],['ultra',1000]].map(r=>({id:'dm_'+r[0],n:'Gem Pouch '+r[1],g:'Gem Pouch'})));
+const BMAP2={};BOOST_ALL.forEach(b=>{BMAP2[b.id]=b});
+function bName(id){return BMAP2[id]?BMAP2[id].n:String(id).replace(/_/g,' ')}
+function skuName(s){return SKU_N[s]||String(s||'')}
+function lvOf(xp){let L=1,x=Math.max(0,Math.floor(+xp||0));while(L<60&&x>=Math.round(36+4.5*L)){x-=Math.round(36+4.5*L);L++}return L}
+function parseSave(doc){if(!doc)return null;try{const g=typeof doc.save==='string'?JSON.parse(doc.save):doc.save;return g&&typeof g==='object'?g:null}catch(e){return null}}
+function hrs(sec){sec=+sec||0;if(sec<3600)return Math.round(sec/60)+' min';const h=sec/3600;return (h<10?h.toFixed(1):Math.round(h))+' h'}
+function sumO(o){let s=0;for(const k in (o||{}))s+=+o[k]||0;return s}
+function verLt(a,b){const A=String(a||'0').split('.').map(n=>parseInt(n,10)||0),B=String(b||'0').split('.').map(n=>parseInt(n,10)||0);for(let i=0;i<3;i++){if((A[i]||0)<(B[i]||0))return true;if((A[i]||0)>(B[i]||0))return false}return false}
+// what looks wrong in a save: impossible numbers, unexplained jumps, the clock turned back, lots of Dark Matter and no purchases
+function profFlags(g){const F=[];if(!g)return F;const pf=g.pf||{};
+  for(const [k,n] of [['cash','Cash'],['dm','Dark Matter'],['shards','Star Shards'],['credits','Credits']]){const v=g[k];if(v!=null&&(!isFinite(v)||v<0))F.push(n+' is '+String(v)+' (impossible)')}
+  (pf.big||[]).forEach(b=>F.push('+'+fmtBig(b[2])+' '+(b[1]==='dm'?'Dark Matter':'Star Shards')+' with no known source, '+rel(b[0])+' (balance then '+fmtBig(b[3])+')'));
+  if(pf.clock>0)F.push('Phone clock turned back '+pf.clock+' time'+(pf.clock>1?'s':'')+' (offline time can be faked this way)');
+  const oth=pf.dm&&pf.dm.in?+pf.dm.in.other||0:0;if(oth>=1500)F.push(fmtBig(oth)+' Dark Matter from sources the game does not name (missions, meteors and such are normal; a lot is worth a look)');
+  const buys=(g.stats&&g.stats.purchases||0)+(g.bought&&g.bought.lic?1:0);if((+g.dm||0)>=20000&&!buys)F.push(fmtBig(g.dm)+' Dark Matter and no purchases');
+  return F}
+function plSummary(row){const doc=row.data||{};const g=parseSave(doc)||{};const pf=g.pf||{};
+  return {uid:row.id,at:+doc.updatedAt||0,v:g.appVer||doc.version||'',lv:lvOf(g.cmd&&g.cmd.xp),cash:+g.cash||0,dm:+g.dm||0,play:+(g.stats&&g.stats.playSec)||0,flags:profFlags(g).length,lic:!!(g.bought&&g.bought.lic),cs:g.lb?csName(g.lb.c1,g.lb.c2,g.lb.n):'',sess:pf.sess&&pf.sess.n||0}}
+function plCardHTML(){const st=secState('pl');let h='<div class="card" id="plCard"><div class="ph"><div><h2>Player profiles</h2><div class="sub">Everyone with a cloud save, most recently active first. Open one for their wallet, boosters, play time, Shop and video history, gifts, and to change their account.</div></div></div>';
+  h+='<div class="srch">'+ic('search')+'<input class="inp" id="plQ" data-f="plQ" value="'+esc(S.plQ||'')+'" placeholder="Name or uid" aria-label="Find a player" autocomplete="off"></div>';
+  if(S.errs.pl&&/permission|insufficient/i.test(String(S.errs.pl.code||S.errs.pl.message||S.errs.pl)))return h+'<div class="warn" style="display:block">Firestore did not let the Command Center read saves. Publish the new rules: copy <b>firebase/firestore.rules</b> from the game kit into Firebase → Firestore → Rules → Publish.</div></div>';
+  if(st)return h+st+'</div>';return h+'<div id="plList">'+plListHTML()+'</div></div>'}
+function plListHTML(){let h='';const q=(S.plQ||'').trim().toLowerCase();
+  let L=S.pl||[];if(q)L=L.filter(x=>x.uid.toLowerCase().indexOf(q)===0||(x.name||'').toLowerCase().indexOf(q)>=0||(x.cs||'').toLowerCase().indexOf(q)>=0);
+  if(q&&q.length>=20&&/^[A-Za-z0-9_-]+$/.test(q)&&!L.some(x=>x.uid.toLowerCase()===q))h+='<div class="facts"><button class="btn sm" data-act="profOpen" data-v="'+esc(S.plQ.trim())+'">'+ic('users')+'Open uid '+esc(shortUid(S.plQ.trim()))+'</button></div>';
+  if(!L.length)return h+'<div class="empty sm">'+(q?'Nobody matches.':'No cloud saves yet.')+'</div>';
+  h+=L.map(x=>'<button class="plrow" data-act="profOpen" data-v="'+esc(x.uid)+'"><span class="pln"><b>'+(x.name?esc(x.name):'<span class="cs">'+esc(x.cs||'Guest')+'</span>')+'</b>'+(x.lic?' <span class="chip lic">License</span>':'')+(x.flags?' <span class="chip flag">'+x.flags+' flag'+(x.flags>1?'s':'')+'</span>':'')+'</span>'
+    +'<span class="plm">Lv '+x.lv+' · v'+esc(x.v||'?')+' · '+esc(hrs(x.play))+' played · '+fmtBig(x.dm)+' DM · seen '+esc(x.at?rel(x.at):'—')+'</span></button>').join('');
+  if(S.plMore)h+='<div style="text-align:center;margin-top:10px"><button class="btn sm sec" data-act="plMore">Show more</button></div>';
+  return h}
+async function plLoad(){const lim=S.plLim||40;const r=await DB.query('users',{order:['updatedAt','desc'],limit:lim+1});S.plMore=r.length>lim;const L=r.slice(0,lim).map(plSummary);
+  const names=await Promise.all(L.map(x=>DB.get('dn/'+x.uid).then(d=>d&&d.name||'',()=>'')));L.forEach((x,i)=>{x.name=names[i]});S.pl=L}
+async function profOpen(uid){uid=String(uid||'').trim();if(!/^[A-Za-z0-9_-]{6,128}$/.test(uid)){toast('That is not a uid','err');return}
+  S.prof={uid,loading:true};S.pfF=S.pfF||{k:'dm',mode:'add',n:'',id:'mine_rare',msg:'',note:''};S.tab='players';try{history.replaceState(null,'','#players')}catch(e){}render();window.scrollTo(0,0);await profFetch(uid)}
+async function profFetch(uid){const P={uid,loading:false};
+  const safe=p=>p.then(v=>v,e=>{P.errs=P.errs||[];P.errs.push(fsErr(e));return null});
+  const [doc,pur,dn,lb,ops,mail]=await Promise.all([safe(DB.get('users/'+uid)),safe(DB.query('users/'+uid+'/purchases',{limit:200})),safe(DB.get('dn/'+uid)),safe(DB.get('lb/'+uid)),safe(DB.query('adm/'+uid+'/ops',{order:['at','desc'],limit:100})),safe(DB.query('mail/'+uid+'/m',{order:['at','desc'],limit:60}))]);
+  Object.assign(P,{doc,g:parseSave(doc),pur:pur||[],dn,lb,ops:ops||[],mail:mail||[]});if(S.prof&&S.prof.uid===uid){S.prof=P;render()}}
+function pRow(k,v){return '<div class="kv"><span>'+k+'</span><b>'+v+'</b></div>'}
+const EV_TXT={open:d=>'Opened the game (v'+d+')',bg:d=>'Left the game after '+d,shop:d=>'Opened the Shop'+(d?' ('+d+')':''),tab:d=>'Shop tab: '+d,'iap+':d=>'Started buying '+skuName(d),'iap✓':d=>'Bought '+skuName(d),'iap×':d=>'Cancelled buying '+skuName(d),'iap!':d=>'Purchase failed: '+d,
+  need_dm:d=>'Wanted something but had too little Dark Matter'+(d?' ('+d+')':''),pack:d=>'Bought with Dark Matter: '+d,'ad+':d=>'Started a video ('+d+')','ad✓':d=>'Watched a video ('+d+')','ad×':d=>'Gave up a video ('+d+')',daily:d=>'Daily reward, '+d,wkgift:()=>'Free weekly gift',
+  gift:d=>'Message gift: '+d,mail:d=>'Mail gift: '+d,chest:d=>'Supply Chest, '+d,use:d=>'Used '+bName(d),spin:d=>'Wheel spin ('+d+')',adm:d=>'Command Center: '+d,clock:d=>'Phone clock turned back '+d};
+function evTxt(e){const f=EV_TXT[e[1]];let d=e[2]||'';if(f)return f(d);try{const o=JSON.parse(d);if(o&&typeof o==='object')d=Object.keys(o).map(k=>k+' '+o[k]).join(', ')}catch(x){}return String(e[1]).replace(/_/g,' ')+(d?': '+d:'')}
+function srcTbl(o,label){const iN=sumO(o&&o.in),oN=sumO(o&&o.out);if(!iN&&!oN)return '<div class="sub">No '+label+' movements recorded yet (game 1.21+).</div>';
+  const rows=(side,obj)=>Object.keys(obj||{}).sort((a,b)=>obj[b]-obj[a]).map(k=>'<tr><td>'+side+'</td><td>'+esc(k)+'</td><td class="num">'+fmtBig(obj[k])+'</td></tr>').join('');
+  return '<div class="tw"><table class="tbl"><thead><tr><th>'+label+'</th><th>Source</th><th class="num">Amount</th></tr></thead><tbody>'+rows('In',o.in)+rows('Out',o.out)+'</tbody></table></div>'}
+function profHTML(){const P=S.prof;if(!P)return '';const head='<div class="card prof" id="profCard"><div class="ph"><div><h2>Player profile</h2><div class="sub mono">'+esc(P.uid)+' <button class="ib xs" data-act="copyUid" data-v="'+esc(P.uid)+'" aria-label="Copy uid">'+ic('copy')+'</button></div></div><div class="facts"><button class="btn sm sec" data-act="profRefresh">Refresh</button><button class="ib" data-act="profClose" aria-label="Close the profile">'+ic('x')+'</button></div></div>';
+  if(P.loading)return head+'<div class="load">Loading the save…</div></div>';
+  const g=P.g;if(!g)return head+(P.errs?'<div class="warn" style="display:block">'+esc(P.errs[0])+'</div>':'')+'<div class="empty">No cloud save for this player.</div></div>';
+  const pf=g.pf||{},c=pf.c||{},st=g.stats||{},doc=P.doc||{};const name=P.dn&&P.dn.name||'';const v=g.appVer||doc.version||'?';const old=verLt(v,'1.21.0');
+  let h=head+'<div class="phero"><div class="pnm">'+(name?esc(name):'<span class="cs">'+esc(g.lb?csName(g.lb.c1,g.lb.c2,g.lb.n)||'Commander':'Commander')+'</span>')+(g.bought&&g.bought.lic?' <span class="chip lic">Commander License</span>':'')+'</div>'
+    +'<div class="sub">Lv '+lvOf(g.cmd&&g.cmd.xp)+' · v'+esc(v)+' · last save '+esc(doc.updatedAt?rel(doc.updatedAt):'—')+' · started '+esc(g.createdAt?new Date(g.createdAt).toLocaleDateString():'—')+'</div>'
+    +'<div class="facts" style="margin-top:8px">'+(name?'<button class="btn sm sec" data-act="pReset" data-v="'+esc(P.uid)+'">'+ic('userx')+'Reset name</button>':'')+'<button class="btn sm sec" data-act="profMail">'+ic('msg')+'Mail</button><button class="btn sm sec" data-act="pMsg" data-v="'+esc(P.uid)+'">'+ic('gift')+'Message / gift</button></div></div>';
+  if(old)h+='<div class="warn" style="display:block">This player is on '+esc(v)+'. The Shop, video and gift history below starts with 1.21, and changes you send apply once they update.</div>';
+  const flags=profFlags(g);h+='<div class="pgrid">';
+  h+='<section class="pcard'+(flags.length?' bad':'')+'"><h3>'+ic('flag')+'Checks</h3>'+(flags.length?'<ul class="flags">'+flags.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul>':'<div class="ok">Nothing unusual.</div>')+'</section>';
+  const plays=(S.plays||[]).filter(p=>pf.iid&&p.iid===pf.iid).sort((a,b)=>a.day<b.day?1:-1);
+  h+='<section class="pcard"><h3>'+ic('chart')+'Play</h3>'+pRow('Total play time',esc(hrs(st.playSec)))+pRow('Sessions',nf(pf.sess&&pf.sess.n||0))+pRow('Days played (last 35)',nf(plays.length))+pRow('Commander Level',lvOf(g.cmd&&g.cmd.xp)+(g.cmd&&g.cmd.asc?' · '+g.cmd.asc+' Ascend'+(g.cmd.asc>1?'s':''):''))
+    +pRow('Star systems',nf((g.maxSys||0)+1))+pRow('Planets',nf((g.planets||[]).length))+pRow('Galaxy value','$'+fmtBig(doc.gv||0))+pRow('Income','$'+fmtBig(doc.income||0)+'/s')
+    +(plays.length?'<div class="minis">'+plays.slice(0,14).map(p=>'<span title="'+esc(p.day)+'"><i style="height:'+Math.min(100,Math.round(p.min/2))+'%"></i><small>'+esc(p.day.slice(5))+'</small><b>'+p.min+'m</b></span>').join('')+'</div>':'')+'</section>';
+  h+='<section class="pcard"><h3>'+ic('tag')+'Wallet</h3>'+pRow('Cash','$'+fmtBig(g.cash))+pRow('Dark Matter (gems)',nf(g.dm))+pRow('Star Shards',nf(g.shards))+pRow('Credits',nf(g.credits))+pRow('Crate keys',nf(g.inv&&g.inv.crate_key))+(g.candy?pRow('Candy',nf(g.candy)):'')+'</section>';
+  const items=Object.keys(g.items||{}).filter(k=>g.items[k]>0).sort((a,b)=>g.items[b]-g.items[a]);const act=Object.keys(g.active||{}).filter(k=>g.active[k]&&g.active[k].until>Date.now());
+  h+='<section class="pcard"><h3>'+ic('gift')+'Boosters</h3>'+(items.length?items.map(k=>pRow(esc(bName(k)),nf(g.items[k]))).join(''):'<div class="sub">No boosters in stock.</div>')+(act.length?'<div class="sub" style="margin-top:6px">Running: '+act.map(k=>esc(k)+' ×'+esc(g.active[k].mult||'')+' for '+esc(dur(g.active[k].until-Date.now()))).join(', ')+'</div>':'')+pRow('Boosters used',nf(st.used||0))+'</section>';
+  const skus=Array.from(new Set(Object.keys(c.iapStart||{}).concat(Object.keys(c.iapDone||{}),Object.keys(c.iapCancel||{}),Object.keys(c.iapFail||{}))));
+  const tabs=Object.keys(c.tabs||{}).sort((a,b)=>c.tabs[b]-c.tabs[a]);
+  h+='<section class="pcard"><h3>'+ic('tag')+'Shop</h3>'+pRow('Opened the Shop',nf(c.shop||0)+(c.shopAt?' · last '+esc(rel(c.shopAt)):''))+(tabs.length?pRow('Tabs looked at',esc(tabs.map(t=>t+' '+c.tabs[t]).join(', '))):'')
+    +(skus.length?'<div class="tw"><table class="tbl"><thead><tr><th>Real-money item</th><th class="num">Tapped buy</th><th class="num">Bought</th><th class="num">Backed out</th></tr></thead><tbody>'+skus.map(s=>'<tr><td>'+esc(skuName(s))+'</td><td class="num">'+nf((c.iapStart||{})[s])+'</td><td class="num">'+nf((c.iapDone||{})[s])+'</td><td class="num">'+nf(((c.iapCancel||{})[s]||0)+((c.iapFail||{})[s]||0))+'</td></tr>').join('')+'</tbody></table></div>':'<div class="sub">Never tapped a real-money item'+(old?' (since 1.21)':'')+'.</div>')
+    +pRow('Wanted something, too little Dark Matter',nf(c.needDm||0))+(Object.keys(c.packs||{}).length?pRow('Bought with Dark Matter',esc(Object.keys(c.packs).map(k=>k+' ×'+c.packs[k]).join(', '))):'')+'</section>';
+  const bought=Object.keys(g.bought||{}).filter(k=>g.bought[k]);
+  h+='<section class="pcard"><h3>'+ic('tag')+'Purchases</h3>'+pRow('Purchases (game count)',nf(st.purchases||0))+(P.pur.length?'<div class="tw"><table class="tbl"><thead><tr><th>Receipt</th><th>When</th><th>Order</th></tr></thead><tbody>'+P.pur.slice().sort((a,b)=>(b.data.at||0)-(a.data.at||0)).map(x=>'<tr><td>'+esc(skuName(x.data.sku||x.data.pack))+'</td><td>'+esc(x.data.at?new Date(x.data.at).toLocaleString():'—')+'</td><td class="mono">'+esc(String(x.data.orderId||'—').slice(0,24))+'</td></tr>').join('')+'</tbody></table></div>':'<div class="sub">No Google Play receipts.</div>')
+    +(bought.length?'<div class="sub" style="margin-top:6px">Owned or used: '+esc(bought.map(k=>k==='lic'?'License':k==='wk'?'weekly deal (week '+g.bought.wk+')':k).join(', '))+'</div>':'')+'</section>';
+  const adK=Array.from(new Set(Object.keys(c.adStart||{}).concat(Object.keys(c.adDone||{}))));const today=g.adDay||{};
+  h+='<section class="pcard"><h3>'+ic('chart')+'Videos</h3>'+pRow('Rewarded videos watched',nf(st.ads||0))+pRow('Today',nf(today.n||0)+' of 20'+(today.d?' ('+esc(today.d)+')':''))
+    +(adK.length?'<div class="tw"><table class="tbl"><thead><tr><th>Reward</th><th class="num">Started</th><th class="num">Watched</th><th class="num">Gave up</th></tr></thead><tbody>'+adK.map(k=>'<tr><td>'+esc(k)+'</td><td class="num">'+nf((c.adStart||{})[k])+'</td><td class="num">'+nf((c.adDone||{})[k])+'</td><td class="num">'+nf((c.adQuit||{})[k])+'</td></tr>').join('')+'</tbody></table></div>':'<div class="sub">No video history'+(old?' (since 1.21)':'')+'.</div>')+'</section>';
+  const cal=g.cal||{};
+  h+='<section class="pcard"><h3>'+ic('gift')+'Rewards and gifts</h3>'+pRow('Daily calendar','day '+((cal.step||0)+1)+' of 7'+(cal.lap?' · lap '+(cal.lap+1):'')+(cal.last?' · last claimed '+esc(cal.last):''))+pRow('Daily rewards claimed',nf(c.daily||0))
+    +pRow('Free weekly gifts',nf(c.wkGift||0)+(g.wkGift?' · last week '+esc(g.wkGift):''))+pRow('Message gifts',nf(c.gifts||0))+pRow('Mail gifts',nf(c.mail||0))+pRow('Supply Chests',nf(c.chests||0))
+    +((pf.gifts||[]).length?'<div class="tw"><table class="tbl"><thead><tr><th>When</th><th>From</th><th>What</th></tr></thead><tbody>'+pf.gifts.slice().reverse().slice(0,25).map(x=>'<tr><td>'+esc(rel(x[0]))+'</td><td>'+esc(x[1])+'</td><td>'+esc(x[2])+'</td></tr>').join('')+'</tbody></table></div>':'')
+    +(P.mail.length?'<div class="sub" style="margin-top:6px">Mail you sent: '+P.mail.length+' · gifts claimed '+P.mail.filter(m=>m.data.got).length+' · read '+P.mail.filter(m=>m.data.seen).length+'</div>':'')+'</section>';
+  h+='<section class="pcard"><h3>'+ic('chart')+'Where Dark Matter comes from</h3>'+srcTbl(pf.dm,'Dark Matter')+'<h3 style="margin-top:10px">'+ic('chart')+'Star Shards</h3>'+srcTbl(pf.sh,'Star Shards')+'</section>';
+  const ev=(pf.ev||[]).slice().reverse().slice(0,S.pfEvAll?200:40);
+  h+='<section class="pcard wide"><h3>'+ic('chart')+'Recent activity</h3>'+(ev.length?'<div class="evl">'+ev.map(e=>'<div><span>'+esc(new Date(e[0]).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}))+'</span><b>'+esc(evTxt(e))+'</b></div>').join('')+'</div>'+((pf.ev||[]).length>40&&!S.pfEvAll?'<button class="btn sm sec" data-act="pfEvAll">Show all '+pf.ev.length+'</button>':''):'<div class="sub">No activity log yet (game 1.21+).</div>')+'</section>';
+  h+=profOpsHTML(P,old)+'</div></div>';return h}
+function profOpsHTML(P,old){const F=S.pfF;const isN=F.k!=='items0'&&F.k!=='lic';
+  let h='<section class="pcard wide" id="pfOps"><h3>'+ic('tag')+'Change this account</h3><p class="sub" style="margin-top:0">Give, take or set. The game applies it the next time the player has it open (game 1.21+), saves it, and it shows here as done with the before and after.</p>';
+  h+='<div class="row">'+fld('pf-k','What','<select class="inp" id="pf-k" data-f="pfK">'+Object.keys(PK).map(k=>'<option value="'+k+'"'+(F.k===k?' selected':'')+'>'+PK[k]+'</option>').join('')+'</select>','pfK');
+  if(F.k!=='items0')h+=fld('pf-mode','How','<select class="inp" id="pf-mode" data-f="pfMode">'+(F.k==='lic'?[['add','Give'],['take','Take away']]:[['add','Give'],['take','Take'],['set','Set to']]).map(o=>'<option value="'+o[0]+'"'+(F.mode===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>','pfMode');
+  if(isN)h+=fld('pf-n','Amount <small>e.g. 500, 2.5M, 1e12</small>','<input class="inp" id="pf-n" data-f="pfN" inputmode="decimal" value="'+esc(F.n)+'">','pfN');h+='</div>';
+  if(F.k==='item')h+=fld('pf-id','Booster','<select class="inp" id="pf-id" data-f="pfId">'+BOOST_ALL.map(b=>'<option value="'+b.id+'"'+(F.id===b.id?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select>','pfId');
+  h+=fld('pf-msg','Note to the player <small>optional, shown in the game, 80 characters</small>','<input class="inp" id="pf-msg" data-f="pfMsg" maxlength="80" value="'+esc(F.msg)+'" placeholder="e.g. Sorry about your purchase. Here it is!">','pfMsg');
+  h+=fld('pf-note','Why <small>for you only</small>','<input class="inp" id="pf-note" data-f="pfNote" maxlength="200" value="'+esc(F.note)+'" placeholder="e.g. bought the Galaxy Bundle, never received it">','pfNote');
+  h+='<p class="hint" id="pfPv">'+esc(pfPreview(F))+'</p><div class="facts">'+[['dm',0,'Dark Matter to 0'],['items0',0,'Remove all boosters']].map(q=>'<button class="btn sm sec" data-act="pfQuick" data-v="'+q[0]+'">'+q[2]+'</button>').join('')+'<button class="btn lg" data-act="pfSend" id="pfSendBtn">Send change</button></div>';
+  const ops=P.ops||[];if(ops.length)h+='<div class="tw" style="margin-top:10px"><table class="tbl"><thead><tr><th>Sent</th><th>Change</th><th>Status</th><th></th></tr></thead><tbody>'+ops.map(o=>{const d=o.data;const r=d.res||{};
+      return '<tr><td>'+esc(rel(d.at||0))+'</td><td>'+esc(opTxt(d))+(d.note?'<div class="sub">'+esc(d.note)+'</div>':'')+'</td><td>'+(d.done?(r.error?'<span class="chip flag">'+esc(r.error)+'</span>':'<span class="chip st live">Done</span> '+(r.before!=null?esc(fmtBig(r.before))+' → '+esc(fmtBig(r.after)):'')):'<span class="chip st sched">Waiting for the game</span>')+'</td><td>'+(d.done?'':'<button class="btn sm sec" data-act="pfCancel" data-v="'+esc(o.id)+'">Cancel</button>')+'</td></tr>'}).join('')+'</tbody></table></div>';
+  return h+'</section>'}
+function parseAmt(s){s=String(s||'').trim().replace(/,/g,'');const m=/^(\d+(?:\.\d+)?(?:e\d+)?)\s*([kmbtq]?)$/i.exec(s);if(!m)return NaN;const mul={'':1,k:1e3,m:1e6,b:1e9,t:1e12,q:1e15}[m[2].toLowerCase()];return +m[1]*mul}
+function opTxt(d){const k=d.k,what=k==='item'?bName(d.b):PK[k]||k;if(k==='items0')return 'Remove all boosters';if(k==='lic')return (+d.n>0?'Give':'Take away')+' the Commander License';
+  return d.mode==='set'?'Set '+what+' to '+fmtBig(d.n):(+d.n<0?'Take '+fmtBig(-d.n)+' ':'Give '+fmtBig(d.n)+' ')+what+(d.msg?' · “'+d.msg+'”':'')}
+function pfOp(F){const k=F.k;if(k==='items0')return {k,mode:'set',n:0};if(k==='lic')return {k,mode:'set',n:F.mode==='take'?0:1};const a=parseAmt(F.n);if(!isFinite(a)||a<0)return null;if(F.mode!=='set'&&a===0)return null;
+  const o={k,mode:F.mode==='set'?'set':'add',n:F.mode==='take'?-a:a};if(k==='item'){if(!BMAP2[F.id])return null;o.b=F.id}return o}
+function pfPreview(F){const o=pfOp(F);if(!o)return 'Type an amount (more than 0 to give or take).';return opTxt(Object.assign({},o,{msg:F.msg.trim()}))+'.'}
+async function pfSend(){const P=S.prof,F=S.pfF;if(!P||!P.g||S.busy)return;const o=pfOp(F);if(!o){toast('Type an amount','err');return}
+  const id='op'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);const op=Object.assign(o,{at:Date.now(),by:S.user&&S.user.email||'',done:false});if(F.msg.trim())op.msg=F.msg.trim().slice(0,80);if(F.note.trim())op.note=F.note.trim().slice(0,200);
+  S.busy=true;try{await DB.set('adm/'+P.uid+'/ops/'+id,op);toast('Sent: '+opTxt(op));S.pfF={k:F.k,mode:F.mode,n:'',id:F.id,msg:'',note:''};await profFetch(P.uid)}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
+function pfField(el,f){const F=S.pfF;const v=el.value;if(f==='pfK'){F.k=v;if(v==='lic'&&F.mode==='set')F.mode='add';render();return}if(f==='pfMode')F.mode=v;else if(f==='pfN')F.n=v;else if(f==='pfId')F.id=v;else if(f==='pfMsg')F.msg=v;else if(f==='pfNote')F.note=v;
+  const pv=$('#pfPv');if(pv)pv.textContent=pfPreview(F)}
+
+async function pfCancel(id){const P=S.prof;if(!P||S.busy)return;S.busy=true;try{await DB.del('adm/'+P.uid+'/ops/'+id);toast('Change cancelled');await profFetch(P.uid)}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
+function pfQuick(k){S.pfF=k==='items0'?{k:'items0',mode:'set',n:'0',id:S.pfF.id,msg:'',note:''}:{k,mode:'set',n:'0',id:S.pfF.id,msg:'',note:''};render();const el=$('#pfOps');if(el)el.scrollIntoView({block:'center'})}
+
 /* reset + block, in a transaction: dn/{uid} is read inside it, so a rename in between can't leave a claim behind */
 async function resetName(uid,opt){opt=opt||{};const row=S.dn.find(x=>x.id===uid),cur0=row?row.data:(S.repDn[uid]||{}),nm=cur0.name||'',k0=cur0.key||'';
   if(!await ask({title:'Reset and block “'+(nm||uid)+'”?',body:'Their name is cleared: they show as their callsign until they pick a new one, which they can do right away. The name '+(k0?'<b>'+esc(k0)+'</b> ':'')+'is also <b>blocked</b>, so nobody can take it again, including this player (you can unblock it under Blocked names). It is cleared from the all-time board and this week\'s board too.'+(opt.reports?' Then their '+opt.reports+' report'+(opt.reports===1?' is':'s are')+' deleted.':''),ok:'Reset and block',danger:true}))return false;
@@ -1534,6 +1685,9 @@ const ACT={
   lbSave:()=>lbSave(),lbDel:el=>lbEdit(el.dataset.id,false),lbEnd:el=>lbEdit(el.dataset.id,true),
   saEnd:el=>liveItem('sa',el.dataset.id,'end'),saDel:el=>liveItem('sa',el.dataset.id,'del'),saAnn:el=>announceSale(el.dataset.id),
   copyUid:el=>copyText(el.dataset.v).then(()=>toast('Copied uid '+shortUid(el.dataset.v)),()=>toast('Copy failed: '+el.dataset.v,'err')),
+  profOpen:el=>profOpen(el.dataset.v),profClose:()=>{S.prof=null;render()},profRefresh:()=>{if(S.prof){S.prof.loading=true;render();profFetch(S.prof.uid)}},
+  profMail:()=>{const P=S.prof;if(P)openMail(P.uid,P.dn&&P.dn.name||'')},pfSend:()=>pfSend(),pfCancel:el=>pfCancel(el.dataset.v),pfQuick:el=>pfQuick(el.dataset.v),pfEvAll:()=>{S.pfEvAll=true;render()},
+  plMore:()=>{S.plLim=(S.plLim||40)+40;load(['pl'])},
   pMsg:el=>msgPlayer(el.dataset.v),pReset:el=>resetName(el.dataset.v),unblock:el=>unblock(el.dataset.v),repReset:el=>repReset(el.dataset.v),repDismiss:el=>repDismiss(el.dataset.v),
   pMail:el=>{const x=S.dn.find(r=>r.id===el.dataset.v);openMail(el.dataset.v,x&&x.data.name||'')},mailClose:()=>{S.mail=null;render()},mailDel:el=>mailDelete(el.dataset.v),
   libCat:el=>{S.libCat=el.dataset.v;render()},libPv:el=>openLibPreview(el.dataset.v),libUse:el=>useLib(el.dataset.v),libBack:()=>go('library'),libReload:()=>{loadLibrary(true);render()},
@@ -1546,6 +1700,8 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act],[data
   const f=ACT[t.dataset.act];if(f){e.preventDefault();Promise.resolve().then(()=>f(t)).catch(x=>{console.error(x);toast(fsErr(x),'err')})}});
 function onField(e){const el=e.target,f=el.dataset&&el.dataset.f;if(!f)return;
   if(f==='ladStep'||f==='ladTop')return ladField(el,f);
+  if(f==='plQ'&&e.type==='input'){S.plQ=el.value;const L=$('#plList');if(L)L.innerHTML=plListHTML();return}
+  if(['pfK','pfMode','pfN','pfId','pfMsg','pfNote'].indexOf(f)>=0){if(f==='pfK'&&e.type!=='change')return;return pfField(el,f)}
   if(f==='lbMult'||f==='lbStart'||f==='lbUntil'||f==='lbNote')return lbField(el,f);
   if(el.closest('#comp'))return draftInput(el,f,e.type);
   if(el.closest('#evForm'))return formInput('ev',el,f);
