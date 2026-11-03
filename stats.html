@@ -451,6 +451,7 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .minis i{display:block;width:70%;min-height:2px;background:var(--accent,#38e1c6);border-radius:3px 3px 0 0}.minis b{font-size:9.5px;font-weight:600}
 .evl{display:flex;flex-direction:column;max-height:380px;overflow:auto}.evl>div{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}.evl span{flex:0 0 120px;color:var(--muted)}.evl b{font-weight:500}
 td.num,th.num{text-align:right}
+.fbBtns{display:flex;gap:8px;flex-wrap:wrap}.fbFrom{margin-left:auto;font:inherit;font-size:12px;color:var(--ac);background:none;border:1px solid currentColor;border-radius:999px;padding:2px 10px;cursor:pointer}.fbFrom.none{color:var(--mu2);border-style:dashed;cursor:default}
 </style></head><body>
 <div class="app" id="app">
   <header class="top">
@@ -661,8 +662,8 @@ function mockDB(){const KEY='cc_mock_db';let docs={},gen={},user=null,authCb=nul
 function mockStats(){const D={},today=dstr(Date.now());let r=0;const rnd=()=>{r=(r*9301+49297)%233280;return r/233280};
   for(let i=0;i<40;i++){const d0=addDays(today,-Math.floor(rnd()*30));let lv=1,tot=0;for(let k=0;k<30;k++){const day=addDays(d0,k);if(day>today)break;if(k>0&&rnd()>(k===1?0.45:0.7))continue;const m=Math.floor(4+rnd()*40);tot+=m;lv=Math.min(60,lv+Math.floor(rnd()*(i%3?2:4)));
     D['plays/'+day+'_i'+i]={iid:'i'+i,day,d0,v:k>3?'1.13.0':'1.12.0',min:m,sess:1+Math.floor(rnd()*3),lv,sys:1+Math.floor(lv/6),tot,acct:rnd()>.6,tut:lv<=16?lv*10+Math.floor(rnd()*3):(rnd()>.85?1001:1000)}}}
-  D['feedback/f1']={stars:5,like:'Watching the whole production line run itself.',confuse:'Took me a while to find where alloys come from.',other:'',v:'1.10.2',lv:14,tot:95,at:Date.now()-3600e3};
-  D['feedback/f2']={stars:3,like:'Planets look great',confuse:'Research tree is a lot at first',other:'Crash when opening the rover once',v:'1.10.2',lv:6,tot:31,at:Date.now()-86400e3};
+  D['feedback/f1']={iid:'inst1',stars:5,like:'Watching the whole production line run itself.',confuse:'Took me a while to find where alloys come from.',other:'',v:'1.10.2',lv:14,tot:95,at:Date.now()-3600e3};
+  D['feedback/f2']={iid:'inst-guest',stars:3,like:'Planets look great',confuse:'Research tree is a lot at first',other:'Crash when opening the rover once',v:'1.10.2',lv:6,tot:31,at:Date.now()-86400e3};
   return D}
 function mockArt(kind){const W=900,H=1200,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');if(!g)return '';
   let r=kind.charCodeAt(0)*131+7;const rnd=()=>{r=(r*9301+49297)%233280;return r/233280};
@@ -690,7 +691,7 @@ function mockUsers(D,t,rnd){const uids=Object.keys(D).filter(k=>k.indexOf('dn/')
     const g={appVer:i===5?'1.20.0':'1.21.0',createdAt:i===7?first-20e3:seen-(lv+2)*DAY,lastSave:seen,cash:Math.pow(10,2+lv/4)*(1+rnd()),dm,shards:sh,credits:Math.round(lv*40*rnd()),cmd:{xp,asc:lv>30?2:0},maxSys:Math.min(10,Math.floor(lv/5)),
       planets:new Array(Math.min(40,lv+3)).fill(0).map((_,k)=>({g:k})),items:{mine_rare:2+i,trade_epic:i%2,warp_common:3,dm_common:1},inv:{crate_key:i},stats:{playSec:play,ads:4+i*3,purchases:i===0?2:0,used:5+i},
       adDay:{d:new Date(t).getFullYear()+'-'+(new Date(t).getMonth()+1)+'-'+new Date(t).getDate(),c:{gems:2,skip:1},n:3},cal:{step:i%7,lap:0,last:new Date(seen).toISOString().slice(0,10)},wkGift:'',bought:i===0?{lic:1,b4:1}:{},lb:{c1:i*3,c2:i*5,n:i*7},
-      pf:{v:1,first,last:seen,iid:'',sess:{n:3+i*2},c:{shop:2+i,shopAt:seen-3*HOUR,tabs:{bundles:2,gems:1+i},iapStart:{of_commander_license:1+i%2},iapCancel:{of_commander_license:1+i%2},adStart:{gems:3,skip:2},adDone:{gems:3,skip:1},adQuit:{skip:1},daily:2+i,gifts:i%3,needDm:i%2},
+      pf:{v:1,first,last:seen,iid:'inst'+i,sess:{n:3+i*2},c:{shop:2+i,shopAt:seen-3*HOUR,tabs:{bundles:2,gems:1+i},iapStart:{of_commander_license:1+i%2},iapCancel:{of_commander_license:1+i%2},adStart:{gems:3,skip:2},adDone:{gems:3,skip:1},adQuit:{skip:1},daily:2+i,gifts:i%3,needDm:i%2},
         dm:{in:{ad:30,daily:60,gift:50,other:i===4?47000:15},out:{pack:20}},sh:{in:{daily:5},out:{}},big:i===4?[[seen-2*DAY,'dm',45000,47900]]:[],clock:i===4?1:0,ev,gifts:[[seen-DAY,'daily','Day 2 of the supply calendar'],[seen-2*HOUR,'message','A gift for every commander · 50 DM']],adm:{}}};
     if(i===0)g.active={trade:{until:t+20*MIN,mult:5}};
     D['users/'+uid]={save:JSON.stringify(g),updatedAt:seen,version:g.appVer,dm,shards:sh,gv:Math.round(Math.pow(10,3+lv/3)),income:Math.round(Math.pow(10,1+lv/5)),sys:g.maxSys,created:g.createdAt};
@@ -875,12 +876,33 @@ function bindChart(){const ch=$('#chart'),c=S.chart;if(!ch||!c)return;const tip=
 function qa(k,v){return v?'<div class="qa"><span>'+k+'</span><div>'+esc(v)+'</div></div>':''}
 VIEWS.feedback=()=>{let h=head('Feedback','What players say in the game (asked after about 20 minutes, or any time from Settings).');const st=secState('feedback');if(st)return h+st;
   const fb=S.fb,stars=fb.filter(f=>f.stars>0),avg=stars.length?(stars.reduce((a,f)=>a+f.stars,0)/stars.length).toFixed(1):'–';
-  h+='<div class="card"><div class="ph"><div><h2>Feedback · '+fb.length+'</h2><div class="sub">Average rating '+avg+' of 5'+(stars.length?' from '+stars.length+' players':'')+'</div></div>'+(fb.length?'<button class="btn sm sec" data-act="copy">'+ic('copy')+'Copy all</button>':'')+'</div>'
-    +(fb.length?fb.map(f=>'<div class="fb"><div class="fbh"><span class="stars" aria-label="'+esc(f.stars||0)+' of 5 stars">'+(f.stars>=1&&f.stars<=5?'★'.repeat(f.stars|0)+'<span style="color:var(--grid)">'+'★'.repeat(5-(f.stars|0))+'</span>':'no rating')+'</span><span>Lv '+esc(f.lv)+' · '+esc(f.tot)+' min played · v'+esc(f.v)+(f.at?' · '+new Date(f.at).toLocaleDateString(undefined,{month:'short',day:'numeric'}):'')+'</span></div>'+qa('Likes most',f.like)+qa('Confusing or annoying',f.confuse)+qa('Anything else',f.other)+'</div>').join(''):'<div class="empty">No feedback yet. Players are asked after about 20 minutes of play, and can send it any time from Settings.</div>')+'</div>';
+  h+='<div class="card"><div class="ph"><div><h2>Feedback · '+fb.length+'</h2><div class="sub">Average rating '+avg+' of 5'+(stars.length?' from '+stars.length+' players':'')+'</div></div>'+(fb.length?'<div class="fbBtns">'+fbWhoBtn()+'<button class="btn sm sec" data-act="copy">'+ic('copy')+'Copy all</button></div>':'')+'</div>'+fbWhoNote()
+    +(fb.length?fb.map(f=>'<div class="fb"><div class="fbh"><span class="stars" aria-label="'+esc(f.stars||0)+' of 5 stars">'+(f.stars>=1&&f.stars<=5?'★'.repeat(f.stars|0)+'<span style="color:var(--grid)">'+'★'.repeat(5-(f.stars|0))+'</span>':'no rating')+'</span><span>Lv '+esc(f.lv)+' · '+esc(f.tot)+' min played · v'+esc(f.v)+(f.at?' · '+new Date(f.at).toLocaleDateString(undefined,{month:'short',day:'numeric'}):'')+'</span>'+fbFromHTML(f)+'</div>'+qa('Likes most',f.like)+qa('Confusing or annoying',f.confuse)+qa('Anything else',f.other)+'</div>').join(''):'<div class="empty">No feedback yet. Players are asked after about 20 minutes of play, and can send it any time from Settings.</div>')+'</div>';
   return h};
+/* ---------- FEEDBACK: who sent it ----------
+   Feedback is saved with the install id only (no name). A signed-in player's cloud save remembers the install it was
+   last played on (pf.iid, game 1.21+). "Find senders" reads the cloud saves page by page (100 at a time, at most 3,000),
+   matches the installs, and puts the display name on each card, with a link to the profile. Guests (not signed in),
+   players on an older game, and feedback sent from another phone than the one they play on now stay unknown. */
+function fbFrom(f){const w=S.fbWho;return w&&f&&f.iid?w.map[f.iid]||null:null}
+function fbWhoBtn(){const w=S.fbWho;if(w&&w.busy)return '<button class="btn sm sec" disabled>Reading saves… '+w.n+'</button>';
+  return '<button class="btn sm sec" data-act="fbWho">'+ic('users')+(w&&w.done?'Look again':'Find senders')+'</button>'}
+function fbWhoNote(){const w=S.fbWho;if(!w||!w.done)return '';const n=(S.fb||[]).filter(f=>fbFrom(f)).length;
+  return '<div class="sub" style="margin:-4px 0 10px">Matched '+n+' of '+(S.fb||[]).length+' to a signed-in player ('+w.n+' cloud saves read). The rest were guests, on a game older than 1.21, or sent from another phone.</div>'}
+function fbFromHTML(f){const w=S.fbWho;if(!w||!w.done)return '';const m=fbFrom(f);
+  if(!m)return '<span class="fbFrom none">Sender unknown</span>';
+  return '<button class="fbFrom" data-act="profOpen" data-v="'+esc(m.uid)+'" title="Open their profile">From <b>'+(m.name?esc(m.name):'(no name)')+'</b></button>'}
+async function fbWho(){if(S.fbWho&&S.fbWho.busy)return;const want=new Set((S.fb||[]).map(f=>f.iid).filter(Boolean));
+  const w=S.fbWho={busy:true,done:false,map:{},n:0};render();let after=null;const PAGE=100,MAX=3000;
+  try{while(want.size&&w.n<MAX){const r=await DB.query('users',{byId:true,after,limit:PAGE});if(!r.length)break;
+      for(const row of r){const g=parseSave(row.data);const iid=g&&g.pf&&g.pf.iid;if(iid&&want.has(iid)&&!w.map[iid])w.map[iid]={uid:row.id,name:''}}
+      w.n+=r.length;after=r[r.length-1].id;render();if(Object.keys(w.map).length>=want.size||r.length<PAGE)break}
+    const ids=Object.keys(w.map);const names=await Promise.all(ids.map(i=>DB.get('dn/'+w.map[i].uid).then(d=>d&&d.name||'',()=>'')));ids.forEach((i,k)=>{w.map[i].name=names[k]})}
+  catch(e){toast('Could not read the cloud saves: '+fsErr(e),'err')}
+  w.busy=false;w.done=true;render()}
 function copyText(txt){const legacy=()=>new Promise((res,rej)=>{const ta=document.createElement('textarea'),f=document.activeElement;ta.value=txt;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='0';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();if(f&&f.focus)try{f.focus()}catch(e){}ok?res():rej(new Error('blocked'))});
   if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(txt).catch(legacy);return legacy()}
-function copyFeedback(){const txt=S.fb.map(f=>(f.stars?f.stars+'/5':'no rating')+' · Lv '+f.lv+' · v'+f.v+'\n'+[['Likes most',f.like],['Confusing or annoying',f.confuse],['Anything else',f.other]].filter(x=>x[1]).map(x=>x[0]+': '+x[1]).join('\n')).join('\n\n');
+function copyFeedback(){const txt=S.fb.map(f=>(f.stars?f.stars+'/5':'no rating')+' · Lv '+f.lv+' · v'+f.v+(fbFrom(f)&&fbFrom(f).name?' · from '+fbFrom(f).name:'')+'\n'+[['Likes most',f.like],['Confusing or annoying',f.confuse],['Anything else',f.other]].filter(x=>x[1]).map(x=>x[0]+': '+x[1]).join('\n')).join('\n\n');
   copyText(txt).then(()=>toast('Copied '+S.fb.length+' feedback entries'),()=>toast('Copy failed: your browser blocked the clipboard','err'))}
 
 /* ---------- MESSAGES (list) ---------- */
@@ -1717,7 +1739,7 @@ const ACT={
   in:()=>DB.signIn().catch(x=>{const c=x&&x.code||'';if(c!=='auth/popup-closed-by-user'&&c!=='auth/cancelled-popup-request')toast('Sign-in failed: '+fsErr(x),'err')}),
   out:()=>DB.signOut(),reload:()=>{toast('Reloading…');loadAll()},
   mockReset:async()=>{if(!DB.reset)return;if(!await ask({title:'Start the preview data over?',body:'Everything you changed in preview mode is replaced by the starting set. Real players are never affected.',ok:'Reset preview data'}))return;DB.reset();S.draft=null;S.imgs={};loadAll();toast('Preview data reset')},
-  tbl:()=>{S.table=!S.table;render()},copy:copyFeedback,
+  tbl:()=>{S.table=!S.table;render()},copy:copyFeedback,fbWho:()=>fbWho(),
   new:el=>startNew(el.dataset.v),
   mEdit:el=>{const m=S.motd.find(x=>x.id===el.dataset.id);if(m)openComposer(draftFromMsg(m))},
   mPause:el=>{const m=S.motd.find(x=>x.id===el.dataset.id);if(m)msgWrite(m,{on:false},'Paused: “'+m.t+'” is hidden in game')},
