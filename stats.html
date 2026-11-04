@@ -1054,7 +1054,7 @@ const TPL={
   gift:{n:'Gift for everyone',tag:'gift',d:'Free items to claim',fill(d,s){Object.assign(d,{t:'A gift for every commander',b:'Thanks for flying with us! Claim your gift before it is gone.',giftOn:true,gift:Object.assign(emptyGift(),{dm:50,uk:2}),end:plusDays(s,3),prio:4})}},
   content:{n:'New content',tag:'system',d:'New system or items',fill(d,s){Object.assign(d,{t:'A new star system is open',b:'Chart a course on the galaxy map: new planets, new ores and new shower routes.',go:'map',ctaL:'Open the galaxy map',end:plusDays(s,7),prio:2})}},
   update:{n:'Version update',tag:'update',d:'What\'s new + Play link',fill(d,s){Object.assign(d,{t:'A new version of Orbital Forge is out',b:'What\'s new:\n• New: …\n• Better: …\n• Fixed: …\nUpdate from Google Play to get it.',go:'url',ctaUrl:PLAY_URL,ctaL:'Get the update',below:GAME_VER,end:plusDays(s,7),prio:3})}},
-  vetnudge:{n:'Update nudge + gift',tag:'update',d:'A gift now, a bigger one in the update',fill(d,s){Object.assign(d,{t:'Your Veteran\'s Package is waiting',b:'Thanks for playing, Commander! Here\'s 10 Dark Matter on us.\n\nA much bigger gift is waiting inside 1.22: your Veteran\'s Package with 100 Dark Matter, 3 Upgrade Keys, an 8-hour Time Warp, an exclusive hull and the Veteran tag.\n\nOnly for Commanders who played before 1.22. Tap below to get it!',go:'url',ctaUrl:PLAY_URL,ctaL:'Get the update',giftOn:true,gift:Object.assign(emptyGift(),{dm:10}),below:GAME_VER,end:plusDays(s,7),prio:7})}},
+  vetnudge:{n:'Update nudge + gift',tag:'update',d:'A gift now, a bigger one in the update',img:'library/update-nudge.jpg',fill(d,s){Object.assign(d,{k:'Limited time',c:'#ff3b4a',t:'A massive reward awaits!',b:'From the dev: it\'s in the update.\n\u23f3 Don\'t wait!',go:'url',ctaUrl:PLAY_URL,ctaL:'Update now',giftOn:true,gift:Object.assign(emptyGift(),{dm:10}),below:GAME_VER,end:plusDays(s,7),prio:7})}},
   rank:{n:'Rankings',tag:'rank',d:'Celebrate top players',fill(d,s){Object.assign(d,{t:'Last week\'s top commanders',b:'The top 10 earn a golden name plate. Can you make the board this week?',go:'leaders',ctaL:'See the rankings',end:plusDays(s,3),prio:3})}},
   blank:{n:'Blank',tag:'news',d:'Start from scratch',fill(){}}};
 const TPL_ORDER=['sale','event','gift','content','update','vetnudge','rank','blank'];
@@ -1065,6 +1065,7 @@ function applyTpl(d,k){const T=TPL[k]||TPL.blank,s=nowMin(),wk=thisWeekend();
     lev:{on:false,mult:5,sys:-1,same:false,start:wk.start,until:wk.until,note:''},lsa:{on:false,sec:'boost',val:30,same:true,start:s,until:plusDays(s,3),note:''}});
   T.fill(d,s);d.dirty=false}
 function newDraft(k){const d=blankDraft();applyTpl(d,k||'blank');return d}
+function tplImg(d,k){const T=TPL[k];if(!T||!T.img||!libImgOk(T.img))return false;d.img={kind:'doc',data:'',changed:true,lib:T.img};d.fit='cover';return true}
 function draftFromMsg(m){const d=blankDraft();
   Object.assign(d,{id:m.id,isNew:false,tpl:null,tag:TAGS[m.tag]?m.tag:'news',k:m.k||'',c:isHex(m.c)?m.c:'',t:m.t||'',b:m.b||'',fit:m.fit==='contain'?'contain':'cover',start:m.start,end:m.end,prio:m.prio||0,pop:m.pop!==false,paused:m.on===false,
     acct:!!(m.aud&&m.aud.acct),minLv:m.aud&&m.aud.minLv||0,maxLv:m.aud&&m.aud.maxLv||0,below:m.aud&&typeof m.aud.below==='string'?m.aud.below:'',imgV:m.imgV||0,prevImgId:m.imgId||''});
@@ -1077,7 +1078,7 @@ function fetchImgInto(d,m){DB.get('motd_img/'+m.imgId).then(x=>{const data=x&&x.
 /* every way into the composer goes through here, so an unsaved draft is never dropped silently */
 async function openComposer(d){if(S.draft&&S.draft!==d&&S.draft.dirty&&!await ask({title:'Discard your unsaved draft?',body:'You have a message in progress (“'+esc(S.draft.t||'untitled')+'”). Opening this one replaces it.',ok:'Discard draft',danger:true}))return;
   S.draft=d;S.pv={i:-1,follow:true,closed:false,claimed:{}};S.toRes=[];S.toQ='';S.tab='messages';try{history.replaceState(null,'','#messages')}catch(e){}S.mounted=null;render();window.scrollTo(0,0)}
-function startNew(k){return openComposer(newDraft(k))}
+async function startNew(k){const d=newDraft(k),pic=tplImg(d,k);await openComposer(d);if(pic&&S.draft===d&&d.img.lib)loadLibImg(d)}
 async function leaveComposer(){if(S.draft&&S.draft.dirty&&!await ask({title:'Discard this draft?',body:'Nothing has been saved yet.',ok:'Discard',danger:true}))return;S.draft=null;S.mounted=null;render()}
 
 /* ---- validation (LIVE_SPEC limits) ---- */
@@ -1804,7 +1805,7 @@ const ACT={
     if(m.img==='doc'){let data=imgSrc(m);if(!data){try{const x=await DB.get('motd_img/'+m.imgId);data=x&&x.d||''}catch(e){toast(fsErr(e),'err')}}d.img=data?{kind:'doc',data,changed:true}:{kind:'none'}}
     d.dirty=true;openComposer(d)},
   dBack:leaveComposer,dCancel:leaveComposer,dSave:saveDraft,
-  dTpl:async el=>{const d=S.draft;if(d.dirty&&!await ask({title:'Use the '+TPL[el.dataset.v].n+' template?',body:'It replaces what you have written (the image and recipient stay).',ok:'Use template'}))return;applyTpl(d,el.dataset.v);S.pv.follow=true;S.mounted=null;render()},
+  dTpl:async el=>{const d=S.draft;if(d.dirty&&!await ask({title:'Use the '+TPL[el.dataset.v].n+' template?',body:'It replaces what you have written (the image and recipient stay).',ok:'Use template'}))return;applyTpl(d,el.dataset.v);const pic=tplImg(d,el.dataset.v);S.pv.follow=true;S.mounted=null;render();if(pic)loadLibImg(d)},
   dMode:el=>{const d=S.draft;d.mode=el.dataset.v;d.dirty=true;S.pv.follow=true;S.mounted=null;render()},
   dTag:el=>{const d=S.draft;d.tag=el.dataset.v;d.dirty=true;S.pv.follow=true;paint('look');paint('link')},
   dCol:el=>{const d=S.draft;d.c=el.dataset.v||'';d.dirty=true;S.pv.follow=true;paint('look')},
