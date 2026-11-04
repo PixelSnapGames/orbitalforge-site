@@ -987,36 +987,37 @@ function imgShared(imgId,exceptId){return S.motd.some(x=>x.id!==exceptId&&x.img=
    waits for every player who started before that version as a Command Center change, adm/{uid}/ops/{campaign id}, which
    only game 1.21+ applies (once, with the thank-you note), so updating is the way to get it. A player who started on the
    new version gets nothing: it is a thank-you for updating. The message doc carries camp:{v,item,n,note,sent,at}. */
-const UR_DEF={t:'Update now: a gift is waiting',b:'Version 1.22 is out! Update from Google Play: a Veteran\'s Package and a free 4-hour Time Warp are waiting for you.\n\nWhat\'s new:\n• Hands-on machines: Make, then Collect\n• Press and hold to keep buying\n• Fly in close to your planets\n• Monuments, crates and rover hauls',note:'Thanks for updating! Here\'s a free 4-hour Time Warp. It\'s in your Boosters.'};
+const UR_DEF={t:'Update now: 1.22 is here',b:'Version 1.22 is out! Update from Google Play to keep playing with everyone.\n\nVeteran players will receive a special reward and status.\n\nWhat\'s new:\n• Hands-on machines: Make, then Collect\n• Press and hold to keep buying\n• Fly in close to your planets\n• Monuments, crates and rover hauls',note:'Thanks for updating! Here\'s a free 4-hour Time Warp. It\'s in your Boosters.'};
 const UR_VER=/^\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 function urId(v){return 'upd_'+String(v).trim().replace(/\./g,'_')}
-function urF(){return S.ur||(S.ur={open:false,v:GAME_VER,item:'warp_rare',n:'1',t:UR_DEF.t,b:UR_DEF.b,note:UR_DEF.note,busy:false,prog:'',cnt:null})}
-function urErr(F){if(!UR_VER.test(F.v.trim()))return 'Version: a number like 1.21.0';if(!BMAP2[F.item])return 'Pick a reward';const n=+F.n;if(!(Number.isInteger(n)&&n>=1&&n<=50))return 'How many: 1 to 50';
+function urF(){return S.ur||(S.ur={open:false,v:GAME_VER,item:'',n:'1',t:UR_DEF.t,b:UR_DEF.b,note:UR_DEF.note,busy:false,prog:'',cnt:null})}
+function urErr(F){if(!UR_VER.test(F.v.trim()))return 'Version: a number like 1.21.0';const rw=!!F.item;if(rw&&!BMAP2[F.item])return 'Pick a reward';const n=+F.n;if(rw&&!(Number.isInteger(n)&&n>=1&&n<=50))return 'How many: 1 to 50';
   if(!F.t.trim())return 'The message needs a title';if(F.t.trim().length>LIM.t)return 'Title: at most '+LIM.t+' characters';if(F.b.trim().length>LIM.b)return 'Message: at most '+LIM.b+' characters';
-  if(!F.note.trim())return 'Write the thank-you note';if(F.note.trim().length>80)return 'Thank-you note: at most 80 characters';if(HTML_RE.test(F.t+F.b+F.note))return 'Plain text only: remove the HTML tags';return ''}
+  if(rw&&!F.note.trim())return 'Write the thank-you note';if(rw&&F.note.trim().length>80)return 'Thank-you note: at most 80 characters';if(HTML_RE.test(F.t+F.b+(rw?F.note:'')))return 'Plain text only: remove the HTML tags';return ''}
 function urCardHTML(){const F=urF(),v=F.v.trim(),m=UR_VER.test(v)?S.motd.find(x=>x.id===urId(v)):null;
-  let h='<div class="card" id="urCard"><div class="ph"><div><h2>Update reward</h2><div class="sub">Players on an older version see a message to update. The reward waits for them: the game gives it, with your thank-you note, the first time they open the new version. Players who start on the new version don\'t get it.</div></div>'+(!m&&!F.open?'<button class="btn sm sec" data-act="urOpen">'+ic('gift')+'<span>Set up</span></button>':'')+'</div>';
-  if(m){const c=m.camp||{},st=mStatus(m),s=S.stat[m.id]||{},K=F.cnt&&F.cnt.v===v?F.cnt:null;
+  let h='<div class="card" id="urCard"><div class="ph"><div><h2>Update message</h2><div class="sub">Players on an older version see a message to update, with a button to Google Play. A reward is optional: if you add one, it waits for them and the game gives it, with your thank-you note, the first time they open the new version (players who start on the new version don\'t get it).</div></div>'+(!m&&!F.open?'<button class="btn sm sec" data-act="urOpen">'+ic('mega')+'<span>Set up</span></button>':'')+'</div>';
+  if(m){const c=m.camp||{},st=mStatus(m),s=S.stat[m.id]||{},K=F.cnt&&F.cnt.v===v?F.cnt:null;const rw=!!c.item;
     h+='<div class="urst"><span class="chip st '+st+'">'+ST_L[st]+'</span><b>Version '+esc(v)+'</b><span class="sub">message '+(st==='ended'?'ended '+esc(rel(m.end)):st==='sched'?'starts '+esc(rel(m.start)):'ends '+esc(rel(m.end)))+'</span></div>'
-      +pRow('Reward',esc(bName(c.item))+(c.n>1?' ×'+nf(c.n):''))+pRow('Waiting for',nf(K?K.all:c.sent||0)+' players')+pRow('Got it',K?nf(K.done)+' of '+nf(K.all):'tap Refresh')
+      +pRow('Reward',rw?esc(bName(c.item))+(c.n>1?' ×'+nf(c.n):''):'None: message only')+(rw?pRow('Waiting for',nf(K?K.all:c.sent||0)+' players')+pRow('Got it',K?nf(K.done)+' of '+nf(K.all):'tap Refresh'):'')
       +pRow('Saw the message',nf(s.seen||0))+pRow('Tapped “Get the update”',nf(s.tap||0))
-      +'<p class="sub">Thank-you note: “'+esc(c.note||'')+'”</p>'
-      +'<div class="facts"><button class="btn sm sec" data-act="urRun" data-v="0"'+(F.busy?' disabled':'')+'>'+ic('refresh')+'<span>Refresh</span></button><span class="sub" id="urProg">'+esc(F.prog||'Refresh counts who got it, and adds the reward for any older player who doesn\'t have it yet.')+'</span></div>'}
-  else if(F.open){h+='<div class="row">'+fld('ur-v','New version','<input class="inp" id="ur-v" data-f="urV" value="'+esc(F.v)+'" inputmode="decimal">')+fld('ur-item','Reward','<select class="inp" id="ur-item" data-f="urItem">'+BOOST_ALL.map(b=>'<option value="'+b.id+'"'+(F.item===b.id?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select>')+fld('ur-n','How many','<input class="inp" id="ur-n" data-f="urN" inputmode="numeric" value="'+esc(F.n)+'">')+'</div>'
+      +(rw?'<p class="sub">Thank-you note: “'+esc(c.note||'')+'”</p>'
+      +'<div class="facts"><button class="btn sm sec" data-act="urRun" data-v="0"'+(F.busy?' disabled':'')+'>'+ic('refresh')+'<span>Refresh</span></button><span class="sub" id="urProg">'+esc(F.prog||'Refresh counts who got it, and adds the reward for any older player who doesn\'t have it yet.')+'</span></div>':'')}
+  else if(F.open){h+='<div class="row">'+fld('ur-v','New version','<input class="inp" id="ur-v" data-f="urV" value="'+esc(F.v)+'" inputmode="decimal">')+fld('ur-item','Reward','<select class="inp" id="ur-item" data-f="urItem"><option value=""'+(F.item?'':' selected')+'>No reward (message only)</option>'+BOOST_ALL.map(b=>'<option value="'+b.id+'"'+(F.item===b.id?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select>')+(F.item?fld('ur-n','How many','<input class="inp" id="ur-n" data-f="urN" inputmode="numeric" value="'+esc(F.n)+'">'):'')+'</div>'
       +fld('ur-t','Message to older versions: title','<input class="inp" id="ur-t" data-f="urT" maxlength="'+LIM.t+'" value="'+esc(F.t)+'">')
       +fld('ur-b','Message text <small>it gets a “Get the update” button to Google Play</small>','<textarea class="inp" id="ur-b" data-f="urB" rows="7" maxlength="'+LIM.b+'">'+esc(F.b)+'</textarea>')
-      +fld('ur-note','Thank-you note <small>shown when the reward arrives, 80 characters</small>','<input class="inp" id="ur-note" data-f="urNote" maxlength="80" value="'+esc(F.note)+'">')
-      +'<div class="facts"><button class="btn lg" data-act="urRun" data-v="1"'+(F.busy?' disabled':'')+'>'+ic('gift')+'<span>Start update reward</span></button><span class="sub" id="urProg">'+esc(F.prog||(UR_VER.test(v)?'Start it once version '+v+' is live on Google Play.':''))+'</span></div>'}
+      +(F.item?fld('ur-note','Thank-you note <small>shown when the reward arrives, 80 characters</small>','<input class="inp" id="ur-note" data-f="urNote" maxlength="80" value="'+esc(F.note)+'">'):'')
+      +'<div class="facts"><button class="btn lg" data-act="urRun" data-v="1"'+(F.busy?' disabled':'')+'>'+ic(F.item?'gift':'mega')+'<span>'+(F.item?'Start update reward':'Send update message')+'</span></button><span class="sub" id="urProg">'+esc(F.prog||(UR_VER.test(v)?'Start it once version '+v+' is live on Google Play.':''))+'</span></div>'}
   return h+'</div>'}
 function urProg(t){const F=urF();F.prog=t;const el=$('#urProg');if(el)el.textContent=t}
-function urField(el,f,type){const F=urF(),k={urV:'v',urItem:'item',urN:'n',urT:'t',urB:'b',urNote:'note'}[f];if(!k)return;F[k]=el.value;if(f==='urV'&&type==='change')render()}
+function urField(el,f,type){const F=urF(),k={urV:'v',urItem:'item',urN:'n',urT:'t',urB:'b',urNote:'note'}[f];if(!k)return;F[k]=el.value;if((f==='urV'||f==='urItem')&&type==='change')render()}
 /* a save that started before the new version: no play record yet (older game), or a record that began well after the
    save did (the player updated). A save that began with its play record started on 1.21+. */
 function urOld(doc){const g=parseSave(doc);if(!g)return false;const p=g.pf;if(!p||typeof p!=='object'||!(+p.first))return true;const c=+g.createdAt||+doc.created||0;return !(c>0&&+p.first-c<5*60e3)}
 async function urRun(el){const F=urF();if(F.busy||S.busy)return;const start=el.dataset.v==='1',v=F.v.trim(),id=urId(v);const m=S.motd.find(x=>x.id===id)||null;
   if(start){const e=urErr(F);if(e){toast(e,'err');return}if(m){render();return}}else if(!m)return;
   const c=start?{v,item:F.item,n:+F.n,note:F.note.trim()}:Object.assign({v},m.camp||{});
-  if(!c.item||!BMAP2[c.item]||!(c.n>=1)){toast('This update reward has no reward set','err');return}
+  if(!c.item){if(!start)return;return urMsgOnly(F,v,id)}
+  if(!BMAP2[c.item]||!(c.n>=1)){toast('This update reward has no reward set','err');return}
   F.busy=true;render();
   try{const users=[];let after=null;
     for(;;){const r=await DB.query('users',{byId:true,after,limit:200});users.push(...r);urProg('Reading player saves… '+nf(users.length));if(r.length<200)break;after=r[r.length-1].id}
@@ -1036,6 +1037,13 @@ async function urRun(el){const F=urF();if(F.busy||S.busy)return;const start=el.d
     await load(['motd','stat'])}
   catch(e){console.warn('[cc] update reward',e);F.prog='';toast(fsErr(e),'err')}
   finally{F.busy=false;render()}}
+
+// the update message with no reward: one message for older versions, nothing waiting for anyone
+async function urMsgOnly(F,v,id){if(!await ask({title:'Send the update message for '+v+'?',body:'Players on a version older than <b>'+esc(v)+'</b> see “'+esc(F.t.trim())+'” for 14 days, with a button to Google Play. No reward.<br><br>Only send it once '+esc(v)+' is live on Google Play.',ok:'Send'}))return;
+  F.busy=true;render();try{const now=Date.now();const doc={t:F.t.trim(),b:F.b.replace(/\r\n?/g,'\n').trim(),k:'',tag:'update',c:'',img:'',imgId:'',imgV:0,fit:'cover',cta:{l:'Get the update',go:'url:'+PLAY_URL},gift:null,start:now,end:plusDays(now,14),prio:6,
+      aud:{acct:false,minLv:0,maxLv:0,below:v},on:true,pop:true,created:now,up:now,camp:{v,item:'',n:0,note:'',sent:0,at:now}};
+    await DB.batch([{op:'set',path:'motd/'+id,data:doc},{op:'set',path:'motd_stat/'+id,data:{seen:0,tap:0,claim:0}}]);F.prog='';F.open=false;toast('Update message sent to older versions');await load(['motd','stat'])}
+  catch(e){console.warn('[cc] update message',e);toast(fsErr(e),'err')}finally{F.busy=false;render()}}
 
 /* =====================================================================
    COMPOSER
@@ -2245,7 +2253,7 @@ function relCardHTML(){if(S.ver&&S.ver.min&&!verLt(S.ver.min,REL_V))return '';
   h+=row(rules==='ok','Publish the 1.22 Firestore rules',rules==='no'?'Not yet: Firebase console → Firestore Database → Rules, paste firestore.rules, Publish. Then reload this page.':rules==='wait'?'Checking…':rules==='err'?'Could not check: reload this page.':'Published: the new documents can be read and written.');
   h+=row(ark,'Arklite Station in the galaxy',ark?'On in Sol Verge, for every 1.22 player.':(rules==='ok'?'Ready to place: the thank-you station in Sol Verge with its plaque.':'Needs the new rules first.'),rules==='ok'?'<button class="btn sm" data-act="arkPlace"'+(S.mon.busy?' disabled':'')+'>'+ic('trophy')+'Place it</button>':'');
   h+=row(false,'Upload 1.22 to Google Play','The .aab is on the GitHub release; the release notes are in it too. This one only ticks off when you turn on the required update.','<a class="btn sm sec" href="'+REL_AAB+'" target="_blank" rel="noopener">'+ic('link')+'Release</a>');
-  h+=row(ur,'Tell 1.21 players to update','The Update reward (Messages tab): a message with a Google Play button, and a Time Warp waiting for them in 1.22.','<button class="btn sm sec" data-act="relUr">'+ic('gift')+'Set it up</button>');
+  h+=row(ur,'Tell 1.21 players to update','The Update message (Messages tab): a message with a Google Play button. No reward needed: veterans get their package in 1.22.','<button class="btn sm sec" data-act="relUr">'+ic('mega')+'Set it up</button>');
   h+=row(false,'Require 1.22','Only once 1.22 is live on Google Play for everyone (after the rollout): set it below in Required update.','');
   return h+'</div></div>'}
 {const o0=VIEWS.overview;VIEWS.overview=()=>{const h=o0();try{const c=relCardHTML();if(!c)return h;return h.replace(/(<div class="pagehead">[\s\S]*?<\/div><\/div>)/,'$1'+c)}catch(e){console.error(e);return h}}}
