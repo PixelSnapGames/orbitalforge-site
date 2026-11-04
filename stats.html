@@ -1541,7 +1541,7 @@ function profHTML(){const P=S.prof;if(!P)return '';const head='<div class="card 
   const pf=g.pf||{},c=pf.c||{},st=g.stats||{},doc=P.doc||{};const name=P.dn&&P.dn.name||'';const v=g.appVer||doc.version||'?';const old=verLt(v,'1.21.0');
   let h=head+'<div class="phero"><div class="pnm">'+(name?esc(name):'<span class="cs">'+esc(g.lb?csName(g.lb.c1,g.lb.c2,g.lb.n)||'Commander':'Commander')+'</span>')+(g.bought&&g.bought.lic?' <span class="chip lic">Commander License</span>':'')+'</div>'
     +'<div class="sub">Lv '+lvOf(g.cmd&&g.cmd.xp)+' · v'+esc(v)+' · last save '+esc(doc.updatedAt?rel(doc.updatedAt):'—')+' · started '+esc(g.createdAt?new Date(g.createdAt).toLocaleDateString():'—')+'</div>'
-    +'<div class="facts" style="margin-top:8px">'+(name?'<button class="btn sm sec" data-act="pReset" data-v="'+esc(P.uid)+'">'+ic('userx')+'Reset name</button>':'')+'<button class="btn sm sec" data-act="profMail">'+ic('msg')+'Mail</button><button class="btn sm sec" data-act="pMsg" data-v="'+esc(P.uid)+'">'+ic('gift')+'Message / gift</button>'+(P.hid?'<button class="btn sm sec" data-act="lbShow" data-v="'+esc(P.uid)+'">'+ic('trophy')+'Put back on the leaderboards</button>':'<button class="btn sm sec" data-act="lbHide" data-v="'+esc(P.uid)+'">'+ic('userx')+'Take off the leaderboards</button>')+'</div>'+(P.hid?'<div class="sub" style="margin-top:6px">Kept off the leaderboards since '+esc(rel(P.hid.at||0))+'.</div>':'')+'</div>';
+    +'<div class="facts" style="margin-top:8px">'+(name?'<button class="btn sm sec" data-act="pReset" data-v="'+esc(P.uid)+'">'+ic('userx')+'Reset name</button>':'')+'<button class="btn sm sec" data-act="profMail">'+ic('msg')+'Mail</button><button class="btn sm sec" data-act="pMsg" data-v="'+esc(P.uid)+'">'+ic('gift')+'Message / gift</button>'+(P.hid?'<button class="btn sm sec" data-act="lbShow" data-v="'+esc(P.uid)+'">'+ic('trophy')+'Put back on the leaderboards</button>':'<button class="btn sm sec" data-act="lbHide" data-v="'+esc(P.uid)+'">'+ic('userx')+'Take off the leaderboards</button>')+'</div>'+(P.hid?'<div class="sub" style="margin-top:6px">'+(P.hid.why==='ver'?'Needs update: off the leaderboards until they play 1.22 ('+(P.hid.v?'was on '+esc(P.hid.v)+', ':'')+'taken off '+esc(rel(P.hid.at||0))+').':'Kept off the leaderboards since '+esc(rel(P.hid.at||0))+'.')+'</div>':'')+'</div>';
   if(old)h+='<div class="warn" style="display:block">This player is on '+esc(v)+'. The Shop, video and gift history below starts with 1.21, and changes you send apply once they update.</div>';
   const flags=profFlags(g);h+='<div class="pgrid">';
   h+='<section class="pcard'+(flags.length?' bad':'')+'"><h3>'+ic('flag')+'Checks</h3>'+(flags.length?'<ul class="flags">'+flags.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul>':'<div class="ok">Nothing unusual.</div>')+'</section>';
@@ -2341,11 +2341,77 @@ VIEWS.players=()=>{let h=head('Players','Profiles, the leaderboards, display nam
   h+='<div class="plSecs" role="tablist">'+PL_SECS.map(([k,n,i])=>'<button role="tab" data-act="plSec" data-v="'+k+'" aria-selected="'+(sec===k)+'"'+(sec===k?' class="on"':'')+'>'+ic(i)+'<span>'+n+'</span>'+(k==='reports'&&S.rep.length?'<span class="cnt">'+S.rep.length+'</span>':'')+'</button>').join('')+'</div>';
   h+=profHTML();if(S.mail)h+=mailPanelHTML();
   if(sec==='profiles')h+=plCardHTML();
-  else if(sec==='boards')h+='<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div></div>'+hidHTML()+'</div>';
+  else if(sec==='boards')h+=ovCardHTML()+'<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div></div>'+hidHTML()+'</div>';
   else if(sec==='names'){h+='<div class="card"><div class="ph"><div><h2>Display names</h2><div class="sub">Newest first. Search matches the start of the name (spaces, _ . - ignored).</div></div></div><div class="srch">'+ic('search')+'<input class="inp" id="dnQ" data-f="dnQ" value="'+esc(S.dnQ)+'" placeholder="Search names, e.g. star" aria-label="Search display names" autocomplete="off"></div><div id="dnList">'+dnListHTML()+'</div></div>';
     h+='<div class="card" id="blkCard"><div class="ph"><div><h2>Blocked names</h2><div class="sub">Names taken away by a reset (names/{key} with uid “blocked”). Nobody can pick them, including the player who had it. Newest first.</div></div></div><div id="blkList">'+blockedHTML()+'</div></div>'}
   else h+=repCardHTML();
   return h};
+/* ---------- Old game versions on the leaderboards (game 1.22) ----------
+   "Remove players older than 1.22": everyone on a board whose game is older than 1.22 comes off it the usual way
+   (lbhide/{uid}, which the rules check, plus their entries on the all-time board, this week's and last week's), marked
+   why:'ver' ("Needs update") with the version seen. A 1.22 game always posts gv on lb/{uid}, so an entry without it came
+   from an older game; the player's cloud save (users/{uid}.version) settles it.
+   "Put updated players back": everyone marked "Needs update" whose cloud save is now 1.22 or newer is put back (lbhide
+   deleted); their game posts its score again within a few minutes of playing. Players taken off by hand (cheaters, your
+   own account) are never touched by either button. Their game and progress are never touched. ---------- */
+const OV_MIN='1.22.0';
+S.ov={busy:false,msg:'',all:false};
+function ovVer(d){if(!d)return '';if(typeof d.version==='string'&&d.version)return d.version;const g=parseSave(d);return g&&typeof g.appVer==='string'?g.appVer:''}
+async function ovAll(col){const out=[];let after=null;for(;;){const r=await DB.query(col,{byId:true,after,limit:300});out.push(...r);if(r.length<300)break;after=r[r.length-1].id}return out}
+async function ovPool(items,n,fn){let i=0;const run=async()=>{while(i<items.length){const k=i++;await fn(items[k],k)}};await Promise.all(Array.from({length:Math.min(n,items.length)},run))}
+function ovSay(m){S.ov.msg=m||'';const el=$('#ovMsg');if(el)el.textContent=S.ov.msg}
+function ovIsVer(x){return !!(x&&x.data&&x.data.why==='ver')}
+async function ovRemove(){if(S.ov.busy)return;S.ov.busy=true;soonRender();
+  try{ovSay('Reading the leaderboards…');const wk=weekId(),lw=weekId(Date.now()-7*DAY);
+    const [lb,w1,w2,hid]=await Promise.all([ovAll('lb'),ovAll('lbw_'+wk),ovAll('lbw_'+lw),ovAll('lbhide')]);
+    const off=new Set(hid.map(x=>x.id)),lbm={},nameOf={};lb.forEach(x=>{lbm[x.id]=x.data});
+    [...w2,...w1,...lb].forEach(x=>{const d=x.data||{};nameOf[x.id]=d.dn||csName(d.c1,d.c2,d.n)||''});
+    const check=[...new Set([...lb,...w1,...w2].map(x=>x.id))].filter(u=>!off.has(u)&&!(lbm[u]&&typeof lbm[u].gv==='number'));
+    const old=[];let n=0;
+    await ovPool(check,6,async u=>{let v='';try{v=ovVer(await DB.get('users/'+u))}catch(e){}if(!v||verLt(v,OV_MIN))old.push({uid:u,v});n++;ovSay('Checking versions… '+n+' of '+check.length)});
+    ovSay('');
+    if(!old.length){toast('Everyone on the leaderboards is on 1.22 or newer','good');return}
+    const many=old.length>1;
+    if(!await ask({title:'Take '+old.length+' player'+(many?'s':'')+' off the leaderboards?',body:(many?'They play':'They play')+' a version older than 1.22. Their entries come off the all-time board, this week\'s and last week\'s, and they\'re marked “Needs update”, so their game can\'t post a score. Their game and progress aren\'t touched. Once they update, “Put updated players back” returns them.',ok:'Take them off',danger:true}))return;
+    ovSay('Taking them off…');const at=Date.now(),by=S.user&&S.user.email||'',ops=[];
+    old.forEach(o=>{ops.push({op:'set',path:'lbhide/'+o.uid,data:{at,by,name:String(nameOf[o.uid]||'').slice(0,40),why:'ver',v:String(o.v||'').slice(0,12)}},{op:'delete',path:'lb/'+o.uid},{op:'delete',path:'lbw_'+wk+'/'+o.uid},{op:'delete',path:'lbw_'+lw+'/'+o.uid})});
+    for(let i=0;i<ops.length;i+=400)await DB.batch(ops.slice(i,i+400));
+    toast(old.length+' player'+(many?'s are':' is')+' off the leaderboards until they update','good');
+    await load(['lb','lbw','hid'])
+  }catch(e){toast(fsErr(e),'err')}finally{S.ov.busy=false;ovSay('');soonRender()}}
+async function ovBack(){if(S.ov.busy)return;S.ov.busy=true;soonRender();
+  try{ovSay('Reading the players marked “Needs update”…');const hid=(await ovAll('lbhide')).filter(ovIsVer);
+    if(!hid.length){toast('Nobody is marked “Needs update”');return}
+    const back=[],still=[];let n=0;
+    await ovPool(hid,6,async x=>{let v='';try{v=ovVer(await DB.get('users/'+x.id))}catch(e){}(v&&!verLt(v,OV_MIN)?back:still).push({uid:x.id,v,name:x.data.name||''});n++;ovSay('Checking versions… '+n+' of '+hid.length)});
+    ovSay('');
+    if(!back.length){toast('Nobody has updated yet: '+still.length+' still on an older version');return}
+    ovSay('Putting them back…');
+    for(let i=0;i<back.length;i+=400)await DB.batch(back.slice(i,i+400).map(o=>({op:'delete',path:'lbhide/'+o.uid})));
+    const nm=back.slice(0,3).map(o=>o.name||shortUid(o.uid)).join(', ')+(back.length>3?' and '+(back.length-3)+' more':'');
+    toast('Back on the leaderboards: '+nm+(still.length?' · '+still.length+' still need'+(still.length>1?'':'s')+' to update':''),'good');
+    await load(['hid']);if(S.prof&&back.some(o=>o.uid===S.prof.uid))profFetch(S.prof.uid)
+  }catch(e){toast(fsErr(e),'err')}finally{S.ov.busy=false;ovSay('');soonRender()}}
+function ovCardHTML(){const n=S.hid.filter(ovIsVer).length,b=S.ov.busy?' disabled':'';
+  return '<div class="card" id="ovCard"><div class="ph"><div><h2>Old game versions</h2><div class="sub">Take players on a version older than 1.22 off the leaderboards. They\'re marked “Needs update”; their game and progress aren\'t touched. When they update, one tap puts them back.</div></div></div>'
+    +'<div class="ovRow"><div class="ovN"><b>'+nf(n)+'</b><span>marked “Needs update”</span></div><div class="ovB"><button class="btn sm danger" data-act="ovRemove"'+b+'>'+ic('userx')+'<span>Remove players older than 1.22</span></button><button class="btn sm" data-act="ovBack"'+b+'>'+ic('trophy')+'<span>Put updated players back</span></button></div></div>'
+    +'<div class="sub ovMsg" id="ovMsg" aria-live="polite">'+esc(S.ov.msg)+'</div></div>'}
+// the list under the boards: players taken off by hand as before, then the ones waiting to update
+hidHTML=function(){if(secState('hid')||!S.hid.length)return '';const man=S.hid.filter(x=>!ovIsVer(x)),ver=S.hid.filter(ovIsVer);let h='';
+  const row=(x,extra)=>'<div class="prow"><div class="pmain"><div class="pn">'+esc(x.data.name||shortUid(x.id))+'</div><div class="pmeta"><span class="mono">'+esc(shortUid(x.id))+'</span>'+(extra||'')+'<span>since '+esc(rel(x.data.at||0))+'</span></div></div><div class="pacts"><button class="btn sm sec" data-act="lbShow" data-v="'+esc(x.id)+'">Put back</button></div></div>';
+  if(man.length)h+='<h3 style="margin-top:16px">Kept off the leaderboards</h3>'+man.map(x=>row(x)).join('');
+  if(ver.length){const L=S.ov.all?ver:ver.slice(0,8);h+='<h3 style="margin-top:16px">Needs update <small>'+nf(ver.length)+'</small></h3>'+L.map(x=>row(x,'<span class="chip paused">'+(x.data.v?'on '+esc(x.data.v):'old version')+'</span>')).join('')
+    +(ver.length>8?'<div style="text-align:center;margin-top:10px"><button class="btn sm sec" data-act="ovAllT">'+(S.ov.all?'Show fewer':'Show all '+nf(ver.length))+'</button></div>':'')}
+  return h};
+LOAD.hid=()=>ovAll('lbhide').then(r=>{S.hid=r.sort((a,b)=>(b.data.at||0)-(a.data.at||0))});
+Object.assign(ACT,{ovRemove:()=>ovRemove(),ovBack:()=>ovBack(),ovAllT:()=>{S.ov.all=!S.ov.all;render()}});
+(function(){const st=document.createElement('style');st.textContent=`
+#ovCard .ovRow{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+#ovCard .ovN{display:flex;align-items:baseline;gap:6px;margin-right:auto}#ovCard .ovN b{font-size:22px}#ovCard .ovN span{color:var(--mu2);font-size:13px}
+#ovCard .ovB{display:flex;flex-wrap:wrap;gap:8px}
+#ovCard .ovMsg{margin-top:8px;min-height:1.2em}
+@media(max-width:640px){#ovCard .ovB{width:100%}#ovCard .ovB .btn{flex:1 1 100%;justify-content:center}}
+`;document.head.appendChild(st)})();
 (function(){const st=document.createElement('style');st.textContent=`
 #retCard .tbl.ret td small,#view .tbl.day td small{display:block;font-size:11px;color:var(--mu2);font-weight:600}
 #retCard .tbl.ret td b{font-size:14.5px}
