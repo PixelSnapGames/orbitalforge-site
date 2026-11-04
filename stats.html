@@ -452,6 +452,50 @@ input[type=number].inp{font-variant-numeric:tabular-nums}
 .evl{display:flex;flex-direction:column;max-height:380px;overflow:auto}.evl>div{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}.evl span{flex:0 0 120px;color:var(--muted)}.evl b{font-weight:500}
 td.num,th.num{text-align:right}
 .fbBtns{display:flex;gap:8px;flex-wrap:wrap}.fbFrom{margin-left:auto;font:inherit;font-size:12px;color:var(--ac);background:none;border:1px solid currentColor;border-radius:999px;padding:2px 10px;cursor:pointer}.fbFrom.none{color:var(--mu2);border-style:dashed;cursor:default}
+
+/* ---------- 1.22: Support, Monuments, Required update ---------- */
+.frow{display:flex;flex-wrap:wrap;gap:0 12px}
+.suList{display:flex;flex-direction:column;margin-top:10px;border-top:1px solid var(--line)}
+.suRow{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);text-align:left;width:100%;color:var(--tx)}
+.suRow:hover{background:rgba(255,255,255,.03)}
+.suRow .grow{min-width:0;flex:1}.suRow b{font-size:14.5px}
+.suLast{display:block;font-size:13px;color:var(--mu2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.suLast i{font-style:normal;color:var(--mu)}
+.suT{flex:none;font-size:12px;color:var(--mu2)}
+.suDot{flex:none;width:9px;height:9px;border-radius:50%;background:transparent}.suRow.un .suDot{background:var(--gn);box-shadow:0 0 0 3px rgba(74,222,128,.18)}.suRow.un b{color:#fff}
+.suMsgs{display:flex;flex-direction:column;gap:10px;max-height:min(60vh,560px);overflow-y:auto;padding:12px 4px;margin:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.suM{display:flex;flex-direction:column;gap:4px;max-width:80%}.suM.me{align-self:flex-end;align-items:flex-end}.suM.them{align-self:flex-start}
+.suB{padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.45;overflow-wrap:anywhere}.suB:empty{display:none}
+.suM.them .suB{background:var(--card3);border-bottom-left-radius:4px}.suM.me .suB{background:#1d4fb8;color:#fff;border-bottom-right-radius:4px}
+.suG{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 11px;border-radius:12px;background:rgba(255,209,102,.08);box-shadow:inset 0 0 0 1px rgba(255,209,102,.35);color:var(--yl);font-size:13px;font-weight:700}.suG .i{width:16px;height:16px}
+.suMt{font-size:11.5px;color:var(--mu2)}
+.suComp .inp{min-height:84px}
+.fbMsg{margin-left:6px}
+.moGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.moCard{display:flex;gap:14px;align-items:flex-start;margin-bottom:0}.moCard.off{opacity:.62}.moCard .grow{flex:1;min-width:0}
+.moThumb{flex:none;width:120px;height:84px;border-radius:10px;background:radial-gradient(circle at 50% 45%,#141d44,#070b19 75%)}
+.moCard .tgl{padding:0;font-size:13px}
+.moSplit{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,360px);gap:18px;margin-top:12px;align-items:start}
+.moPv{position:sticky;top:76px}.moPv canvas{width:100%;aspect-ratio:1;border-radius:14px;display:block;border:1px solid var(--line)}
+.moPv .sub{margin-top:6px}
+.moH{font-size:14px;font-weight:800;margin:16px 0 4px;padding-top:12px;border-top:1px solid var(--line)}
+.moThs{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:6px}
+.moTh{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:5px;border-radius:12px;background:transparent;border:1px solid var(--line);color:var(--fg);cursor:pointer;font:inherit}
+.moTh.on{border-color:var(--a);box-shadow:0 0 0 2px var(--a)}
+.moThP{position:relative;display:block;height:46px;border-radius:9px;background:linear-gradient(180deg,var(--g1),var(--g2));border:1px solid color-mix(in srgb,var(--a) 40%,transparent);overflow:hidden}
+.moThP b{position:absolute;left:8px;top:9px;width:44%;height:6px;border-radius:3px;background:var(--a)}
+.moThP em{position:absolute;left:8px;bottom:8px;width:30%;height:10px;border-radius:4px;background:var(--b);opacity:.85}
+.moThX{position:absolute;right:6px;top:6px;width:14px;height:14px;border-radius:50%;border:2px solid var(--a);box-shadow:0 0 6px var(--a),0 0 12px var(--a)}
+.moThN{font-size:12px;font-weight:700;text-align:center}
+.moKS{margin-top:6px}
+.moTL small{font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted)}
+.moTL{margin:12px 0 2px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.moTS{margin:4px 0 8px}
+.moSw{width:28px;height:28px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}.moSw.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--tx)}
+.moEd input[type=color]{width:40px;height:30px;padding:0;border:0;background:none}
+.moEd .seg{margin-top:4px}
+.rng{width:100%;accent-color:var(--ac)}
+@media (max-width:899px){nav.nav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(58px,1fr);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}nav.nav::-webkit-scrollbar{display:none}}
+@media (max-width:760px){.moSplit{grid-template-columns:1fr}.moPv{position:static;order:-1;max-width:340px}.moGrid{grid-template-columns:1fr}}
 </style></head><body>
 <div class="app" id="app">
   <header class="top">
@@ -480,7 +524,7 @@ const FB_CFG={apiKey:"AIzaSyCnBxh70YWlrOfQJQ9JO33h8zAs_nOfnxE",authDomain:"orbit
 const ADMINS=['pixelsnapgames@gmail.com'];
 const MIN=6e4,HOUR=36e5,DAY=864e5;
 const PLAY_URL='https://play.google.com/store/apps/details?id=com.pixelsnapgames.orbitalforge';
-const GAME_VER='1.21.0';// the newest game version: an update message goes only to players older than this (game 1.21+ checks it)
+const GAME_VER='1.22.0';// the newest game version: an update message goes only to players older than this (game 1.21+ checks it)
 
 /* ---------- small helpers ---------- */
 const $=(s,r)=>(r||document).querySelector(s);
@@ -611,7 +655,7 @@ function ic(n,c){return '<svg class="i'+(c?' '+c:'')+'" viewBox="0 0 24 24" aria
 function norm(v){if(v&&typeof v==='object'){if(typeof v.toMillis==='function')return v.toMillis();if(Array.isArray(v))return v.map(norm);const o={};for(const k in v)o[k]=norm(v[k]);return o}return v}
 function loadScript(src,ms){return new Promise((res,rej)=>{const s=document.createElement('script');const to=setTimeout(()=>rej(new Error('Timed out loading '+src)),ms||12000);s.src=src;s.onload=()=>{clearTimeout(to);res()};s.onerror=()=>{clearTimeout(to);rej(new Error('Could not load '+src))};document.head.appendChild(s)})}
 function fireDB(){let auth=null,db=null;
-  function apply(b,o){const r=db.doc(o.path);if(o.op==='set')b.set(r,o.data);else if(o.op==='update')b.update(r,o.data);else if(o.op==='delete')b.delete(r)}
+  function apply(b,o){const r=db.doc(o.path);if(o.op==='merge')b.set(r,o.data,{merge:true});else if(o.op==='set')b.set(r,o.data);else if(o.op==='update')b.update(r,o.data);else if(o.op==='delete')b.delete(r)}
   return {mode:'live',
     init(){const v='https://www.gstatic.com/firebasejs/10.14.1/';return loadScript(v+'firebase-app-compat.js').then(()=>Promise.all([loadScript(v+'firebase-auth-compat.js'),loadScript(v+'firebase-firestore-compat.js')])).then(()=>{const app=firebase.initializeApp(FB_CFG,'cc');auth=app.auth();db=app.firestore()})},
     onAuth(cb){auth.onAuthStateChanged(u=>cb(u?{email:(u.email||'').toLowerCase(),name:u.displayName||''}:null))},
@@ -632,7 +676,7 @@ function mockDB(){const KEY='cc_mock_db';let docs={},gen={},user=null,authCb=nul
   const wait=()=>new Promise(r=>setTimeout(r,30+Math.random()*60));
   function save(){try{localStorage.setItem(KEY,JSON.stringify({v:2,docs}))}catch(e){if(!warned){warned=true;toast('Preview storage is full: changes last until you reload','warn')}}}
   function fail(code,msg){const e=new Error(msg);e.code=code;return e}
-  function applyOp(o){if(o.op==='set')docs[o.path]=clone(o.data);else if(o.op==='update'){if(!docs[o.path])throw fail('not-found','No document to update: '+o.path);Object.assign(docs[o.path],clone(o.data))}else if(o.op==='delete')delete docs[o.path]}
+  function applyOp(o){if(o.op==='merge')docs[o.path]=Object.assign({},docs[o.path]||{},clone(o.data));else if(o.op==='set')docs[o.path]=clone(o.data);else if(o.op==='update'){if(!docs[o.path])throw fail('not-found','No document to update: '+o.path);Object.assign(docs[o.path],clone(o.data))}else if(o.op==='delete')delete docs[o.path]}
   /* failNext: tests can make the next write fail with a Firestore error code, e.g. 'permission-denied' */
   function commit(ops){if(api.failNext){const c=api.failNext;api.failNext=null;throw fail(c,'Missing or insufficient permissions.')}const snap=docs;docs=Object.assign({},docs);try{ops.forEach(applyOp)}catch(e){docs=snap;throw e}save()}
   function cmp(a,op,b){if(a==null)return false;switch(op){case '==':return a===b;case '!=':return a!==b;case '>':return a>b;case '>=':return a>=b;case '<':return a<b;case '<=':return a<=b}return false}
@@ -943,7 +987,7 @@ function imgShared(imgId,exceptId){return S.motd.some(x=>x.id!==exceptId&&x.img=
    waits for every player who started before that version as a Command Center change, adm/{uid}/ops/{campaign id}, which
    only game 1.21+ applies (once, with the thank-you note), so updating is the way to get it. A player who started on the
    new version gets nothing: it is a thank-you for updating. The message doc carries camp:{v,item,n,note,sent,at}. */
-const UR_DEF={t:'Update now for a free reward',b:'Version 1.21 is out! Update from Google Play and a free 4-hour Time Warp will be waiting for you.\n\nWhat\'s new:\n• Money keeps coming after the Smelter\n• Faster first levels\n• License boost days with up to ×25 ore\n• Self-upgrade works top to bottom',note:'Thanks for updating! Here\'s a free 4-hour Time Warp. It\'s in your Boosters.'};
+const UR_DEF={t:'Update now: a gift is waiting',b:'Version 1.22 is out! Update from Google Play: a Veteran\'s Package and a free 4-hour Time Warp are waiting for you.\n\nWhat\'s new:\n• Hands-on machines: Make, then Collect\n• Press and hold to keep buying\n• Fly in close to your planets\n• Monuments, crates and rover hauls',note:'Thanks for updating! Here\'s a free 4-hour Time Warp. It\'s in your Boosters.'};
 const UR_VER=/^\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 function urId(v){return 'upd_'+String(v).trim().replace(/\./g,'_')}
 function urF(){return S.ur||(S.ur={open:false,v:GAME_VER,item:'warp_rare',n:'1',t:UR_DEF.t,b:UR_DEF.b,note:UR_DEF.note,busy:false,prog:'',cnt:null})}
@@ -1796,6 +1840,285 @@ const ACT={
   seeMail:()=>{const d=S.draft;if(d&&d.to)openMail(d.to.uid,d.to.name)},
   dnMore:()=>{S.dnLimit+=40;fetchDn().then(paintDn,e=>toast(fsErr(e),'err'))},annTop:announceTop
 };
+/* =====================================================================
+   SUPPORT, MONUMENTS AND THE REQUIRED UPDATE (game 1.22)
+   ===================================================================== */
+TABS.splice(TABS.findIndex(x=>x[0]==='feedback'),0,['support','Support','chat']);
+TABS.splice(TABS.findIndex(x=>x[0]==='feedback')+1,0,['monuments','Monuments','trophy']);
+Object.assign(LBL,{sup:'support conversations',mon:'monuments',ver:'the required update'});
+S.sup={rows:[],names:{},open:null,thread:null,msgs:[],loading:false,text:'',giftOn:false,gift:emptyGift(),bId:'mine_rare',bN:1,q:'',res:[],busy:false};
+S.mon={list:[],edit:null,idx:-1,busy:false};S.ver={min:'',msg:''};
+const supAct=d=>Math.max(+d.pAt||0,+d.dAt||0);
+const supUnread=d=>(+d.pAt||0)>(+d.seenAt||0);
+Object.assign(LOAD,{
+  sup:()=>supSeedMock().then(()=>DB.query('sup',{limit:500})).then(r=>{S.sup.rows=r.sort((a,b)=>supAct(b.data)-supAct(a.data));
+    const need=r.map(x=>x.id).filter(u=>S.sup.names[u]===undefined);return Promise.all(need.map(u=>DB.get('dn/'+u).then(d=>{S.sup.names[u]=d&&d.name||''},()=>{S.sup.names[u]=''})))}),
+  mon:()=>monSeedMock().then(()=>DB.get('config/mon')).then(d=>{S.mon.list=d&&Array.isArray(d.list)?d.list:[]}),
+  ver:()=>DB.get('config/ver').then(d=>{S.ver={min:d&&d.min||'',msg:d&&d.msg||''}})});
+/* preview data: two conversations and two monuments (Arklite Station off), added once */
+function supSeedMock(){if(DB.mode!=='mock')return Promise.resolve();const all=DB.dump();if(Object.keys(all).some(k=>/^sup\//.test(k)))return Promise.resolve();
+  return DB.query('users',{limit:3}).then(r=>{const t=Date.now(),ops=[];if(!r.length)return;const a=r[0].id,b=(r[1]||r[0]).id;
+    ops.push({op:'set',path:'sup/'+a,data:{pAt:t-40*60e3,last:'My Foundry stopped after the update, is that normal?',pn:2,v:'1.22.0'}});
+    ops.push({op:'set',path:'sup/'+a+'/m/p1',data:{from:'p',t:'Hi! Love the game.',at:t-50*60e3}});
+    ops.push({op:'set',path:'sup/'+a+'/m/p2',data:{from:'p',t:'My Foundry stopped after the update, is that normal?',at:t-40*60e3}});
+    if(b!==a){ops.push({op:'set',path:'sup/'+b,data:{pAt:t-2*DAY,last:'My boosters disappeared',pn:1,v:'1.22.0',dAt:t-DAY,dLast:'So sorry about that! Here they are.',seenAt:t-DAY}});
+      ops.push({op:'set',path:'sup/'+b+'/m/p1',data:{from:'p',t:'My boosters disappeared',at:t-2*DAY}});
+      ops.push({op:'set',path:'sup/'+b+'/m/d1',data:{from:'dev',t:'So sorry about that! Here they are.',at:t-DAY,gift:{dm:0,sh:0,uk:0,ck:0,cash:0,ship:0,items:{prod_rare:2}},seen:true,got:true}})}
+    return DB.batch(ops)})}
+function monSeedMock(){if(DB.mode!=='mock')return Promise.resolve();if(DB.dump()['config/mon'])return Promise.resolve();
+  return DB.set('config/mon',{list:[monTemplate('thanks'),Object.assign(monTemplate('beacon'),{id:'supply_beacon'})],up:Date.now()})}
+
+/* ---------- SUPPORT ---------- */
+function supName(uid){const n=S.sup.names[uid];return n?esc(n):'<span class="cs">Guest '+esc(shortUid(uid))+'</span>'}
+function supWhen(t){if(!t)return '';const d=Date.now()-t;return d<60e3?'just now':d<DAY?rel(t):new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
+VIEWS.support=()=>{let h=head('Support','Tech support conversations. Players write from Settings → Tech support in game 1.22 and newer. You can start one from a player\'s profile or by name below, and a reply can carry a gift they claim right in the chat.');
+  if(S.sup.open)return h+supThreadHTML();const st=secState('sup');if(st)return h+st;
+  h+='<div class="card"><div class="ph"><div><h2>Start a conversation</h2><div class="sub">Type a display name (or paste a uid).</div></div></div><input class="inp" id="su-q" data-su="q" placeholder="Display name or uid" value="'+esc(S.sup.q)+'" autocomplete="off"><div id="suRes">'+supResHTML()+'</div></div>';
+  const R=S.sup.rows;const un=R.filter(x=>supUnread(x.data)).length;
+  h+='<div class="card"><div class="ph"><div><h2>Conversations · '+R.length+'</h2><div class="sub">'+(un?un+' waiting for an answer':'Nothing waiting')+'. Newest first.</div></div><button class="btn sm sec" data-act="supReload">'+ic('refresh')+'Refresh</button></div>';
+  h+=R.length?'<div class="suList">'+R.map(x=>{const d=x.data,dev=(+d.dAt||0)>(+d.pAt||0);return '<button class="suRow'+(supUnread(d)?' un':'')+'" data-act="supOpen" data-v="'+esc(x.id)+'"><span class="suDot"></span><span class="grow"><b>'+supName(x.id)+'</b>'+(d.muted?' <span class="chip soft">Muted</span>':'')+'<span class="suLast">'+(dev?'<i>You:</i> ':'')+esc(dev?d.dLast||'':d.last||'')+'</span></span><span class="suT">'+supWhen(supAct(d))+'</span></button>'}).join('')+'</div>':'<div class="empty">No conversations yet.</div>';
+  return h+'</div>'};
+function supResHTML(){const q=S.sup.q.trim();if(!q)return '';if(q.length>=20&&/^[A-Za-z0-9_-]+$/.test(q))return '<div class="facts"><button class="btn sm" data-act="supOpen" data-v="'+esc(q)+'">'+ic('chat')+'Message uid '+esc(shortUid(q))+'</button></div>';
+  if(!S.sup.res.length)return '<div class="empty sm">No display name starts with “'+esc(q)+'”.</div>';
+  return '<div class="facts">'+S.sup.res.map(r=>'<button class="btn sm sec" data-act="supOpen" data-v="'+esc(r.id)+'">'+ic('chat')+esc(r.data.name||r.id)+'</button>').join('')+'</div>'}
+function supThreadHTML(){const u=S.sup.open,th=S.sup.thread||{},M=S.sup.msgs;
+  let h='<div class="card suThread"><div class="ph"><div class="grow"><button class="btn sm sec" data-act="supBack">'+ic('back')+'All conversations</button><h2 style="margin-top:10px">'+supName(u)+'</h2><div class="sub mono">'+esc(shortUid(u))+(th.v?' · game '+esc(th.v):'')+'</div></div>'
+    +'<div class="facts"><button class="btn sm sec" data-act="profOpen" data-v="'+esc(u)+'">'+ic('user')+'Profile</button><button class="btn sm sec" data-act="supMute">'+(th.muted?'Unmute':'Mute')+'</button><button class="ib" data-act="supRefresh" aria-label="Refresh">'+ic('refresh')+'</button></div></div>';
+  if(th.muted)h+='<div class="warn" style="display:block">Muted: this player can\'t send messages until you unmute them. They still see your replies.</div>';
+  if(S.sup.loading)h+='<div class="load">Loading the conversation…</div>';
+  else h+='<div class="suMsgs" id="suMsgs">'+(M.length?M.map(m=>{const dev=m.from==='dev';return '<div class="suM '+(dev?'me':'them')+'"><div class="suB">'+(m.t?esc(m.t).replace(/\n/g,'<br>'):'')+'</div>'+(m.gift?'<div class="suG">'+ic('gift')+esc(giftText(giftClean(m.gift)))+'<span class="chip '+(m.got?'live':'soft')+'">'+(m.got?'Claimed':'Not claimed yet')+'</span></div>':'')+'<div class="suMt">'+(dev?'You':'Player')+' · '+(m.at?new Date(m.at).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'sending…')+(dev&&m.seen?' · Seen':'')+'</div></div>'}).join(''):'<div class="empty sm">No messages yet. Say hi: they get a note in the game and find it under Settings → Tech support.</div>')+'</div>';
+  const s=S.sup;h+='<div class="suComp"><textarea class="inp" id="su-t" data-su="text" rows="3" maxlength="1500" placeholder="Write a reply…">'+esc(s.text)+'</textarea>'
+    +'<label class="tgl" style="margin-top:8px"><span class="sw2"><input type="checkbox" data-su="giftOn"'+(s.giftOn?' checked':'')+'><i></i></span><span>Attach a gift<small>It shows as a gift card in their chat; Claim gives it, once.</small></span></label>';
+  if(s.giftOn)h+='<div class="ggrid" style="margin-top:8px">'+GF.map(f=>'<label class="fld"><span>'+f.n+' <small>max '+f.max+'</small></span><input class="inp" type="number" min="0" max="'+f.max+'" step="'+(f.dec?'0.5':'1')+'" data-su="g.'+f.k+'" value="'+(s.gift[f.k]||'')+'" placeholder="0"></label>').join('')+'</div>'
+    +'<div class="frow"><label class="fld"><span>Booster</span><select class="inp" data-su="bId">'+BOOST.map(b=>'<option value="'+b.id+'"'+(b.id===s.bId?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select></label><label class="fld" style="flex:0 0 110px"><span>How many</span><input class="inp" type="number" min="0" max="'+GIFT_ITEM_MAX+'" data-su="bN" value="'+(s.bN||'')+'"></label><button class="btn sm sec" data-act="supAddB" style="align-self:flex-end;margin-bottom:12px">'+ic('plus')+'Add</button></div>'
+    +(Object.keys(s.gift.items).length?'<div class="facts">'+Object.keys(s.gift.items).map(id=>'<span class="chip gold">'+s.gift.items[id]+'× '+esc(BOOSTMAP[id].n)+' <button class="ib xs" data-act="supRmB" data-v="'+id+'" aria-label="Remove">'+ic('x')+'</button></span>').join('')+'</div>':'');
+  h+='<div class="facts"><button class="btn'+(s.busy?' busy':'')+'" data-act="supSend">'+ic('chat')+'Send'+(s.giftOn?' with gift':'')+'</button><span class="sub">They see it next time the game is open.</span></div></div></div>';
+  return h}
+function supLoadThread(u){S.sup.loading=true;render();return Promise.all([DB.get('sup/'+u),DB.query('sup/'+u+'/m',{order:['at','asc'],limit:300})]).then(([th,r])=>{if(S.sup.open!==u)return;S.sup.thread=th;S.sup.msgs=r.map(x=>Object.assign({},x.data,{id:x.id}));S.sup.loading=false;
+    if(S.sup.names[u]===undefined)DB.get('dn/'+u).then(d=>{S.sup.names[u]=d&&d.name||'';render()},()=>{});
+    // opening it marks it answered-for (seen)
+    if(th&&supUnread(th))return DB.update('sup/'+u,{seenAt:DB.serverTime()}).then(()=>{th.seenAt=Date.now();const row=S.sup.rows.find(x=>x.id===u);if(row)row.data.seenAt=Date.now()}).catch(()=>{})}).catch(e=>{S.sup.loading=false;toast(fsErr(e),'err')}).then(()=>{render();const L=$('#suMsgs');if(L)L.scrollTop=L.scrollHeight})}
+function supOpenWith(u){u=String(u||'').trim();if(!/^[A-Za-z0-9_-]{6,128}$/.test(u)){toast('That is not a uid','err');return}S.sup.open=u;S.sup.thread=null;S.sup.msgs=[];S.sup.text='';S.sup.giftOn=false;S.sup.gift=emptyGift();S.tab='support';try{history.replaceState(null,'','#support')}catch(e){}window.scrollTo(0,0);return supLoadThread(u)}
+function supSend(){const s=S.sup,u=s.open;if(!u||s.busy)return;const t=s.text.trim();const g=s.giftOn?giftClean(s.gift):null;const hasG=g&&giftText(g);
+  if(!t&&!hasG){toast('Write a message or add a gift','err');return}
+  if(g){for(const f of GF){const v=g[f.k];if(v<0||v>f.max){toast(f.n+': 0 to '+f.max,'err');return}}}
+  const id='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);const ts=DB.serverTime();const msg={from:'dev',t:t.slice(0,1500),at:ts,seen:false,got:false};if(hasG)msg.gift=g;
+  const thData={dAt:ts,dLast:(t||'A gift: '+giftText(g)).slice(0,120),seenAt:ts};
+  s.busy=true;render();
+  return DB.batch([{op:'set',path:'sup/'+u+'/m/'+id,data:msg},{op:'merge',path:'sup/'+u,data:thData}]).then(()=>{s.text='';s.giftOn=false;s.gift=emptyGift();s.busy=false;toast(hasG?'Sent, with the gift':'Sent');return Promise.all([supLoadThread(u),load(['sup'])])},e=>{s.busy=false;render();toast(fsErr(e),'err')})}
+Object.assign(ACT,{
+  supOpen:el=>supOpenWith(el.dataset.v),supWith:el=>supOpenWith(el.dataset.v),
+  supBack:()=>{S.sup.open=null;render();load(['sup'])},supReload:()=>load(['sup']),supRefresh:()=>supLoadThread(S.sup.open),
+  supSend:()=>supSend(),
+  // muting is supmute/{uid} (only you can write or delete it); the conversation keeps a copy for this page
+  supMute:()=>{const u=S.sup.open,th=S.sup.thread;const on=!(th&&th.muted);return DB.batch([on?{op:'set',path:'supmute/'+u,data:{at:DB.serverTime()}}:{op:'delete',path:'supmute/'+u},{op:'merge',path:'sup/'+u,data:{muted:on}}]).then(()=>{S.sup.thread=Object.assign({},th||{},{muted:on});toast(on?'Muted':'Unmuted');render();load(['sup'])})},
+  supAddB:()=>{const s=S.sup;const n=Math.trunc(+s.bN||0);if(n<1||n>GIFT_ITEM_MAX){toast('1 to '+GIFT_ITEM_MAX,'err');return}s.gift.items[s.bId]=Math.min(GIFT_ITEM_MAX,(s.gift.items[s.bId]||0)+n);render()},
+  supRmB:el=>{delete S.sup.gift.items[el.dataset.v];render()}});
+document.addEventListener('input',e=>{const el=e.target,f=el.dataset&&el.dataset.su;if(!f)return;const s=S.sup;
+  if(f==='q'){s.q=el.value;clearTimeout(s.qT);s.qT=setTimeout(()=>{const k=nameKey(s.q);if(!k||k.length<1){s.res=[];const b=$('#suRes');if(b)b.innerHTML=supResHTML();return}
+    DB.query('dn',{where:[['key','>=',k],['key','<=',k+'']],order:['key','asc'],limit:8}).then(r=>{s.res=r;const b=$('#suRes');if(b)b.innerHTML=supResHTML()},()=>{})},220);return}
+  if(f==='text'){s.text=el.value;return}
+  if(f==='bN'){s.bN=el.value;return}
+  if(/^g\./.test(f)){s.gift[f.slice(2)]=el.value===''?0:+el.value;return}});
+document.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.dataset.su;if(!f)return;const s=S.sup;
+  if(f==='giftOn'){s.giftOn=el.checked;render()}else if(f==='bId'){s.bId=el.value}});
+// conversations stay fresh while you look at them
+setInterval(()=>{if(document.hidden||!S.admin||S.tab!=='support')return;const a=document.activeElement;
+  if(S.sup.open){if(S.sup.loading||S.sup.busy)return;Promise.all([DB.get('sup/'+S.sup.open),DB.query('sup/'+S.sup.open+'/m',{order:['at','asc'],limit:300})]).then(([th,r])=>{const M=r.map(x=>Object.assign({},x.data,{id:x.id}));
+    const sig=x=>JSON.stringify(x.map(m=>[m.id,m.seen,m.got]));if(sig(M)===sig(S.sup.msgs))return;const L=$('#suMsgs');const end=L&&L.scrollTop+L.clientHeight>=L.scrollHeight-30;S.sup.thread=th;S.sup.msgs=M;
+    if(a&&a.id==='su-t'){if(L){const box=document.createElement('div');box.innerHTML=supThreadHTML();const nm=box.querySelector('#suMsgs');if(nm)L.innerHTML=nm.innerHTML;if(end)L.scrollTop=L.scrollHeight}}else{render();const L2=$('#suMsgs');if(L2&&end)L2.scrollTop=L2.scrollHeight}
+    if(th&&supUnread(th))DB.update('sup/'+S.sup.open,{seenAt:DB.serverTime()}).catch(()=>{})},()=>{})}
+  else if(!(a&&a.matches&&a.matches('input,textarea,select')))load(['sup'])},20000);
+// the Support tab shows how many are waiting
+{const n0=renderNav;renderNav=function(){n0.apply(this,arguments);try{const cur=$('#nav [aria-current=page]');if(cur&&innerWidth<900){const n=$('#nav');const l=cur.offsetLeft-n.clientWidth/2+cur.clientWidth/2;if(Math.abs(n.scrollLeft-l)>20)n.scrollLeft=l}}catch(e){}try{const un=S.sup.rows.filter(x=>supUnread(x.data)).length;const b=$('#nav [data-tab="support"]');if(b&&un)b.insertAdjacentHTML('beforeend','<span class="bd" title="'+un+' waiting">'+un+'</span>')}catch(e){}}}
+// a Message button on every player profile and next to a feedback sender
+{const p0=profHTML;profHTML=function(){const h=p0.apply(this,arguments);const P=S.prof;if(!P||!P.uid)return h;return h.replace('<button class="btn sm sec" data-act="profRefresh">','<button class="btn sm" data-act="supWith" data-v="'+esc(P.uid)+'">'+ic('chat')+'Message</button><button class="btn sm sec" data-act="profRefresh">')}}
+{const f0=fbFromHTML;fbFromHTML=function(f){const h=f0.apply(this,arguments);const m=fbFrom(f);return m?h+'<button class="btn sm sec fbMsg" data-act="supWith" data-v="'+esc(m.uid)+'">'+ic('chat')+'Message</button>':h}}
+
+/* ---------- MONUMENTS ---------- */
+const MON_LOOKS=[['station','Space station'],['beacon','Light beacon'],['obelisk','Obelisk'],['asteroid','Asteroid'],['comet','Comet']];
+const MON_PLACES=[['fixed','Parked at a spot'],['random','A random spot (each player)'],['orbit','Circles the star'],['drift','Drifts across now and then']];
+const MON_COLS=['#ffd166','#38e1c6','#c084fc','#5aa9ff','#ff6fb5','#fb923c','#4ade80','#ffffff'];
+/* each monument's colour theme: its panel, buttons and the neon close button (the same list is in the game) */
+const MON_THEMES=[['auto','Match its colour'],['neon','Neon','#38e1c6','#ff4fd8','#0c1838','#170a2e'],['solar','Solar','#ffc94d','#ff7a3d','#2a1806','#140a03'],['nebula','Nebula','#c084fc','#ff6fb5','#1e1038','#0e0720'],
+  ['ice','Ice','#7dd3fc','#e0f2fe','#0b2036','#06111e'],['crimson','Crimson','#ff6b6b','#ffd166','#2c0c12','#160509'],['emerald','Emerald','#4ade80','#bbf7d0','#0a2418','#04120c'],['royal','Royal','#ffd166','#7aa2ff','#13205a','#080f2e'],['void','Void','#f3f6ff','#9aa8ff','#0b0d18','#020308']];
+function monThemeOf(m){const t=MON_THEMES.find(x=>x[0]===(m&&m.theme))||MON_THEMES[0];if(t[2])return {id:t[0],n:t[1],a:t[2],b:t[3],g1:t[4],g2:t[5]};const c=(m&&m.color)||'#ffd166';
+  return {id:'auto',n:t[1],a:c,b:'color-mix(in srgb,'+c+' 50%,#ffffff)',g1:'color-mix(in srgb,'+c+' 15%,#0b1030)',g2:'color-mix(in srgb,'+c+' 5%,#060918)'}}
+/* a monument's trade: what players give (Dark Matter, shards, keys, some income, ore/bars/parts, boosters) and the gift they get.
+   The game's ore, bar and part list (ids and names, copied from the 1.22 game data). */
+const MO_RES=[[["copper","Copper"],["iron","Iron"],["lead","Lead"],["silicon","Silicon"],["aluminium","Aluminium"],["silver","Silver"],["gold","Gold"],["diamond","Diamond"],["cobalt","Cobalt"],["platinum","Platinum"],["titanium","Titanium"],["helium3","Helium-3"],["iridium","Iridium"],["tungsten","Tungsten"],["palladium","Palladium"],["brimstone","Brimstone"],["osmium","Osmium"],["rhodium","Rhodium"],["uranium","Uranium"],["cryolite","Cryolite"],["nullite","Nullite"],["quadrite","Quadrite"],["voidsteel","Voidsteel"],["darkglass","Darkglass"],["starcore","Starcore"],["pulsarite","Pulsarite"],["aetherite","Aetherite"],["plasma","Solar Plasma"],["vitrex","Vitrex"],["xenolith","Xenolith"],["quantite","Quantite"],["prism","Prism Shard"],["lumenite","Lumenite"],["phantom","Phantom"],["umbrium","Umbrium"],["horizon","Horizon Dust"],["chronite","Chronite"],["gravitite","Gravitite"],["nebulite","Nebulite"],["tachyon","Tachyon Gas"],["singularite","Singularite"],["apexium","Apexium"],["celestium","Celestium"],["godsilk","Godsilk"]],[["copper_bar","Copper Bar"],["iron_bar","Iron Bar"],["lead_bar","Lead Bar"],["silicon_bar","Silicon Bar"],["aluminium_bar","Aluminium Bar"],["silver_bar","Silver Bar"],["gold_bar","Gold Bar"],["cut_diamond","Cut Diamond"],["cobalt_bar","Cobalt Bar"],["platinum_bar","Platinum Bar"],["titanium_bar","Titanium Bar"],["helium_cell","Helium Cell"],["iridium_bar","Iridium Bar"],["tungsten_bar","Tungsten Bar"],["palladium_bar","Palladium Bar"],["brimstone_block","Brimstone Block"],["osmium_bar","Osmium Bar"],["rhodium_bar","Rhodium Bar"],["uranium_bar","Uranium Bar"],["cryo_crystal","Cryo Crystal"],["nullite_bar","Nullite Bar"],["quadrite_bar","Quadrite Bar"],["voidsteel_bar","Voidsteel Bar"],["darkglass_pane","Darkglass Pane"],["starcore_bar","Starcore Bar"],["pulsarite_bar","Pulsarite Bar"],["aetherite_bar","Aetherite Bar"],["plasma_cell","Plasma Cell"],["vitrex_bar","Vitrex Bar"],["xenolith_bar","Xenolith Bar"],["quantite_bar","Quantite Bar"],["prism_core","Prism Core"],["lumenite_bar","Lumenite Bar"],["phantom_bar","Phantom Bar"],["umbrium_bar","Umbrium Bar"],["horizon_ingot","Horizon Ingot"],["chronite_bar","Chronite Bar"],["gravitite_bar","Gravitite Bar"],["nebulite_bar","Nebulite Bar"],["tachyon_cell","Tachyon Cell"],["singularite_bar","Singularite Bar"],["apexium_bar","Apexium Bar"],["celestium_bar","Celestium Bar"],["godsilk_weave","Godsilk Weave"],["bronze_bar","Bronze Bar"],["steel_bar","Steel Bar"],["electrum_bar","Electrum Bar"],["duralumin_bar","Duralumin Bar"],["nitinol_bar","Nitinol Bar"],["superalloy_bar","Superalloy Bar"],["voidglass","Voidglass"],["starsteel_bar","Starsteel Bar"],["prismatic_alloy","Prismatic Alloy"],["chronosteel_bar","Chronosteel Bar"]],[["copper_wire","Copper Wire"],["iron_nails","Iron Nails"],["battery","Battery"],["hammer","Hammer"],["glass","Glass"],["gear","Gear"],["drill_bit","Drill Bit"],["circuit","Circuit"],["lens","Lens"],["laser","Laser"],["solar_panel","Solar Panel"],["basic_computer","Basic Computer"],["diamond_drill","Diamond Drill"],["mining_drone","Mining Drone"],["conductive_plating","Conductive Plating"],["mirror","Mirror"],["laser_torch","Laser Torch"],["advanced_battery","Advanced Battery"],["thermal_scanner","Thermal Scanner"],["fusion_cell","Fusion Cell"],["nitinol_frame","Nitinol Frame"],["ion_thruster","Ion Thruster"],["magnet","Magnet"],["electric_motor","Electric Motor"],["hull_plate","Hull Plate"],["coolant_tank","Coolant Tank"],["advanced_computer","Advanced Computer"],["plasma_torch","Plasma Torch"],["navigation_module","Navigation Module"],["heat_shield","Heat Shield"],["reactor_core","Reactor Core"],["drill_tip","Drill Tip"],["catalytic_converter","Catalytic Converter"],["battery_acid","Battery Acid"],["radiation_shielding","Radiation Shielding"],["telescope_item","Telescope"],["satellite","Satellite"],["cryo_pod","Cryo Pod"],["nuclear_reactor","Nuclear Reactor"],["gravity_chamber","Gravity Chamber"],["fuel_rod","Fuel Rod"],["rtg_cell","RTG Power Cell"],["precision_bearing","Precision Bearing"],["void_lens","Void Lens"],["warp_coil","Warp Coil"],["quantum_processor","Quantum Processor"],["stasis_field","Stasis Field"],["null_capacitor","Null Capacitor"],["observation_dome","Observation Dome"],["star_forge","Star Forge"],["plasma_drill","Plasma Drill"],["aether_engine","Aether Engine"],["solar_sail","Solar Sail"],["aether_conduit","Aether Conduit"],["starsteel_hull","Starsteel Hull"],["prism_array","Prism Array"],["xeno_compiler","Xeno Compiler"],["quantum_battery","Quantum Battery"],["ai_core","AI Core"],["quantum_sensor","Quantum Sensor"],["prism_reflector","Prism Reflector"],["phantom_hull","Phantom Hull"],["umbral_siphon","Umbral Siphon"],["horizon_drive","Horizon Drive"],["lumen_beacon","Lumen Beacon"],["cloaking_field","Cloaking Field"],["chrono_gear","Chrono Gear"],["graviton_emitter","Graviton Emitter"],["nebula_reactor","Nebula Reactor"],["atomic_clock","Atomic Clock"],["nebula_condenser","Nebula Condenser"],["singularity_core","Singularity Core"],["apex_processor","Apex Processor"],["celestial_engine","Celestial Engine"],["dyson_shard","Dyson Shard"],["gravity_anchor","Gravity Anchor"],["apex_circuit","Apex Circuit"],["celestial_compass","Celestial Compass"],["crate_key","Crate Key"],["vault_key","Vault Key"]]];
+const MO_RESMAP={};MO_RES.forEach(L=>L.forEach(r=>{MO_RESMAP[r[0]]=r[1]}));
+const OP_F=[{k:'dm',n:'Dark Matter',max:100000},{k:'sh',n:'Star Shards',max:100000},{k:'uk',n:'Upgrade Keys',max:1000},{k:'ck',n:'Crate Keys',max:1000},{k:'cash',n:'Income (hours)',max:48,dec:true}];
+function emptyOffer(){return {title:'Trade',limit:1,pay:{dm:25,sh:0,uk:0,ck:0,cash:0,res:{},items:{}},get:{dm:0,sh:0,uk:0,ck:1,cash:0,ship:0,items:{}}}}
+function offerPayClean(p){p=p||{};const o={};for(const f of OP_F){const v=f.dec?+p[f.k]||0:Math.trunc(+p[f.k]||0);if(v>0)o[f.k]=Math.min(v,f.max)}
+  const res={};Object.keys(p.res||{}).forEach(id=>{const n=Math.trunc(+p.res[id]||0);if(n>0&&MO_RESMAP[id])res[id]=Math.min(n,1e12)});if(Object.keys(res).length)o.res=res;
+  const it={};Object.keys(p.items||{}).forEach(id=>{const n=Math.trunc(+p.items[id]||0);if(n>0&&BOOSTMAP[id])it[id]=Math.min(n,999)});if(Object.keys(it).length)o.items=it;return o}
+function offerPayText(p){const L=[];for(const f of OP_F)if(p[f.k])L.push(f.k==='cash'?p.cash+'h of income':p[f.k]+' '+f.n);
+  Object.keys(p.res||{}).forEach(id=>L.push(p.res[id]+' '+(MO_RESMAP[id]||id)));Object.keys(p.items||{}).forEach(id=>L.push(p.items[id]+'× '+(BOOSTMAP[id]?BOOSTMAP[id].n:id)));return L.join(' · ')}
+function monTS(){const el=document.querySelector('.moTS'),d=S.mon.edit;if(!el||!d||!d.offer)return;const oc=offerClean(d.offer);el.textContent=oc?'Players see: give '+offerPayText(oc.pay)+' → get '+giftText(oc.get)+(oc.limit?' · '+oc.limit+'× each':' · no limit'):'Set something to give and something to get.'}
+function offerClean(o){if(!o)return null;const pay=offerPayClean(o.pay);const get=giftClean(o.get||{});if(!Object.keys(pay).length||!giftText(get))return null;
+  return {title:String(o.title||'').trim().slice(0,40),limit:Math.max(0,Math.min(999,Math.trunc(+o.limit||0))),pay,get}}
+function monTemplate(k){if(k==='thanks')return {id:'arklite',on:false,name:'Arklite Station',sys:0,look:'station',color:'#ffd166',size:1,label:true,place:'fixed',ang:62,dist:0,speed:1,trail:false,
+    plaque:{k:'Dedicated to',title:'Arklite',text:"This station is named for Arklite, a commander whose feedback shaped Orbital Forge 1.22. He told us the screens were too busy and that the game played itself. So 1.22 made the machines hands-on, cleared away extra buttons and simplified the menus.\n\nThe station is parked in Sol Verge for good, for every commander who passes by.\n\nThank you, Arklite.",sign:'Orbital Forge 1.22 · November 2026'},gift:null,offer:null,theme:'royal'};
+  if(k==='beacon')return {id:'',on:true,name:'Supply Beacon',sys:0,look:'beacon',color:'#38e1c6',size:1,label:true,place:'orbit',ang:200,dist:0,speed:.6,trail:true,plaque:{k:'',title:'Supply Beacon',text:'A gift from the crew. Each commander can claim it once.',sign:''},gift:{dm:10,sh:0,uk:0,ck:0,cash:0,ship:0,items:{}},offer:null,theme:'neon'};
+  if(k==='trade')return {id:'',on:true,name:'Trading Post',sys:0,look:'station',color:'#38e1c6',size:1,label:true,place:'random',ang:120,dist:0,speed:1,trail:false,plaque:{k:'Trading post',title:'Trading Post',text:'The crew trades here. Each commander can make this deal a few times.',sign:''},gift:null,
+    offer:{title:'Crate deal',limit:3,pay:{dm:25,sh:0,uk:0,ck:0,cash:0,res:{},items:{}},get:{dm:0,sh:0,uk:0,ck:1,cash:0,ship:0,items:{}}},theme:'solar'};
+  return {id:'',on:true,name:'New monument',sys:0,look:'station',color:'#ffd166',size:1,label:true,place:'fixed',ang:300,dist:0,speed:1,trail:false,plaque:null,gift:null,offer:null,theme:'auto'}}
+function monSum(m){const sys=m.sys===-1?'Every system':SYS[m.sys]||'?';const pl=(MON_PLACES.find(x=>x[0]===m.place)||MON_PLACES[0])[1];const L=(MON_LOOKS.find(x=>x[0]===m.look)||MON_LOOKS[0])[1];
+  return [sys,L,pl].concat(String(m.mapLabel||'').trim()?['map shows: '+String(m.mapLabel).trim()]:[]).concat(m.theme&&m.theme!=='auto'?[monThemeOf(m).n+' theme']:[]).concat(m.trail?['trail']:[]).concat(m.plaque?['plaque']:[]).concat(m.gift&&giftText(giftClean(m.gift))?['gift: '+giftText(giftClean(m.gift))]:[]).concat((()=>{const o=offerClean(m.offer);return o?['trade: '+offerPayText(o.pay)+' → '+giftText(o.get)+(o.limit?' (×'+o.limit+')':'')]:[]})())}
+VIEWS.monuments=()=>{let h=head('Monuments','Things you place in the galaxy for every player: a thank-you station, a beacon with a gift, a trading post, a comet drifting by. Games 1.22 and newer show them; switch one off and it disappears.');
+  const st=secState('mon');if(st)return h+st;if(S.mon.edit)return h+monEditHTML();const L=S.mon.list;
+  h+='<div class="facts" style="margin-bottom:14px"><button class="btn" data-act="monNew">'+ic('plus')+'New monument</button><button class="btn sec" data-act="monTpl" data-v="thanks">'+ic('trophy')+'Thank-you station (Arklite)</button><button class="btn sec" data-act="monTpl" data-v="beacon">'+ic('gift')+'Gift beacon</button><button class="btn sec" data-act="monTpl" data-v="trade">'+ic('tag')+'Trading post</button></div>';
+  if(!L.length)return h+'<div class="card"><div class="empty">No monuments yet.</div></div>';
+  return h+'<div class="moGrid">'+L.map((m,i)=>'<div class="card moCard'+(m.on===false?' off':'')+'"><canvas class="moThumb" data-mi="'+i+'" width="120" height="84"></canvas><div class="grow"><div class="ph"><h2>'+esc(m.name)+'</h2><label class="tgl" title="Show it in the game"><span class="sw2"><input type="checkbox" data-mo-on="'+i+'"'+(m.on!==false?' checked':'')+'><i></i></span><span>'+(m.on!==false?'On':'Off')+'</span></label></div><div class="facts" style="margin-top:4px">'+monSum(m).map(x=>'<span class="chip soft">'+esc(x)+'</span>').join('')+'</div><div class="facts"><button class="btn sm sec" data-act="monEdit" data-v="'+i+'">'+ic('edit')+'Edit</button><button class="btn sm sec" data-act="monDup" data-v="'+i+'">'+ic('copy')+'Duplicate</button><button class="btn sm danger" data-act="monDel" data-v="'+i+'">'+ic('trash')+'Delete</button></div></div></div>').join('')+'</div>'};
+function monEditHTML(){const d=S.mon.edit;const sel=(f,opts,v)=>'<select class="inp" data-mo="'+f+'">'+opts.map(o=>'<option value="'+o[0]+'"'+(String(o[0])===String(v)?' selected':'')+'>'+esc(o[1])+'</option>').join('')+'</select>';
+  const seg=(f,opts,v)=>'<div class="seg" role="group">'+opts.map(o=>'<button data-act="monSeg" data-f="'+f+'" data-v="'+o[0]+'" aria-pressed="'+(String(o[0])===String(v))+'">'+esc(o[1])+'</button>').join('')+'</div>';
+  const tg=(f,on,t,s)=>'<label class="tgl"><span class="sw2"><input type="checkbox" data-mo="'+f+'"'+(on?' checked':'')+'><i></i></span><span>'+t+(s?'<small>'+s+'</small>':'')+'</span></label>';
+  const moving=d.place==='orbit'||d.place==='drift';const angN=d.place==='orbit'?'Starts at (degrees)':d.place==='drift'?'Heading (degrees)':'Angle (degrees, 0 = right, 90 = down)';
+  let h='<div class="card form moEd"><div class="ph"><h2>'+(S.mon.idx>=0?'Edit monument':'New monument')+'</h2><div class="facts"><button class="btn sm sec" data-act="monCancel">Cancel</button><button class="btn sm'+(S.mon.busy?' busy':'')+'" data-act="monSave">Save</button></div></div>';
+  h+='<div class="moSplit"><div class="moForm">';
+  h+='<label class="fld"><span>Name <small>its real name, shown when a player opens it</small></span><input class="inp" data-mo="name" maxlength="40" value="'+esc(d.name)+'"></label>';
+  h+=tg('on',d.on!==false,'Show it in the game','Off keeps it here without players seeing it.')+tg('label',d.label!==false,'Show a label under it on the map','');
+  if(d.label!==false)h+='<label class="fld"><span>Label on the map <small>leave empty to show its name; try ??? for a mystery</small></span><input class="inp" data-mo="mapLabel" maxlength="40" value="'+esc(d.mapLabel||'')+'" placeholder="'+esc(d.name||'')+'"></label>'
+    +(String(d.mapLabel||'').trim()?tg('reveal',d.reveal!==false,'Show its real name on the map once a player has opened it','Off: the map keeps showing this label.'):'');
+  h+='<label class="fld"><span>Star system</span>'+sel('sys',[[-1,'Every system']].concat(SYS.map((n,i)=>[i,n])),d.sys)+'</label>';
+  h+='<div class="fld"><span>Look</span>'+seg('look',MON_LOOKS,d.look)+'</div>';
+  h+='<div class="fld"><span>Colour</span><div class="facts" style="margin-top:4px">'+MON_COLS.map(c=>'<button class="moSw'+(d.color===c?' on':'')+'" style="--c:'+c+'" data-act="monCol" data-v="'+c+'" aria-label="'+c+'"></button>').join('')+'<input type="color" data-mo="color" value="'+esc(d.color)+'"></div></div>';
+  h+='<div class="fld"><span>Colour theme <small>its panel, buttons and the glowing close button</small></span><div class="moThs">'+MON_THEMES.map(t=>{const T=monThemeOf({theme:t[0],color:d.color});return '<button class="moTh'+((d.theme||'auto')===t[0]?' on':'')+'" data-act="monTheme" data-v="'+t[0]+'" style="--a:'+T.a+';--b:'+T.b+';--g1:'+T.g1+';--g2:'+T.g2+'" aria-pressed="'+((d.theme||'auto')===t[0])+'"><span class="moThP"><i class="moThX"></i><b></b><em></em></span><span class="moThN">'+esc(t[1])+'</span></button>'}).join('')+'</div></div>';
+  h+='<label class="fld"><span>Size · '+(+d.size).toFixed(1)+'×</span><input class="rng" type="range" min="0.5" max="2.5" step="0.1" data-mo="size" value="'+d.size+'"></label>';
+  h+='<div class="fld"><span>How it sits</span>'+seg('place',MON_PLACES,d.place)+'</div>';
+  if(d.place!=='random')h+='<label class="fld"><span>'+angN+' · '+Math.round(d.ang)+'°</span><input class="rng" type="range" min="0" max="359" step="1" data-mo="ang" value="'+d.ang+'"></label>';
+  h+='<label class="fld"><span>Distance from the star</span>'+sel('dist',[[0,'Just past the planets']].concat(Array.from({length:14},(_,i)=>[i+1,'Ring '+(i+1)+(i===0?' (nearest the star)':'')])),d.dist)+'</label>';
+  if(moving)h+='<label class="fld"><span>Speed · '+(+d.speed).toFixed(1)+'×</span><input class="rng" type="range" min="0.1" max="5" step="0.1" data-mo="speed" value="'+d.speed+'"></label>';
+  h+=tg('trail',!!d.trail,'Leaves a trail','A fading streak behind it while it moves.');
+  {const kind=d.gift&&d.offer?'both':d.gift?'gift':d.offer?'trade':'look';
+   h+='<h3 class="moH">When a player taps it</h3><div class="fld"><span>What it gives</span>'+'<div class="seg" role="group">'+[['look','Nothing, just a look'],['gift','A gift to claim'],['trade','A trade'],['both','Gift and trade']].map(o=>'<button data-act="monKind" data-v="'+o[0]+'" aria-pressed="'+(kind===o[0])+'">'+esc(o[1])+'</button>').join('')+'</div>'
+     +'<div class="sub moKS">'+({look:'Players open it and see its name (and the plaque, if it has one). Nothing to claim or buy.',gift:'Each player can claim the gift once: Dark Matter, Star Shards, keys, income, ship levels or boosters.',trade:'Players give what you set and get something back, up to a limit. In the game they tap Buy, then Confirm.',both:'A gift each player claims once, and a trade they can make up to its limit.'})[kind]+'</div></div>'}
+  h+=tg('plaqueOn',!!d.plaque,'Show a plaque','A heading, a big title, a few paragraphs and a signature line.');
+  if(d.plaque)h+='<div class="frow"><label class="fld"><span>Small heading</span><input class="inp" data-mo="p.k" maxlength="40" value="'+esc(d.plaque.k||'')+'" placeholder="Dedicated to"></label><label class="fld"><span>Title</span><input class="inp" data-mo="p.title" maxlength="60" value="'+esc(d.plaque.title||'')+'"></label></div><label class="fld"><span>Text <small>a blank line starts a new paragraph</small></span><textarea class="inp" data-mo="p.text" maxlength="800" rows="6">'+esc(d.plaque.text||'')+'</textarea></label><label class="fld"><span>Signature line</span><input class="inp" data-mo="p.sign" maxlength="80" value="'+esc(d.plaque.sign||'')+'"></label>';
+  if(d.gift)h+='<div class="moTL">The gift <small>each player claims it once</small></div>';
+  if(d.gift){const g=d.gift;h+='<div class="ggrid">'+GF.map(f=>'<label class="fld"><span>'+f.n+' <small>max '+f.max+'</small></span><input class="inp" type="number" min="0" max="'+f.max+'" step="'+(f.dec?'0.5':'1')+'" data-mo="g.'+f.k+'" value="'+(g[f.k]||'')+'" placeholder="0"></label>').join('')+'</div>'
+    +'<div class="frow"><label class="fld"><span>Booster</span><select class="inp" data-mo="bId">'+BOOST.map(b=>'<option value="'+b.id+'"'+(b.id===(S.mon.bId||'mine_rare')?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select></label><label class="fld" style="flex:0 0 110px"><span>How many</span><input class="inp" type="number" min="1" max="'+GIFT_ITEM_MAX+'" data-mo="bN" value="'+(S.mon.bN||1)+'"></label><button class="btn sm sec" data-act="monAddB" style="align-self:flex-end;margin-bottom:12px">'+ic('plus')+'Add</button></div>'
+    +(Object.keys(g.items||{}).length?'<div class="facts">'+Object.keys(g.items).map(id=>'<span class="chip gold">'+g.items[id]+'× '+esc((BOOSTMAP[id]||{n:id}).n)+' <button class="ib xs" data-act="monRmB" data-v="'+id+'" aria-label="Remove">'+ic('x')+'</button></span>').join('')+'</div>':'')}
+  if(d.offer)h+='<div class="moTL">The trade</div>';
+  if(d.offer){const o=d.offer;o.pay=o.pay||{};o.get=o.get||emptyGift();o.pay.res=o.pay.res||{};o.pay.items=o.pay.items||{};o.get.items=o.get.items||{};
+    const bsel=(f,v)=>'<select class="inp" data-mo="'+f+'">'+BOOST.map(b=>'<option value="'+b.id+'"'+(b.id===(v||'mine_rare')?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select>';
+    const chips=(obj,name,rm,cls)=>Object.keys(obj).length?'<div class="facts">'+Object.keys(obj).map(id=>'<span class="chip '+cls+'">'+obj[id]+(rm==='monRmR'?' ':'× ')+esc(name(id))+' <button class="ib xs" data-act="'+rm+'" data-v="'+id+'" aria-label="Remove">'+ic('x')+'</button></span>').join('')+'</div>':'';
+    h+='<div class="frow"><label class="fld"><span>Trade name</span><input class="inp" data-mo="o.title" maxlength="40" value="'+esc(o.title||'')+'" placeholder="Trade"></label><label class="fld" style="flex:0 0 160px"><span>Times each player <small>0 = no limit</small></span><input class="inp" type="number" min="0" max="999" data-mo="o.limit" value="'+(+o.limit||0)+'"></label></div>';
+    h+='<div class="moTL">They give</div><div class="ggrid">'+OP_F.map(f=>'<label class="fld"><span>'+f.n+'</span><input class="inp" type="number" min="0" max="'+f.max+'" step="'+(f.dec?'0.5':'1')+'" data-mo="op.'+f.k+'" value="'+(o.pay[f.k]||'')+'" placeholder="0"></label>').join('')+'</div>';
+    h+='<div class="frow"><label class="fld"><span>Ore, bar or part</span><select class="inp" data-mo="oRes">'+[['Ore',MO_RES[0]],['Bars',MO_RES[1]],['Parts',MO_RES[2]]].map(g=>'<optgroup label="'+g[0]+'">'+g[1].map(r=>'<option value="'+r[0]+'"'+(r[0]===(S.mon.oRes||'iron')?' selected':'')+'>'+esc(r[1])+'</option>').join('')+'</optgroup>').join('')+'</select></label><label class="fld" style="flex:0 0 120px"><span>How many</span><input class="inp" type="number" min="1" data-mo="oResN" value="'+(S.mon.oResN||100)+'"></label><button class="btn sm sec" data-act="monAddR" style="align-self:flex-end;margin-bottom:12px">'+ic('plus')+'Add</button></div>'+chips(o.pay.res,id=>MO_RESMAP[id]||id,'monRmR','soft');
+    h+='<div class="frow"><label class="fld"><span>Booster</span>'+bsel('oPB',S.mon.oPB)+'</label><label class="fld" style="flex:0 0 120px"><span>How many</span><input class="inp" type="number" min="1" max="999" data-mo="oPBN" value="'+(S.mon.oPBN||1)+'"></label><button class="btn sm sec" data-act="monAddPB" style="align-self:flex-end;margin-bottom:12px">'+ic('plus')+'Add</button></div>'+chips(o.pay.items,id=>(BOOSTMAP[id]||{n:id}).n,'monRmPB','soft');
+    h+='<div class="moTL">They get</div><div class="ggrid">'+GF.map(f=>'<label class="fld"><span>'+f.n+' <small>max '+f.max+'</small></span><input class="inp" type="number" min="0" max="'+f.max+'" step="'+(f.dec?'0.5':'1')+'" data-mo="og.'+f.k+'" value="'+(o.get[f.k]||'')+'" placeholder="0"></label>').join('')+'</div>';
+    h+='<div class="frow"><label class="fld"><span>Booster</span>'+bsel('oGB',S.mon.oGB)+'</label><label class="fld" style="flex:0 0 120px"><span>How many</span><input class="inp" type="number" min="1" max="'+GIFT_ITEM_MAX+'" data-mo="oGBN" value="'+(S.mon.oGBN||1)+'"></label><button class="btn sm sec" data-act="monAddGB" style="align-self:flex-end;margin-bottom:12px">'+ic('plus')+'Add</button></div>'+chips(o.get.items,id=>(BOOSTMAP[id]||{n:id}).n,'monRmGB','gold');
+    const oc=offerClean(o);h+='<div class="sub moTS">'+(oc?'Players see: give '+esc(offerPayText(oc.pay))+' → get '+esc(giftText(oc.get))+(oc.limit?' · '+oc.limit+'× each':' · no limit'):'Set something to give and something to get.')+'</div>'}
+  h+='</div><div class="moPv"><canvas id="moPv" width="320" height="320"></canvas><div class="sub">Live preview: a star system with seven planets. Tap targets and sizes match the game.</div></div></div></div>';
+  return h}
+function monCleanForSave(m,i,ids){const o={id:String(m.id||'').replace(/[^a-z0-9_-]/gi,'').slice(0,40),on:m.on!==false,name:String(m.name||'').trim().slice(0,40)||'Monument',sys:Math.max(-1,Math.min(SYS.length-1,Math.round(+m.sys||0))),
+    look:MON_LOOKS.some(x=>x[0]===m.look)?m.look:'station',color:/^#[0-9a-f]{6}$/i.test(m.color||'')?m.color:'#ffd166',size:Math.max(.5,Math.min(2.5,+m.size||1)),label:m.label!==false,mapLabel:String(m.mapLabel||'').trim().slice(0,40),reveal:m.reveal!==false,
+    place:MON_PLACES.some(x=>x[0]===m.place)?m.place:'fixed',ang:Math.round(((+m.ang||0)%360+360)%360),dist:Math.max(0,Math.min(14,Math.round(+m.dist||0))),speed:Math.max(.1,Math.min(5,+m.speed||1)),trail:!!m.trail,plaque:null,gift:null,offer:null,theme:MON_THEMES.some(x=>x[0]===m.theme)?m.theme:'auto'};
+  if(!o.id||ids.has(o.id))o.id=(o.name.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,30)||'mon')+'_'+Date.now().toString(36).slice(-4)+i;ids.add(o.id);
+  if(m.plaque&&(m.plaque.title||m.plaque.text))o.plaque={k:String(m.plaque.k||'').slice(0,40),title:String(m.plaque.title||'').slice(0,60),text:String(m.plaque.text||'').slice(0,800),sign:String(m.plaque.sign||'').slice(0,80)};
+  if(m.gift){const g=giftClean(m.gift);if(giftText(g))o.gift=g}if(m.offer){const of=offerClean(m.offer);if(of)o.offer=of}return o}
+function monSaveList(L,msg){S.mon.busy=true;render();const ids=new Set();const clean=L.map((m,i)=>monCleanForSave(m,i,ids));
+  return DB.set('config/mon',{list:clean,up:DB.serverTime()}).then(()=>{S.mon.list=clean;S.mon.busy=false;S.mon.edit=null;S.mon.idx=-1;toast(msg||'Saved: players see it within a minute');render()},e=>{S.mon.busy=false;render();toast(fsErr(e),'err')})}
+function monEditStart(m,idx){S.mon.edit=JSON.parse(JSON.stringify(m));S.mon.idx=idx;render();window.scrollTo(0,0)}
+Object.assign(ACT,{
+  monNew:()=>monEditStart(monTemplate(''),-1),monTpl:el=>monEditStart(monTemplate(el.dataset.v),-1),
+  monEdit:el=>monEditStart(S.mon.list[+el.dataset.v],+el.dataset.v),monDup:el=>{const m=JSON.parse(JSON.stringify(S.mon.list[+el.dataset.v]));m.id='';m.name=(m.name+' copy').slice(0,40);monEditStart(m,-1)},
+  monDel:async el=>{const i=+el.dataset.v,m=S.mon.list[i];if(!m)return;if(!await ask({title:'Delete '+m.name+'?',body:'It disappears from every player\'s galaxy. Gifts already claimed stay claimed.',ok:'Delete',danger:true}))return;const L=S.mon.list.slice();L.splice(i,1);return monSaveList(L,'Deleted')},
+  monCancel:()=>{S.mon.edit=null;S.mon.idx=-1;render()},
+  monSave:()=>{const d=S.mon.edit;if(!d)return;if(!String(d.name||'').trim()){toast('Give it a name','err');return}if(d.gift){const g=giftClean(d.gift);for(const f of GF){if(g[f.k]<0||g[f.k]>f.max){toast(f.n+': 0 to '+f.max,'err');return}}}
+    if(d.offer&&!offerClean(d.offer)){toast('A trade needs something to give and something to get','err');return}
+    const L=S.mon.list.slice();if(S.mon.idx>=0)L[S.mon.idx]=d;else{if(L.length>=40){toast('At most 40 monuments','err');return}L.push(d)}return monSaveList(L,d.on!==false?'Saved: players see it within a minute':'Saved (off: players don\'t see it)')},
+  monSeg:el=>{const d=S.mon.edit;if(!d)return;d[el.dataset.f]=el.dataset.v;render()},
+  monCol:el=>{if(S.mon.edit){S.mon.edit.color=el.dataset.v;render()}},
+  monTheme:el=>{if(S.mon.edit){S.mon.edit.theme=el.dataset.v;render()}},
+  monKind:el=>{const d=S.mon.edit;if(!d)return;const k=el.dataset.v;const g=k==='gift'||k==='both',o=k==='trade'||k==='both';d.gift=g?(d.gift||Object.assign(emptyGift(),{dm:10})):null;d.offer=o?(d.offer||emptyOffer()):null;render()},
+  monAddB:()=>{const d=S.mon.edit;if(!d||!d.gift)return;const n=Math.trunc(+S.mon.bN||1);if(n<1||n>GIFT_ITEM_MAX){toast('1 to '+GIFT_ITEM_MAX,'err');return}const id=S.mon.bId||'mine_rare';d.gift.items=d.gift.items||{};d.gift.items[id]=Math.min(GIFT_ITEM_MAX,(d.gift.items[id]||0)+n);render()},
+  monRmB:el=>{const d=S.mon.edit;if(d&&d.gift&&d.gift.items)delete d.gift.items[el.dataset.v];render()},
+  monAddR:()=>{const o=S.mon.edit&&S.mon.edit.offer;if(!o)return;const n=Math.trunc(+S.mon.oResN||100);if(!(n>=1)){toast('At least 1','err');return}const id=S.mon.oRes||'iron';o.pay.res=o.pay.res||{};o.pay.res[id]=(o.pay.res[id]||0)+n;render()},
+  monRmR:el=>{const o=S.mon.edit&&S.mon.edit.offer;if(o&&o.pay.res)delete o.pay.res[el.dataset.v];render()},
+  monAddPB:()=>{const o=S.mon.edit&&S.mon.edit.offer;if(!o)return;const n=Math.trunc(+S.mon.oPBN||1);if(n<1||n>999){toast('1 to 999','err');return}const id=S.mon.oPB||'mine_rare';o.pay.items=o.pay.items||{};o.pay.items[id]=Math.min(999,(o.pay.items[id]||0)+n);render()},
+  monRmPB:el=>{const o=S.mon.edit&&S.mon.edit.offer;if(o&&o.pay.items)delete o.pay.items[el.dataset.v];render()},
+  monAddGB:()=>{const o=S.mon.edit&&S.mon.edit.offer;if(!o)return;const n=Math.trunc(+S.mon.oGBN||1);if(n<1||n>GIFT_ITEM_MAX){toast('1 to '+GIFT_ITEM_MAX,'err');return}const id=S.mon.oGB||'mine_rare';o.get.items=o.get.items||{};o.get.items[id]=Math.min(GIFT_ITEM_MAX,(o.get.items[id]||0)+n);render()},
+  monRmGB:el=>{const o=S.mon.edit&&S.mon.edit.offer;if(o&&o.get.items)delete o.get.items[el.dataset.v];render()}});
+function monField(e){const el=e.target;if(!el.dataset)return;
+  if(el.dataset.moOn!=null&&e.type==='change'){const i=+el.dataset.moOn;const L=S.mon.list.map(x=>Object.assign({},x));if(!L[i])return;L[i].on=el.checked;monSaveList(L,el.checked?L[i].name+' is on: players see it within a minute':L[i].name+' is off');return}
+  const f=el.dataset.mo,d=S.mon.edit;if(!f||!d)return;
+  if(f==='bId'){S.mon.bId=el.value;return}if(f==='bN'){S.mon.bN=el.value;return}
+  if(f==='oRes'||f==='oResN'||f==='oPB'||f==='oPBN'||f==='oGB'||f==='oGBN'){S.mon[f]=el.value;return}
+  if(f==='offerOn'){if(e.type==='change'){d.offer=el.checked?emptyOffer():null;render()}return}
+  if(d.offer&&(f==='o.title'||f==='o.limit')){d.offer[f.slice(2)]=f==='o.limit'?(el.value===''?0:+el.value):el.value;monTS();return}
+  if(d.offer&&/^op\./.test(f)){d.offer.pay[f.slice(3)]=el.value===''?0:+el.value;monTS();return}
+  if(d.offer&&/^og\./.test(f)){d.offer.get[f.slice(3)]=el.value===''?0:+el.value;monTS();return}
+  if(f==='on'||f==='label'||f==='trail'||f==='reveal'){if(e.type==='change'){d[f]=el.checked;if(f==='label')render()}return}
+  if(f==='mapLabel'){d.mapLabel=el.value;if(e.type==='change'&&!!String(el.value).trim()!==!!document.querySelector('[data-mo=reveal]'))render();return}
+  if(f==='plaqueOn'){if(e.type==='change'){d.plaque=el.checked?{k:'',title:d.name,text:'',sign:''}:null;render()}return}
+  if(f==='giftOn'){if(e.type==='change'){d.gift=el.checked?emptyGift():null;render()}return}
+  if(/^p\./.test(f)){d.plaque=d.plaque||{};d.plaque[f.slice(2)]=el.value;return}
+  if(/^g\./.test(f)){d.gift=d.gift||emptyGift();d.gift[f.slice(2)]=el.value===''?0:+el.value;return}
+  if(f==='sys'||f==='dist'){d[f]=+el.value;return}
+  if(f==='size'||f==='ang'||f==='speed'){d[f]=+el.value;const lab=el.closest('.fld')&&el.closest('.fld').querySelector('span');if(lab)lab.textContent=lab.textContent.replace(/·.*$/,'· '+(f==='ang'?Math.round(d[f])+'°':(+d[f]).toFixed(1)+'×'));return}
+  if(f==='color'){d.color=el.value;return}
+  if(f==='name'){d.name=el.value;return}}
+document.addEventListener('input',monField);document.addEventListener('change',monField);
+
+/* the looks, drawn the same way as in the game */
+function moRgb(hex){const v=parseInt(String(hex).slice(1),16)||0xffd166;return [(v>>16)&255,(v>>8)&255,v&255].join(',')}
+function moGlow(c,k,rgb,a){const g=c.createRadialGradient(0,0,0,0,0,28*k);g.addColorStop(0,'rgba('+rgb+','+(.34*a)+')');g.addColorStop(.5,'rgba('+rgb+','+(.1*a)+')');g.addColorStop(1,'rgba('+rgb+',0)');c.fillStyle=g;c.beginPath();c.arc(0,0,28*k,0,7);c.fill()}
+const MO_DRAW={
+  station(c,k,m,ts,rgb){moGlow(c,k,rgb,1);c.fillStyle='#8f9bc0';c.fillRect(-19*k,-.8*k,38*k,1.6*k);
+    for(const s of [-1,1]){const wx=s>0?8*k:-20*k;c.fillStyle='#1c3a86';c.fillRect(wx,-4*k,12*k,8*k);c.strokeStyle='#76adff';c.lineWidth=Math.max(.8,.7*k);c.strokeRect(wx,-4*k,12*k,8*k)}
+    const tilt=.38+.08*Math.sin(ts/3000);c.lineWidth=Math.max(1.2,1.5*k);c.strokeStyle='rgba('+rgb+',.55)';c.beginPath();c.ellipse(0,0,11*k,11*k*tilt,0,Math.PI,2*Math.PI);c.stroke();
+    const hg=c.createRadialGradient(-1.6*k,-1.8*k,.5,0,0,5.6*k);hg.addColorStop(0,'#fff');hg.addColorStop(.45,'#c9d3ee');hg.addColorStop(1,'#56618a');c.fillStyle=hg;c.beginPath();c.arc(0,0,5.4*k,0,7);c.fill();
+    c.strokeStyle=m.color;c.beginPath();c.ellipse(0,0,11*k,11*k*tilt,0,0,Math.PI);c.stroke();const b=(Math.sin(ts/320)+1)/2;c.fillStyle='rgba(255,96,96,'+(.35+.65*b)+')';c.beginPath();c.arc(0,-9.5*k,1.6*k,0,7);c.fill()},
+  beacon(c,k,m,ts,rgb){moGlow(c,k,rgb,1.2);const p=(ts/1600)%1;c.strokeStyle='rgba('+rgb+','+(.7*(1-p))+')';c.lineWidth=Math.max(1,1.4*k);c.beginPath();c.ellipse(0,7*k,(5+p*16)*k,(1.6+p*5)*k,0,0,7);c.stroke();
+    c.fillStyle='#fff';c.beginPath();c.moveTo(0,-11*k);c.lineTo(4*k,0);c.lineTo(0,7*k);c.lineTo(-4*k,0);c.closePath();c.fill();c.fillStyle=m.color;c.globalAlpha=.75;c.beginPath();c.moveTo(0,-11*k);c.lineTo(4*k,0);c.lineTo(0,0);c.closePath();c.fill();c.globalAlpha=1},
+  obelisk(c,k,m,ts,rgb){moGlow(c,k,rgb,.8);c.fillStyle='#10142c';c.strokeStyle=m.color;c.lineWidth=Math.max(1,1.2*k);c.beginPath();c.moveTo(-3*k,-15*k);c.lineTo(0,-19*k);c.lineTo(3*k,-15*k);c.lineTo(5*k,10*k);c.lineTo(-5*k,10*k);c.closePath();c.fill();c.stroke();
+    c.strokeStyle='rgba('+rgb+','+(.45+.45*Math.sin(ts/700))+')';c.beginPath();for(const y of [-9,-4,1,6]){c.moveTo(-1.6*k,y*k);c.lineTo(1.6*k,y*k)}c.moveTo(0,-12*k);c.lineTo(0,8*k);c.stroke()},
+  asteroid(c,k,m,ts,rgb){moGlow(c,k,rgb,.6);c.rotate(ts/4000);c.fillStyle='#6f6a78';c.strokeStyle='rgba('+rgb+',.85)';c.lineWidth=Math.max(1,1.1*k);c.beginPath();
+    for(let i=0;i<9;i++){const a=i/9*Math.PI*2,r=(8+3.2*Math.sin(i*2.7+10))*k;i?c.lineTo(Math.cos(a)*r,Math.sin(a)*r):c.moveTo(Math.cos(a)*r,Math.sin(a)*r)}c.closePath();c.fill();c.stroke()},
+  comet(c,k,m,ts,rgb,dir){c.save();c.rotate((dir==null?-Math.PI*.75:dir)+Math.PI);const g=c.createLinearGradient(0,0,34*k,0);g.addColorStop(0,'rgba('+rgb+',.75)');g.addColorStop(1,'rgba('+rgb+',0)');c.fillStyle=g;c.beginPath();c.moveTo(0,-4.5*k);c.quadraticCurveTo(18*k,-3*k,36*k,0);c.quadraticCurveTo(18*k,3*k,0,4.5*k);c.closePath();c.fill();c.restore();
+    const h=c.createRadialGradient(0,0,0,0,0,7*k);h.addColorStop(0,'#fff');h.addColorStop(.35,'rgba('+rgb+',.95)');h.addColorStop(1,'rgba('+rgb+',0)');c.fillStyle=h;c.beginPath();c.arc(0,0,7*k,0,7);c.fill()}};
+function moThumbs(){$$('canvas.moThumb').forEach(cv=>{const m=S.mon.list[+cv.dataset.mi];if(!m)return;const d=window.devicePixelRatio||1;if(cv.width!==120*d){cv.width=120*d;cv.height=84*d;cv.style.width='120px';cv.style.height='84px'}
+  const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,120,84);c.translate(60,40);try{(MO_DRAW[m.look]||MO_DRAW.station)(c,1.5*Math.min(1.4,+m.size||1),m,performance.now(),moRgb(m.color))}catch(e){}})}
+// the editor's preview: a small star system (orbits at the game's spacing), the monument where the game puts it
+const MOPV={trail:[],last:''};
+function moPvFrame(ts){const cv=$('#moPv'),d=S.mon.edit;if(!cv||!d)return;const D=window.devicePixelRatio||1,Wd=cv.clientWidth||320;if(cv.width!==Math.round(Wd*D)){cv.width=Math.round(Wd*D);cv.height=Math.round(Wd*D)}
+  const c=cv.getContext('2d');c.setTransform(D,0,0,D,0,0);c.clearRect(0,0,Wd,Wd);c.fillStyle='#070b19';c.fillRect(0,0,Wd,Wd);
+  const n=7,orbitR=k=>96+k*34,outer=orbitR(n-1)+15+(n-1)*.9+72,R=d.dist>0?orbitR(d.dist-1)+17:outer;const z=Wd/2/Math.max(outer+40,R+40);const cx=Wd/2,cy=Wd/2;
+  c.strokeStyle='rgba(142,154,200,.14)';for(let i=0;i<n;i++){c.beginPath();c.arc(cx,cy,orbitR(i)*z,0,7);c.stroke()}
+  const g=c.createRadialGradient(cx,cy,2,cx,cy,30*z*2.4);g.addColorStop(0,'#ffd166');g.addColorStop(.3,'#ffd16677');g.addColorStop(1,'#ffd16600');c.fillStyle=g;c.beginPath();c.arc(cx,cy,30*z*2.4,0,7);c.fill();c.fillStyle='#ffd166';c.beginPath();c.arc(cx,cy,22*z,0,7);c.fill();
+  for(let i=0;i<n;i++){const a=ts/1000*(.12/(1+i*.4))+i*1.7;c.fillStyle='#8a93b8';c.beginPath();c.arc(cx+Math.cos(a)*orbitR(i)*z,cy+Math.sin(a)*orbitR(i)*z,Math.max(2,(15+i*.9)*z),0,7);c.fill()}
+  const Dg=Math.PI/180;let x,y,vis=true;
+  if(d.place==='random'){const a=300*Dg;x=Math.cos(a)*R;y=Math.sin(a)*R}
+  else if(d.place==='orbit'){const a=(+d.ang+ts/1000*(+d.speed||1)*1.2)*Dg;x=Math.cos(a)*R;y=Math.sin(a)*R}
+  else if(d.place==='drift'){const per=150/(+d.speed||1);const ph=((ts/1000)%per)/per;const k=ph/.7;if(k>1)vis=false;else{const far=R+260,a=+d.ang*Dg,ux=Math.cos(a),uy=Math.sin(a),px=-uy,py=ux,off=R*.45;x=-ux*far+px*off+ux*2*far*k;y=-uy*far+py*off+uy*2*far*k}}
+  else{const a=+d.ang*Dg;x=Math.cos(a)*R;y=Math.sin(a)*R}
+  const key=d.place+d.ang+d.speed+d.dist;if(key!==MOPV.last){MOPV.last=key;MOPV.trail=[]}
+  if(!vis){MOPV.trail=[];return}let dir=null;const T=MOPV.trail;const l=T[T.length-1];if(!l||Math.hypot(l[0]-x,l[1]-y)>3){T.push([x,y]);if(T.length>26)T.shift()}if(T.length>1){const a=T[T.length-2];dir=Math.atan2(y-a[1],x-a[0])}
+  const rgb=moRgb(d.color),k=Math.max(.8,Math.min(2.4,z*1.7))*(+d.size||1);
+  if(d.trail&&T.length>2){c.lineCap='round';for(let i=1;i<T.length;i++){const f=i/T.length;c.strokeStyle='rgba('+rgb+','+(.55*f)+')';c.lineWidth=Math.max(1,3.2*k*f);c.beginPath();c.moveTo(cx+T[i-1][0]*z,cy+T[i-1][1]*z);c.lineTo(cx+T[i][0]*z,cy+T[i][1]*z);c.stroke()}}
+  c.save();c.translate(cx+x*z,cy+y*z);try{(MO_DRAW[d.look]||MO_DRAW.station)(c,k,d,ts,rgb,dir)}catch(e){}c.restore();
+  if(d.label!==false){c.font='600 11px system-ui,sans-serif';c.textAlign='center';c.textBaseline='top';c.fillStyle='rgb('+rgb+')';c.fillText(d.name||'',cx+x*z,cy+y*z+16*k)}}
+(function loop(ts){requestAnimationFrame(loop);if(document.hidden||S.tab!=='monuments')return;if(S.mon.edit)moPvFrame(ts);else if(!MOPV.th||ts-MOPV.th>120){MOPV.th=ts;moThumbs()}})(0);
+
+/* ---------- THE REQUIRED UPDATE (Overview) ---------- */
+function verPlayers(min){if(!min)return null;const last={};(S.plays||[]).forEach(p=>{if(!p.iid)return;const o=last[p.iid];if(!o||p.day>o.day)last[p.iid]=p});const wk=addDays(dstr(Date.now()),-7);let n=0,old=0;
+  Object.values(last).forEach(p=>{if(p.day<wk)return;n++;if(verLt(p.v||'0.0.0',min))old++});return {n,old}}
+function verLt(a,b){const x=String(a).split('.').map(n=>parseInt(n,10)||0),y=String(b).split('.').map(n=>parseInt(n,10)||0);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)<(y[i]||0)}return false}
+function verCardHTML(){const st=secState('ver');let h='<div class="card" id="verCard"><div class="ph"><div><h2>Required update</h2><div class="sub">Games older than this version can\'t be played until they update: they show “Update to keep playing” with a Google Play button. Games 1.22 and newer have this screen (1.21 players get your update message instead).</div></div></div>';
+  if(st)return h+st+'</div>';const v=S.ver;const P=verPlayers(v.min);
+  h+='<div class="facts" style="margin-top:6px">'+(v.min?'<span class="chip live st">On: '+esc(v.min)+' or newer required</span>':'<span class="chip soft">Off: any version can play</span>')+(P&&P.n?'<span class="sub">'+P.old+' of '+P.n+' players this week are on an older version</span>':'')+'</div>';
+  h+='<div class="frow" style="margin-top:12px"><label class="fld"><span>Oldest version allowed</span><input class="inp mono" id="ver-min" placeholder="1.22.0" value="'+esc(v.min)+'"></label><label class="fld" style="flex:2 1 260px"><span>Extra line on the screen <small>optional</small></span><input class="inp" id="ver-msg" maxlength="200" placeholder="This update fixes saving on some phones." value="'+esc(v.msg)+'"></label></div>';
+  return h+'<div class="facts"><button class="btn" data-act="verSave">'+ic('up')+'Require it</button>'+(v.min?'<button class="btn sec" data-act="verOff">Turn off</button>':'')+'</div></div>'}
+{const o0=VIEWS.overview;VIEWS.overview=()=>{const h=o0();return h.replace(/(<div class="pagehead">[\s\S]*?<\/div><\/div>)/,'$1'+verCardHTML())}}
+Object.assign(ACT,{
+  verSave:async()=>{const min=($('#ver-min').value||'').trim(),msg=($('#ver-msg').value||'').trim();if(!/^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(min)){toast('Use a version like 1.22.0','err');return}
+    const P=verPlayers(min);if(!await ask({title:'Require '+min+'?',body:'Every game older than '+min+' stops at “Update to keep playing” until it updates.'+(P&&P.old?' Right now '+P.old+' of this week\'s '+P.n+' players are on an older version.':'')+' Only do this once '+min+' is live on Google Play for everyone (a staged rollout or a review still in progress would leave some players stuck).',ok:'Require '+min}))return;
+    return DB.set('config/ver',{min,msg,up:DB.serverTime()}).then(()=>{S.ver={min,msg};toast(min+' is now required');render()})},
+  verOff:async()=>{if(!await ask({title:'Turn off the required update?',body:'Any version can play again.',ok:'Turn off'}))return;return DB.set('config/ver',{min:'',msg:'',up:DB.serverTime()}).then(()=>{S.ver={min:'',msg:''};toast('Turned off');render()})}});
+
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act],[data-tab],[data-range]');if(!t||t.disabled||t.closest('#modal'))return;
   if(t.dataset.tab){go(t.dataset.tab);return}
   if(t.dataset.range){S.range=+t.dataset.range;render();return}
@@ -1825,6 +2148,127 @@ window.addEventListener('beforeunload',e=>{if(S.draft&&S.draft.dirty){e.preventD
 /* keep relative times fresh without stealing focus */
 setInterval(()=>{if(document.hidden||!S.admin||!$('#modal').hidden)return;const a=document.activeElement;if(a&&a.matches&&a.matches('input,textarea,select'))return;if(S.tab==='messages'&&S.draft){updateLive();return}render()},30000);
 bindCrop();
+
+/* ---------- Tags (game 1.22): config/tags {defs:[{id,n,c,nm}], who:{uid:{t:[ids],c}}}. A tag shows next to a player's name on the
+   leaderboards and on their profile; a tag with "Colours the name" colours the name, with a glow. A player can also get a name
+   colour of their own, which wins over their tags'. Everyone reads the doc; only this account (or the game, signed in as the
+   developer) writes it. Veteran is built into the game, not a tag here. ---------- */
+TABS.splice(TABS.findIndex(x=>x[0]==='monuments')+1,0,['tags','Tags','tag']);
+LBL.tags='tags';
+const TAG_PAL=['#ff5d8f','#ff8a3d','#ffd166','#4ade80','#38e1c6','#3aa7ff','#c084fc','#ffffff'];
+S.tags={defs:[],who:{},edit:null,busy:false,add:''};
+const tagHex=c=>typeof c==='string'&&/^#[0-9a-fA-F]{6}$/.test(c)?c.toLowerCase():'';
+LOAD.tags=()=>DB.get('config/tags').then(d=>{S.tags.defs=d&&Array.isArray(d.defs)?d.defs.filter(x=>x&&x.id&&x.n):[];S.tags.who=d&&d.who&&typeof d.who==='object'?d.who:{}});
+function tagSaveAll(defs,who,msg){S.tags.busy=true;render();const W={};for(const u in who){const w=who[u]||{};const t=(w.t||[]).filter(id=>defs.some(d=>d.id===id));const c=tagHex(w.c);if(t.length||c)W[u]={t,c}}
+  return DB.set('config/tags',{defs,who:W,up:DB.serverTime()}).then(()=>{S.tags.defs=defs;S.tags.who=W;S.tags.busy=false;S.tags.edit=null;toast(msg||'Saved: players see it within a minute');render()},e=>{S.tags.busy=false;render();toast(fsErr(e),'err')})}
+function tagChipHTML(d){return '<span class="ttag" style="--tc:'+esc(d.c)+'">'+esc(d.n)+'</span>'}
+function tagNameHTML(n,c){return '<span class="tname'+(c?' on':'')+'"'+(c?' style="--nc:'+esc(c)+'"':'')+'>'+esc(n)+'</span>'}
+function tagWhoName(u){const r=S.dn.find(x=>x.id===u);if(r&&r.data&&r.data.name)return r.data.name;const l=(S.lb||[]).find(x=>x.id===u);if(l&&l.data&&l.data.dn)return l.data.dn;return ''}
+function tagNameColor(u){const w=S.tags.who[u];if(!w)return '';if(tagHex(w.c))return tagHex(w.c);const d=(w.t||[]).map(id=>S.tags.defs.find(x=>x.id===id)).find(x=>x&&x.nm);return d?d.c:''}
+function tagEditHTML(){const d=S.tags.edit;return '<div class="card"><div class="ph"><h2>'+(d.i>=0?'Edit tag':'New tag')+'</h2></div><div class="tgEd">'+
+  '<label class="fl"><span>Name</span><input class="inp" maxlength="18" data-tg="n" value="'+esc(d.n||'')+'" placeholder="Tester, Founder, Champion…"></label>'+
+  '<div class="fl"><span>Colour</span><div class="tgSw">'+TAG_PAL.map(c=>'<button class="tgC'+(d.c===c?' on':'')+'" style="--c:'+c+'" data-act="tagCol" data-v="'+c+'" aria-label="'+c+'"></button>').join('')+'<input type="color" class="tgPick" data-tg="c" value="'+esc(d.c||'#38e1c6')+'" aria-label="Any colour"></div></div>'+
+  '<label class="tgl"><span class="sw2"><input type="checkbox" data-tg="nm"'+(d.nm?' checked':'')+'><i></i></span><span>Colours the player\'s name on the leaderboards, with a glow</span></label>'+
+  '<div class="tgPrev"><span class="sub">Preview</span><div class="tgRow">'+tagNameHTML('Polar Mantis 83',d.nm?d.c:'')+tagChipHTML({n:d.n||'Tag',c:d.c||'#38e1c6'})+'</div></div>'+
+  '<div class="facts"><button class="btn" data-act="tagSave"'+(S.tags.busy?' disabled':'')+'>'+ic('up')+'Save</button><button class="btn sec" data-act="tagCancel">Cancel</button></div></div></div>'}
+VIEWS.tags=()=>{let h=head('Tags','Labels next to a player\'s name on the leaderboards and on their profile in the game (1.22 and newer). A tag can colour the name, with a glow. Veteran is built into the game. Give tags to players from their profile (Players), or tap a player\'s name in the game while signed in as the developer.');
+  const st=secState('tags');if(st)return h+st;if(S.tags.edit)return h+tagEditHTML();const T=S.tags;
+  h+='<div class="facts" style="margin-bottom:14px"><button class="btn" data-act="tagNew">'+ic('plus')+'New tag</button></div>';
+  h+='<div class="card"><div class="ph"><h2>Tags</h2><span class="sub">'+T.defs.length+' of 40</span></div>'+(T.defs.length?'<div class="tgList">'+T.defs.map((d,i)=>{const n=Object.values(T.who).filter(w=>(w.t||[]).includes(d.id)).length;
+    return '<div class="tgItem"><div class="tgRow">'+tagChipHTML(d)+(d.nm?'<span class="chip soft">colours the name</span>':'')+'<span class="sub">'+n+' player'+(n===1?'':'s')+'</span></div><div class="facts"><button class="btn sm sec" data-act="tagEdit" data-v="'+i+'">'+ic('edit')+'Edit</button><button class="btn sm danger" data-act="tagDel" data-v="'+i+'">'+ic('trash')+'Delete</button></div></div>'}).join('')+'</div>':'<div class="empty">No tags yet.</div>')+'</div>';
+  const us=Object.keys(T.who);
+  h+='<div class="card"><div class="ph"><h2>Players with tags or a name colour</h2><span class="sub">'+us.length+'</span></div>'+
+    '<div class="tgAdd"><input class="inp mono" data-tg="add" placeholder="Player uid" value="'+esc(T.add)+'"><button class="btn sec" data-act="tagAddUid">'+ic('user')+'Open their profile</button></div>'+
+    (us.length?'<div class="tgList">'+us.map(u=>{const w=T.who[u]||{};const nm=tagWhoName(u);const c=tagNameColor(u);
+      return '<div class="tgItem"><div class="tgRow">'+tagNameHTML(nm||u.slice(0,10)+'…',c)+(w.t||[]).map(id=>{const d=T.defs.find(x=>x.id===id);return d?tagChipHTML(d):''}).join('')+(tagHex(w.c)?'<span class="chip soft">own colour</span>':'')+'</div><div class="facts"><button class="btn sm sec" data-act="profOpen" data-v="'+esc(u)+'">'+ic('user')+'Profile</button><button class="btn sm danger" data-act="tagWhoClear" data-v="'+esc(u)+'">'+ic('x')+'Remove all</button></div></div>'}).join('')+'</div>':'<div class="empty">Nobody yet.</div>')+'</div>';
+  return h};
+// a player's profile (Players): their tags and name colour
+function tagProfCard(u){const T=S.tags;const w=T.who[u]||{t:[],c:''};const own=tagHex(w.c);const nm=(S.prof&&S.prof.dn&&S.prof.dn.name)||tagWhoName(u)||'This player';
+  return '<div class="card" id="tagProf"><div class="ph"><h2>'+ic('tag')+' Tags and name colour</h2><div class="tgRow">'+tagNameHTML(nm,tagNameColor(u))+'</div></div>'+
+    (T.defs.length?'<div class="tgTP">'+T.defs.map(d=>{const on=(w.t||[]).includes(d.id);return '<button class="tgT'+(on?' on':'')+'" style="--tc:'+esc(d.c)+'" data-act="tagWho" data-v="'+esc(u)+'" data-t="'+esc(d.id)+'">'+(on?'✓ ':'+ ')+esc(d.n)+'</button>'}).join('')+'</div>':'<div class="sub">No tags yet: make them in the Tags tab.</div>')+
+    '<div class="fl" style="margin-top:12px"><span>Name colour of their own (wins over their tags)</span><div class="tgSw">'+TAG_PAL.map(c=>'<button class="tgC'+(own===c?' on':'')+'" style="--c:'+c+'" data-act="tagWhoCol" data-v="'+esc(u)+'" data-c="'+c+'" aria-label="'+c+'"></button>').join('')+
+    '<input type="color" class="tgPick" data-tg="who" data-u="'+esc(u)+'" value="'+esc(own||'#38e1c6')+'" aria-label="Any colour"><button class="btn sm sec" data-act="tagWhoCol" data-v="'+esc(u)+'" data-c=""'+(own?'':' disabled')+'>None</button></div></div></div>'}
+{const p0=profHTML;profHTML=function(){const h=p0.apply(this,arguments);try{const P=S.prof;if(!P||!P.uid||P.loading)return h;return h+tagProfCard(P.uid)}catch(e){console.error(e);return h}}}
+function tagWhoSet(u,fn,msg){const T=S.tags;const who=JSON.parse(JSON.stringify(T.who));const w=who[u]||{t:[],c:''};fn(w);who[u]=w;return tagSaveAll(T.defs,who,msg)}
+Object.assign(ACT,{
+  tagNew:()=>{S.tags.edit={i:-1,n:'',c:TAG_PAL[0],nm:true};render()},
+  tagEdit:el=>{const i=+el.dataset.v,d=S.tags.defs[i];if(!d)return;S.tags.edit=Object.assign({i},d);render()},
+  tagCancel:()=>{S.tags.edit=null;render()},
+  tagCol:el=>{if(!S.tags.edit)return;S.tags.edit.c=el.dataset.v;render()},
+  tagSave:()=>{const d=S.tags.edit;if(!d)return;const n=String(d.n||'').trim().slice(0,18);if(!n){toast('Give the tag a name','err');return}const c=tagHex(d.c)||'#38e1c6';const defs=S.tags.defs.slice();
+    if(d.i>=0&&defs[d.i])defs[d.i]=Object.assign({},defs[d.i],{n,c,nm:!!d.nm});else{if(defs.length>=40){toast('40 tags at most','err');return}defs.push({id:n.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,14)+'_'+Date.now().toString(36).slice(-4),n,c,nm:!!d.nm})}
+    return tagSaveAll(defs,S.tags.who,'Saved “'+n+'”')},
+  tagDel:async el=>{const i=+el.dataset.v,d=S.tags.defs[i];if(!d)return;if(!await ask({title:'Delete '+d.n+'?',body:'Every player loses it. Their own name colours stay.',ok:'Delete',danger:true}))return;const defs=S.tags.defs.slice();defs.splice(i,1);return tagSaveAll(defs,S.tags.who,'Deleted')},
+  tagWho:el=>{const u=el.dataset.v,id=el.dataset.t;return tagWhoSet(u,w=>{w.t=(w.t||[]).slice();const k=w.t.indexOf(id);if(k>=0)w.t.splice(k,1);else w.t.push(id)})},
+  tagWhoCol:el=>{const u=el.dataset.v;return tagWhoSet(u,w=>{w.c=tagHex(el.dataset.c)})},
+  tagWhoClear:async el=>{const u=el.dataset.v;if(!await ask({title:'Remove their tags and name colour?',ok:'Remove',danger:true}))return;const who=JSON.parse(JSON.stringify(S.tags.who));delete who[u];return tagSaveAll(S.tags.defs,who,'Removed')},
+  tagAddUid:()=>{const u=String(S.tags.add||'').trim();if(!/^[A-Za-z0-9_-]{6,128}$/.test(u)){toast('Paste a player uid','err');return}profOpen(u)}});
+function tagField(e){const el=e.target,f=el.dataset&&el.dataset.tg;if(!f)return;
+  if(f==='add'){S.tags.add=el.value;return}
+  if(f==='who'){if(e.type!=='change')return;const u=el.dataset.u;const c=tagHex(el.value);if(c)tagWhoSet(u,w=>{w.c=c});return}
+  const d=S.tags.edit;if(!d)return;
+  if(f==='n'){d.n=el.value;const p=$('.tgPrev .ttag');if(p)p.textContent=el.value||'Tag';return}
+  if(f==='c'){d.c=tagHex(el.value)||d.c;if(e.type==='change')render();return}
+  if(f==='nm'){d.nm=el.checked;render()}}
+document.addEventListener('input',tagField);document.addEventListener('change',tagField);
+// preview data: one tag on one player
+{const l0=LOAD.tags;LOAD.tags=()=>{if(DB.mode!=='mock'||DB.dump()['config/tags'])return l0();return DB.query('users',{limit:1}).then(r=>DB.set('config/tags',{defs:[{id:'tester_a1',n:'Tester',c:'#ff5d8f',nm:true},{id:'founder_b2',n:'Founder',c:'#ffd166',nm:false}],who:r[0]?{[r[0].id]:{t:['tester_a1'],c:''}}:{},up:Date.now()})).then(l0)}}
+(function(){const st=document.createElement('style');st.textContent=`
+.ttag{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:7px;font:800 10px/1 inherit;letter-spacing:.09em;text-transform:uppercase;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,#0a0f22);border:1px solid color-mix(in srgb,var(--tc) 50%,transparent);box-shadow:0 0 8px color-mix(in srgb,var(--tc) 18%,transparent);white-space:nowrap}
+.tname{font-weight:700;font-size:15px}.tname.on{color:var(--nc);text-shadow:0 0 8px color-mix(in srgb,var(--nc) 75%,transparent),0 0 18px color-mix(in srgb,var(--nc) 40%,transparent)}
+.tgRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tgList{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.tgItem{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.tgEd{display:flex;flex-direction:column;gap:14px;margin-top:10px;max-width:520px}
+.fl{display:flex;flex-direction:column;gap:6px}.fl>span{font-size:12.5px;color:#9aa6c9;font-weight:700}
+.tgSw{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tgC{width:30px;height:30px;border-radius:50%;background:var(--c);border:2px solid #0b1020;box-shadow:0 0 0 1px var(--line2);cursor:pointer;padding:0}
+.tgC.on{box-shadow:0 0 0 2px #fff,0 0 12px var(--c)}
+.tgPick{width:40px;height:32px;padding:0;border:1px solid var(--line2);border-radius:8px;background:none;cursor:pointer}
+.tgPrev{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:12px;background:#070b19;border:1px solid var(--line)}
+.tgAdd{display:flex;gap:8px;margin-top:10px}.tgAdd .inp{flex:1;min-width:0}
+.tgPick+.btn{margin-left:2px}
+.tgT{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:10px;font-weight:800;font-size:12.5px;color:var(--tc);background:rgba(255,255,255,.03);border:1px solid color-mix(in srgb,var(--tc) 40%,var(--line));cursor:pointer}
+.tgT.on{background:color-mix(in srgb,var(--tc) 18%,transparent);border-color:var(--tc);box-shadow:0 0 10px color-mix(in srgb,var(--tc) 30%,transparent)}
+.tgTP{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+`;document.head.appendChild(st)})();
+
+/* ---------- Launch checklist for 1.22 (Overview) and Arklite Station, placed in one tap ---------- */
+const REL_V='1.22.0',REL_AAB='https://github.com/PixelSnapGames/orbitalforge/releases/tag/v1.22.0';
+function arkMon(){return (S.mon.list||[]).find(m=>m.id==='arklite')}
+function arkLive(){const m=arkMon();return !!(m&&m.on!==false)}
+function relRulesSt(){const e=S.errs.tags||S.errs.mon;if(!S.loaded.tags||!S.loaded.mon)return 'wait';if(e)return /permission|insufficient/i.test(String(e&&(e.code||e.message)||e))?'no':'err';return 'ok'}
+function relCardHTML(){if(S.ver&&S.ver.min&&!verLt(S.ver.min,REL_V))return '';
+  const rules=relRulesSt(),ark=arkLive(),ur=!!S.motd.find(x=>x.id===urId(REL_V));
+  const row=(ok,t,sub,btn)=>'<div class="relRow'+(ok?' ok':'')+'"><span class="relI">'+(ok?'✓':'')+'</span><div class="grow"><b>'+t+'</b><div class="sub">'+sub+'</div></div>'+(ok?'':btn||'')+'</div>';
+  let h='<div class="card" id="relCard"><div class="ph"><div><h2>'+ic('up')+' Launch 1.22</h2><div class="sub">In this order. Each line ticks itself off.</div></div></div><div class="relList">';
+  h+=row(rules==='ok','Publish the 1.22 Firestore rules',rules==='no'?'Not yet: Firebase console → Firestore Database → Rules, paste firestore.rules, Publish. Then reload this page.':rules==='wait'?'Checking…':rules==='err'?'Could not check: reload this page.':'Published: the new documents can be read and written.');
+  h+=row(ark,'Arklite Station in the galaxy',ark?'On in Sol Verge, for every 1.22 player.':(rules==='ok'?'Ready to place: the thank-you station in Sol Verge with its plaque.':'Needs the new rules first.'),rules==='ok'?'<button class="btn sm" data-act="arkPlace"'+(S.mon.busy?' disabled':'')+'>'+ic('trophy')+'Place it</button>':'');
+  h+=row(false,'Upload 1.22 to Google Play','The .aab is on the GitHub release; the release notes are in it too. This one only ticks off when you turn on the required update.','<a class="btn sm sec" href="'+REL_AAB+'" target="_blank" rel="noopener">'+ic('link')+'Release</a>');
+  h+=row(ur,'Tell 1.21 players to update','The Update reward (Messages tab): a message with a Google Play button, and a Time Warp waiting for them in 1.22.','<button class="btn sm sec" data-act="relUr">'+ic('gift')+'Set it up</button>');
+  h+=row(false,'Require 1.22','Only once 1.22 is live on Google Play for everyone (after the rollout): set it below in Required update.','');
+  return h+'</div></div>'}
+{const o0=VIEWS.overview;VIEWS.overview=()=>{const h=o0();try{const c=relCardHTML();if(!c)return h;return h.replace(/(<div class="pagehead">[\s\S]*?<\/div><\/div>)/,'$1'+c)}catch(e){console.error(e);return h}}}
+// the Monuments tab: the same one-tap Arklite
+{const m0=VIEWS.monuments;VIEWS.monuments=()=>{const h=m0();try{if(S.mon.edit||arkLive()||secState('mon'))return h;const off=!!arkMon();
+  const ban='<div class="card relArk"><div class="ph"><div><h2>'+ic('trophy')+' Arklite Station is ready</h2><div class="sub">The thank-you station for Arklite, parked in Sol Verge with its plaque. '+(off?'It is in the list but switched off.':'It isn\'t in the galaxy yet.')+'</div></div><button class="btn" data-act="arkPlace"'+(S.mon.busy?' disabled':'')+'>'+ic('trophy')+'Place it now</button></div></div>';
+  return h.replace(/(<div class="pagehead">[\s\S]*?<\/div><\/div>)/,'$1'+ban)}catch(e){console.error(e);return h}}}
+Object.assign(ACT,{
+  arkPlace:async()=>{if(S.mon.busy)return;if(!await ask({title:'Place Arklite Station?',body:'It appears in Sol Verge for every player on 1.22 within a minute, with the plaque dedicated to Arklite. You can switch it off or edit it in Monuments.',ok:'Place it'}))return;
+    const L=(S.mon.list||[]).slice();const i=L.findIndex(m=>m.id==='arklite');if(i>=0)L[i]=Object.assign({},L[i],{on:true});else L.push(Object.assign(monTemplate('thanks'),{on:true}));return monSaveList(L,'Arklite Station is in the galaxy')},
+  relUr:()=>{go('messages');setTimeout(()=>{urF().open=true;render();const c=document.getElementById('urCard');if(c)try{c.scrollIntoView({block:'start'})}catch(e){}},50)}});
+(function(){const st=document.createElement('style');st.textContent=`
+#relCard{border-color:rgba(56,225,198,.45);background:linear-gradient(180deg,rgba(56,225,198,.07),transparent 60%),var(--card)}
+#relCard h2{display:flex;align-items:center;gap:8px}
+.relList{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.relRow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.relRow b{font-size:14.5px}
+.relI{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line2);font-weight:800;font-size:13px}
+.relRow.ok{opacity:.75}.relRow.ok .relI{background:var(--gn,#4ade80);border-color:var(--gn,#4ade80);color:#06140c}
+.relRow .btn{flex:none}
+.relArk{border-color:rgba(255,209,102,.5);background:linear-gradient(180deg,rgba(255,209,102,.08),transparent 70%),var(--card)}
+.relArk h2{display:flex;align-items:center;gap:8px}
+`;document.head.appendChild(st)})();
 
 /* ---------- boot ---------- */
 (function(){const h=location.hash.slice(1);if(TABS.some(x=>x[0]===h))S.tab=h})();
