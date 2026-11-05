@@ -2,8 +2,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Orbital Forge · Command Center</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#090e22">
+<meta name="theme-color" content="#0b1128">
 <link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rubik:wght@400;500;600;700&display=swap">
 <style>
 :root{--bg:#090e22;--card:#111936;--card2:#0d1430;--card3:#1b2655;--inp:#0a1028;--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.15);--grid:rgba(255,255,255,.07);--tx:#eef2ff;--mu:#aab6d8;--mu2:#7f8bb3;--ac:#38e1c6;--acd:#06201c;--yl:#ffd166;--pk:#ff6fb5;--bl:#5aa9ff;--pu:#b46bff;--rd:#ff5c7a;--gn:#4ade80;--hh:60px}
 *{box-sizing:border-box;margin:0;padding:0}[hidden]{display:none!important}
@@ -496,15 +498,227 @@ td.num,th.num{text-align:right}
 .rng{width:100%;accent-color:var(--ac)}
 @media (max-width:899px){nav.nav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(58px,1fr);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}nav.nav::-webkit-scrollbar{display:none}}
 @media (max-width:760px){.moSplit{grid-template-columns:1fr}.moPv{position:static;order:-1;max-width:340px}.moGrid{grid-template-columns:1fr}}
+
+/* =====================================================================
+   LAYOUT 2 (Nov 2026): the game's look. Five sections (Home, Stats, Live ops, Players, Inbox) with their own pages:
+   a bottom bar and page chips on phones, a sidebar on desktop. Chakra Petch + Rubik, the game's navy panels and teal.
+   ===================================================================== */
+:root{--bg:#070b19;--bg2:#0b1128;--card:#121a38;--card2:#0e1530;--card3:#182250;--inp:#0a1029;--line:#25315e;--line2:#34428a;--grid:rgba(255,255,255,.07);
+  --tx:#e9edff;--mu:#a6b1d8;--mu2:#7f8bb8;--ac:#38e1c6;--ac2:#3aa7ff;--acd:#04221c;--yl:#ffd166;--pk:#ff6fb5;--bl:#5aa9ff;--pu:#c084fc;--rd:#f87171;--gn:#4ade80;
+  --display:'Chakra Petch',system-ui,sans-serif;--body:'Rubik',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --hh:56px;--bn:64px;--sb:252px;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+html{background:var(--bg)}
+body{background:var(--bg);font-family:var(--body);font-size:14.5px;color:var(--tx)}
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 88% -8%,rgba(56,225,198,.09),transparent 70%),
+    radial-gradient(800px 600px at -12% 108%,rgba(192,132,252,.09),transparent 70%),
+    radial-gradient(1.2px 1.2px at 23px 41px,rgba(255,255,255,.55),transparent 60%),
+    radial-gradient(1px 1px at 131px 97px,rgba(255,255,255,.4),transparent 60%),
+    radial-gradient(1.4px 1.4px at 71px 151px,rgba(200,230,255,.5),transparent 60%),
+    radial-gradient(1px 1px at 173px 13px,rgba(255,255,255,.35),transparent 60%),
+    radial-gradient(1.6px 1.6px at 211px 181px,rgba(255,255,255,.45),transparent 60%),
+    var(--bg);
+  background-size:auto,auto,197px 173px,233px 211px,277px 241px,311px 263px,389px 331px,auto}
+h1,h2,h3,.pagehead h2,.card h2,.sech h2,.tile .v,.btn,.chip,.range button,.lv .v,.num-d{font-family:var(--display)}
+.i{stroke-width:2}
+
+/* ---- frame ---- */
+.app{display:block;min-height:100vh}
+.top{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;height:calc(var(--hh) + var(--sat));padding:var(--sat) max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));
+  background:linear-gradient(180deg,rgba(11,17,40,.97),rgba(9,14,34,.94));border-bottom:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);flex-wrap:nowrap}
+.logoBtn{flex:none;display:flex;border-radius:10px}
+.logo{width:34px;height:34px;border-radius:10px;box-shadow:0 0 0 1px var(--line2),0 0 14px rgba(56,225,198,.18)}
+.brand{min-width:0;flex:1;display:flex;flex-direction:column;justify-content:center}
+.brand .kick{font-family:var(--display);font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ac);line-height:1.2}
+.brand .kick b{color:var(--mu2);font-weight:600}
+.brand h1{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acct{display:flex;align-items:center;gap:8px;flex:none;flex-basis:auto;margin-left:auto;position:relative}
+.acct .upd{display:none;font-size:12px;color:var(--mu2);white-space:nowrap}
+.acct .em{display:none}
+.avatar{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:15px;color:#04221c;background:linear-gradient(180deg,#5cf0d6,#1fb9a0);box-shadow:0 0 0 2px rgba(56,225,198,.25)}
+.menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:240px;max-width:min(320px,calc(100vw - 24px));padding:8px;border-radius:14px;background:var(--card3);border:1px solid var(--line2);box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.menu .me{padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.menu .me b{display:block;font-family:var(--display);font-size:14px}
+.menu .me span{display:block;font-size:12.5px;color:var(--mu);overflow:hidden;text-overflow:ellipsis}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border-radius:10px;font-size:14px;font-weight:500}
+.menu button:hover{background:rgba(255,255,255,.06)}
+.pchip{font-family:var(--display)}
+
+/* bottom bar (phones) — like the game's own */
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:45;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));height:calc(var(--bn) + var(--sab));padding:0 max(6px,env(safe-area-inset-right,0px)) var(--sab) max(6px,env(safe-area-inset-left,0px));
+  background:linear-gradient(180deg,rgba(11,17,40,.97),#080d22);border-top:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.bnav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--mu2);font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.02em;min-width:0}
+.bnav button .i{width:23px;height:23px}
+.bnav button span.l{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bnav button[aria-current=page]{color:var(--ac);text-shadow:0 0 12px rgba(56,225,198,.55)}
+.bnav button[aria-current=page]::before{content:'';position:absolute;top:-1px;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--ac);box-shadow:0 0 12px rgba(56,225,198,.8)}
+.bnav button[aria-current=page] .i{filter:drop-shadow(0 0 6px rgba(56,225,198,.6))}
+.bd{position:absolute;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--gn);color:#04210f;font-family:var(--body);font-size:10.5px;font-weight:700;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--bg2)}
+.bnav .bd{top:6px;left:calc(50% + 6px)}
+.bd.dot{min-width:9px;width:9px;height:9px;padding:0}
+.bnav .bd.dot{top:9px;left:calc(50% + 10px)}
+.bd.red{background:var(--rd);color:#2a0710}
+.bd.gold{background:var(--yl);color:#2d1f00}
+
+/* page chips under the header (phones) */
+.subnav{position:sticky;top:calc(var(--hh) + var(--sat));z-index:35;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));
+  background:linear-gradient(180deg,rgba(7,11,25,.96),rgba(7,11,25,.88));border-bottom:1px solid rgba(37,49,94,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.subnav::-webkit-scrollbar{display:none}
+.subnav button{flex:none;position:relative;display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--mu);font-family:var(--display);font-size:13.5px;font-weight:600;white-space:nowrap}
+.subnav button .i{width:16px;height:16px}
+.subnav button[aria-current=page]{color:var(--ac);background:rgba(56,225,198,.12);border-color:rgba(56,225,198,.55);box-shadow:0 0 14px rgba(56,225,198,.15)}
+.subnav .bd{position:static;margin-left:2px;box-shadow:none}
+
+/* sidebar (desktop) */
+.side{display:none}
+.view{max-width:1180px;width:100%;padding:16px max(14px,env(safe-area-inset-right,0px)) calc(var(--bn) + var(--sab) + 28px) max(14px,env(safe-area-inset-left,0px));margin:0 auto}
+@media(min-width:960px){
+  .top{padding:0 22px}
+  .brand h1{font-size:18px}
+  .acct .upd{display:block}
+  .bnav,.subnav{display:none!important}
+  .side{display:flex;flex-direction:column;position:fixed;top:var(--hh);left:0;bottom:0;width:var(--sb);z-index:30;overflow-y:auto;padding:14px 12px 16px;background:linear-gradient(180deg,rgba(11,17,40,.92),rgba(7,11,25,.92));border-right:1px solid var(--line)}
+  .side[hidden]{display:none}
+  .sgrp{margin-bottom:6px}
+  .sgh{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:10px;color:var(--mu);font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .sgh .i{width:18px;height:18px}
+  .sgh.on{color:var(--ac)}
+  .sgh .bd{position:static;margin-left:auto;box-shadow:none}
+  .sgl{display:flex;flex-direction:column;gap:2px;padding:2px 0 6px 18px;margin-left:9px;border-left:1px solid var(--line)}
+  .sgl button{position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;color:var(--mu);font-size:14px;font-weight:500;text-align:left}
+  .sgl button .i{width:16px;height:16px;opacity:.85}
+  .sgl button:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+  .sgl button[aria-current=page]{color:var(--tx);background:rgba(56,225,198,.1);box-shadow:inset 3px 0 0 var(--ac)}
+  .sgl button[aria-current=page] .i{color:var(--ac);opacity:1}
+  .sgl .bd{position:static;margin-left:auto;box-shadow:none}
+  .sfoot{margin-top:auto;padding:12px 10px 0;font-size:12px;color:var(--mu2);border-top:1px solid var(--line)}
+  .view{margin-left:var(--sb);margin-right:0;width:auto;max-width:none;padding:24px 34px 56px}
+  .view>*{max-width:1180px}
+}
+
+/* ---- page head ---- */
+.pagehead{margin-bottom:14px;align-items:flex-start}
+.pagehead h2{font-size:22px;font-weight:700;letter-spacing:.01em}
+.pagehead .sub{font-size:13px;color:var(--mu2);line-height:1.45;cursor:pointer}
+.brand .kick{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:959px){.pagehead h2{display:none}.pagehead{margin-top:-2px}.pagehead .grow{min-width:0;flex:1 1 100%}
+  .pagehead .sub{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.pagehead .sub.open{display:block}}
+.sech{margin:22px 0 10px}
+.sech h2{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ac)}
+.sech h2 .i{width:16px;height:16px}
+
+/* ---- components in the game's style ---- */
+.card,.tile,.lv{background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,0) 46%),var(--card);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 10px 28px rgba(0,0,0,.22)}
+.card{border-radius:14px;padding:16px}
+@media(max-width:600px){.card{padding:14px}}
+.card h2{font-size:16px;font-weight:700;letter-spacing:.01em}
+.card h3{font-family:var(--display);font-weight:700}
+.btn{font-family:var(--display);font-weight:700;letter-spacing:.02em;background:linear-gradient(180deg,#38e1c6,#16a68f);color:#04221c;border:1px solid #6ff3dc;box-shadow:0 4px 16px rgba(56,225,198,.18);border-radius:11px}
+.btn:hover{filter:brightness(1.08)}
+.btn.sec{background:var(--card3);color:var(--tx);border:1px solid var(--line2);box-shadow:none}
+.btn.sec:hover{background:#1e2a60}
+.btn.danger{background:rgba(248,113,113,.1);color:#ff9d9d;border:1px solid rgba(248,113,113,.4);box-shadow:none}
+.btn.dangerP{background:linear-gradient(180deg,#ff8585,#e05252);color:#2a0710;border:1px solid #ffb0b0}
+.btn.gold{background:linear-gradient(180deg,#f4c75a,#dba733);color:#2d1f00;border:1px solid #ffe08a;box-shadow:0 4px 16px rgba(255,209,102,.2)}
+.ib{background:var(--card3);box-shadow:none;border:1px solid var(--line)}
+.inp,select.inp,textarea.inp{background:var(--inp);border:1px solid var(--line2);border-radius:10px}
+.inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(56,225,198,.15)}
+.tiles{gap:10px}
+@media(max-width:600px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{border-radius:14px;padding:12px 14px;min-width:0}
+.tile .k{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu2)}
+.tile .v{font-size:28px;font-weight:700;letter-spacing:.01em}
+.tbl th{font-family:var(--display);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.tbl tbody tr:hover td{background:rgba(255,255,255,.02)}
+.range{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.range button{padding:6px 12px;border-radius:9px;font-size:13px;background:none}
+.range button.on{background:rgba(56,225,198,.16);color:var(--ac)}
+.lv{border-radius:14px}
+.lv .k{font-family:var(--display)}
+.chip.tagc{font-family:var(--display)}
+.banner{font-family:var(--body)}
+
+/* ---- chips used as filters ---- */
+.fbar{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px;margin:0 0 12px}
+.fbar::-webkit-scrollbar{display:none}
+.fbar button{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:var(--mu);font-family:var(--display);font-size:13px;font-weight:600;white-space:nowrap}
+.fbar button .n{font-family:var(--body);font-size:11.5px;font-weight:700;padding:0 6px;border-radius:8px;background:rgba(255,255,255,.07);color:var(--mu)}
+.fbar button.on{color:var(--ac);background:rgba(56,225,198,.12);border-color:rgba(56,225,198,.5)}
+.fbar button.on .n{background:rgba(56,225,198,.2);color:var(--ac)}
+.fbar .grow{flex:1}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.tools .srch{flex:1 1 220px;margin:0}
+.tools select.inp{flex:0 1 auto;width:auto;min-height:40px}
+
+/* ---- Home ---- */
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:18px;margin-bottom:14px;border:1px solid var(--line2);
+  background:radial-gradient(420px 200px at 100% 0%,rgba(56,225,198,.16),transparent 70%),radial-gradient(360px 220px at 0% 100%,rgba(192,132,252,.13),transparent 70%),linear-gradient(180deg,#16204a,#0f1736);box-shadow:0 14px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
+.hero::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.6;background:radial-gradient(1.2px 1.2px at 30px 24px,#fff,transparent 60%),radial-gradient(1px 1px at 110px 70px,#fff,transparent 60%),radial-gradient(1.4px 1.4px at 190px 30px,#cfe,transparent 60%);background-size:230px 110px}
+.hero .hk{position:relative;z-index:1;display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ac)}
+.hero .hk .live{width:8px;height:8px;border-radius:50%;background:var(--gn);box-shadow:0 0 0 4px rgba(74,222,128,.18);animation:hpulse 2s ease-in-out infinite}
+@keyframes hpulse{50%{box-shadow:0 0 0 7px rgba(74,222,128,.05)}}
+.hero .hk span.t{margin-left:auto;color:var(--mu2);letter-spacing:.06em;font-weight:600}
+@media(max-width:600px){.hero .hk span.t{display:none}.hfoot{display:grid;grid-template-columns:minmax(0,1fr) auto}.hfoot .ht{min-width:0}}
+.hmain{position:relative;z-index:1;display:flex;align-items:flex-end;gap:12px;margin-top:6px;flex-wrap:wrap}
+.hbig{font-family:var(--display);font-size:54px;font-weight:700;line-height:1;letter-spacing:-.01em;text-shadow:0 0 30px rgba(56,225,198,.35)}
+.hcap{font-size:14px;color:var(--mu);padding-bottom:6px}
+.hcap b{color:var(--tx);font-weight:600}
+.hgrid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+@media(max-width:600px){.hgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.hbig{font-size:46px}}
+.hst{padding:10px 12px;border-radius:12px;background:rgba(7,11,25,.45);border:1px solid rgba(52,66,138,.7);min-width:0;text-align:left}
+.hst .k{display:flex;align-items:center;gap:6px;font-family:var(--display);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu2)}
+.hst .k .i{width:14px;height:14px}
+.hst .v{font-family:var(--display);font-size:23px;font-weight:700;margin-top:2px}
+.hst .d{font-size:11.5px;color:var(--mu2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hfoot{position:relative;z-index:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--mu)}
+.hfoot b{color:var(--tx)}
+.hfoot .btn{margin-left:auto}.hfoot .ht{flex:1}
+.alerts{display:flex;flex-direction:column;gap:8px}
+.alr{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);text-align:left;width:100%}
+.alr:hover{border-color:var(--line2)}
+.alr .ai{flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:var(--c,var(--ac));background:color-mix(in srgb,var(--c,var(--ac)) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c,var(--ac)) 40%,transparent)}
+.alr .ai .i{width:20px;height:20px}
+.alr .at{flex:1;min-width:0}
+.alr .at b{display:block;font-family:var(--display);font-size:15px;font-weight:700}
+.alr .at span{display:block;font-size:12.5px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alr .ch{color:var(--mu2);flex:none}
+.alr.ok{background:rgba(74,222,128,.05);border-color:rgba(74,222,128,.25)}
+.qgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media(min-width:960px){.qgrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.qbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:96px;padding:12px 8px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent),var(--card);border:1px solid var(--line);text-align:center;font-family:var(--display);font-size:13px;font-weight:600;line-height:1.2}
+.qbtn:hover{border-color:color-mix(in srgb,var(--c,var(--ac)) 60%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--c,var(--ac)) 18%,transparent)}
+.qbtn .qi{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--c,var(--ac));background:color-mix(in srgb,var(--c,var(--ac)) 15%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c,var(--ac)) 45%,transparent)}
+.qbtn .qi .i{width:22px;height:22px}
+.home2{display:grid;grid-template-columns:minmax(0,1fr);gap:0 18px}
+@media(min-width:1180px){.home2{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}}
+
+/* ---- messages ---- */
+.tdr{margin:0 0 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line)}
+.tdr{display:block}.tdr summary{width:100%;display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;list-style:none;font-family:var(--display);font-weight:600;font-size:14px}
+.tdr summary::-webkit-details-marker{display:none}
+.tdr summary .i:first-child{color:var(--yl)}
+.tdr summary .chv{margin-left:auto;transition:transform .2s;color:var(--mu2)}
+.tdr[open] summary .chv{transform:rotate(90deg)}
+.tdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:0 12px 12px}
+.tdb{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:11px;background:var(--card);border:1px solid var(--line);text-align:left}
+.tdb:hover{border-color:color-mix(in srgb,var(--pc) 60%,transparent)}
+.tdb b{display:flex;align-items:center;gap:7px;font-family:var(--display);font-size:13.5px;font-weight:600}
+.tdb b::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--pc);box-shadow:0 0 8px var(--pc)}
+.tdb span{font-size:12px;color:var(--mu2)}
+.mempty{padding:26px 10px;text-align:center;color:var(--mu)}
+@media(max-width:959px){.abar{bottom:calc(var(--bn) + var(--sab) + 10px)}}
 </style></head><body>
 <div class="app" id="app">
   <header class="top">
-    <img class="logo" src="icon.png" alt="">
-    <div class="brand"><h1>Orbital Forge <span>·</span> Command Center</h1><p class="who" id="who"></p></div>
+    <button class="logoBtn" data-tab="home" aria-label="Home"><img class="logo" src="icon.png" alt=""></button>
+    <div class="brand"><div class="kick" id="crumb">Orbital Forge</div><h1 id="ttl">Command Center</h1></div>
     <div class="acct" id="acct"></div>
   </header>
-  <nav class="nav" id="nav" aria-label="Command Center sections" hidden></nav>
+  <div class="subnav" id="subnav" hidden></div>
+  <aside class="side" id="side" aria-label="Command Center pages" hidden></aside>
   <main class="view" id="view"><div class="load">Loading…</div></main>
+  <nav class="bnav" id="nav" aria-label="Sections" hidden></nav>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="modalw" id="modal" hidden></div>
@@ -875,8 +1089,8 @@ function compute(){
   const inRange=Object.keys(inst).filter(k=>Object.keys(inst[k].days).some(d=>d>=from));
   const newIn=inRange.filter(k=>inst[k].d0>=from);
   const pd=days.reduce((a,d)=>a+byDay[d].players,0),mins=days.reduce((a,d)=>a+byDay[d].min,0);
-  const c1=Object.keys(inst).filter(k=>inst[k].d0<=addDays(today,-1)),r1=c1.filter(k=>inst[k].days[addDays(inst[k].d0,1)]);
-  const c7=Object.keys(inst).filter(k=>inst[k].d0<=addDays(today,-7)),r7=c7.filter(k=>{const I=inst[k],lim=addDays(I.d0,7);return Object.keys(I.days).some(d=>d>=lim)});
+  const c1=Object.keys(inst).filter(k=>inst[k].d0<=addDays(today,-2)),r1=c1.filter(k=>inst[k].days[addDays(inst[k].d0,1)]);
+  const c7=Object.keys(inst).filter(k=>inst[k].d0<=addDays(today,-8)),r7=c7.filter(k=>{const I=inst[k],lim=addDays(I.d0,7);return Object.keys(I.days).some(d=>d>=lim)});
   const buckets=[['Lv 1–4',1,4],['Lv 5–9',5,9],['Lv 10–19',10,19],['Lv 20–39',20,39],['Lv 40–60+',40,999]].map(b=>({n:b[0],c:inRange.filter(k=>inst[k].lv>=b[1]&&inst[k].lv<=b[2]).length}));
   const vers={};inRange.forEach(k=>{const v=inst[k].v||'?';vers[v]=(vers[v]||0)+1});
   const ranks={},stale=addDays(today,-2);let rdone=0,roff=0;inRange.forEach(k=>{const I=inst[k];let r,t=null;
@@ -1941,7 +2155,7 @@ setInterval(()=>{if(document.hidden||!S.admin||S.tab!=='support')return;const a=
     if(th&&supUnread(th))DB.update('sup/'+S.sup.open,{seenAt:DB.serverTime()}).catch(()=>{})},()=>{})}
   else if(!(a&&a.matches&&a.matches('input,textarea,select')))load(['sup'])},20000);
 // the Support tab shows how many are waiting
-{const n0=renderNav;renderNav=function(){n0.apply(this,arguments);try{const cur=$('#nav [aria-current=page]');if(cur&&innerWidth<900){const n=$('#nav');const l=cur.offsetLeft-n.clientWidth/2+cur.clientWidth/2;if(Math.abs(n.scrollLeft-l)>20)n.scrollLeft=l}}catch(e){}try{const un=S.sup.rows.filter(x=>supUnread(x.data)).length;const b=$('#nav [data-tab="support"]');if(b&&un)b.insertAdjacentHTML('beforeend','<span class="bd" title="'+un+' waiting">'+un+'</span>')}catch(e){}}}
+// (the old nav scroll and Support badge live in renderNav now: LAYOUT 2)
 // a Message button on every player profile and next to a feedback sender
 {const p0=profHTML;profHTML=function(){const h=p0.apply(this,arguments);const P=S.prof;if(!P||!P.uid)return h;return h.replace('<button class="btn sm sec" data-act="profRefresh">','<button class="btn sm" data-act="supWith" data-v="'+esc(P.uid)+'">'+ic('chat')+'Message</button><button class="btn sm sec" data-act="profRefresh">')}}
 {const f0=fbFromHTML;fbFromHTML=function(f){const h=f0.apply(this,arguments);const m=fbFrom(f);return m?h+'<button class="btn sm sec fbMsg" data-act="supWith" data-v="'+esc(m.uid)+'">'+ic('chat')+'Message</button>':h}}
@@ -2153,8 +2367,8 @@ document.addEventListener('dragover',e=>{const z=e.target.closest&&e.target.clos
 document.addEventListener('dragleave',e=>{const dz=$('#drop');if(dz&&!dz.contains(e.relatedTarget))dz.classList.remove('over')});
 document.addEventListener('drop',e=>{const z=e.target.closest&&e.target.closest('#drop, #s-img');if(!z||!S.draft)return;e.preventDefault();const dz=$('#drop');if(dz)dz.classList.remove('over');const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)imgFromFile(f)});
 document.addEventListener('paste',e=>{if(!S.draft||!$('#comp'))return;const items=e.clipboardData&&e.clipboardData.files;if(items&&items[0]&&/^image\//.test(items[0].type)){e.preventDefault();imgFromFile(items[0])}});
-window.addEventListener('resize',()=>{clearTimeout(S.rz);S.rz=setTimeout(()=>{fitPreview();if(S.tab==='overview'&&!S.table&&S.admin){const w=chartWidth();if(Math.abs(w-(S.cw||0))>8)render()}},150)});
-window.addEventListener('hashchange',()=>{const t=location.hash.slice(1);if(t!==S.tab&&TABS.some(x=>x[0]===t))go(t)});
+window.addEventListener('resize',()=>{clearTimeout(S.rz);S.rz=setTimeout(()=>{fitPreview();if(S.tab==='stats'&&!S.table&&S.admin){const w=chartWidth();if(Math.abs(w-(S.cw||0))>8)render()}},150)});
+
 window.addEventListener('beforeunload',e=>{if(S.draft&&S.draft.dirty){e.preventDefault();e.returnValue=''}});
 /* keep relative times fresh without stealing focus */
 setInterval(()=>{if(document.hidden||!S.admin||!$('#modal').hidden)return;const a=document.activeElement;if(a&&a.matches&&a.matches('input,textarea,select'))return;if(S.tab==='messages'&&S.draft){updateLive();return}render()},30000);
@@ -2256,7 +2470,7 @@ function relCardHTML(){if(S.ver&&S.ver.min&&!verLt(S.ver.min,REL_V))return '';
   h+=row(rules==='ok','Publish the 1.22 Firestore rules',rules==='no'?'Not yet: Firebase console → Firestore Database → Rules, paste firestore.rules, Publish. Then reload this page.':rules==='wait'?'Checking…':rules==='err'?'Could not check: reload this page.':'Published: the new documents can be read and written.');
   h+=row(ark,'Arklite Station in the galaxy',ark?'On in Sol Verge, for every 1.22 player.':(rules==='ok'?'Ready to place: the thank-you station in Sol Verge with its plaque.':'Needs the new rules first.'),rules==='ok'?'<button class="btn sm" data-act="arkPlace"'+(S.mon.busy?' disabled':'')+'>'+ic('trophy')+'Place it</button>':'');
   h+=row(false,'Upload 1.22 to Google Play','The .aab is on the GitHub release; the release notes are in it too. This one only ticks off when you turn on the required update.','<a class="btn sm sec" href="'+REL_AAB+'" target="_blank" rel="noopener">'+ic('link')+'Release</a>');
-  h+=row(ur,'Tell 1.21 players to update','The Update message (Messages tab): a message with a Google Play button. No reward needed: veterans get their package in 1.22.','<button class="btn sm sec" data-act="relUr">'+ic('mega')+'Set it up</button>');
+  h+=row(ur,'Tell 1.21 players to update','The update message (below): a message with a Google Play button. No reward needed: veterans get their package in 1.22.','<button class="btn sm sec" data-act="relUr">'+ic('mega')+'Set it up</button>');
   h+=row(false,'Require 1.22','Only once 1.22 is live on Google Play for everyone (after the rollout): set it below in Required update.','');
   return h+'</div></div>'}
 {const o0=VIEWS.overview;VIEWS.overview=()=>{const h=o0();try{const c=relCardHTML();if(!c)return h;return h.replace(/(<div class="pagehead">[\s\S]*?<\/div><\/div>)/,'$1'+c)}catch(e){console.error(e);return h}}}
@@ -2295,9 +2509,9 @@ function anaRet(){const today=dstr(Date.now()),win=addDays(today,-34),inst=anaIn
   for(const k in inst){const I=inst[k];if(I.d0<win||I.v0Day!==I.d0)continue;// started in the window, and we have their first day
     const v=verKey(I.v0);const c=C[v]||(C[v]={v,n:0,e1:0,r1:0,e3:0,r3:0,e7:0,r7:0,min:0,lv:0});c.n++;c.min+=I.min0;c.lv+=I.lv;
     const ds=Object.keys(I.days);
-    if(I.d0<=addDays(today,-1)){c.e1++;if(I.days[addDays(I.d0,1)])c.r1++}
-    if(I.d0<=addDays(today,-3)){c.e3++;const l=addDays(I.d0,3);if(ds.some(d=>d>=l))c.r3++}
-    if(I.d0<=addDays(today,-7)){c.e7++;const l=addDays(I.d0,7);if(ds.some(d=>d>=l))c.r7++}}
+    if(I.d0<=addDays(today,-2)){c.e1++;if(I.days[addDays(I.d0,1)])c.r1++}
+    if(I.d0<=addDays(today,-4)){c.e3++;const l=addDays(I.d0,3);if(ds.some(d=>d>=l))c.r3++}
+    if(I.d0<=addDays(today,-8)){c.e7++;const l=addDays(I.d0,7);if(ds.some(d=>d>=l))c.r7++}}
   const L=Object.values(C).filter(c=>c.v!=='?').sort((a,b)=>verCmp(a.v,b.v));
   const sc=(c,use)=>{const P=[[c.e1,c.r1,.5],[c.e3,c.r3,.3],[c.e7,c.r7,.2]].filter((x,i)=>use[i]);const w=P.reduce((a,x)=>a+x[2],0);return w?Math.round(P.reduce((a,x)=>a+x[1]/x[0]*x[2],0)/w*100):null};
   const ok=c=>[c.e1>=3,c.e3>=3,c.e7>=3];
@@ -2314,7 +2528,7 @@ function retCardHTML(){const L=anaRet();let h='<div class="card" id="retCard"><d
   h+='<div class="retC">'+L.map((c,i)=>{const d=c.delta;const r=(e,x)=>e?Math.round(x/e*100)+'%':'—';
     return '<div class="rc'+(i===0?' new':'')+'"><div class="rcH"><b>v'+esc(c.v)+'</b><span class="sub">'+nf(c.n)+' new'+(c.n<15?' · <span class="few">few players</span>':'')+'</span><span class="rcS">'+(c.score==null?'<span class="sub">too new</span>':'<span class="scv">'+c.score+'</span>'+(d!=null&&d!==0?'<span class="dl '+(d>0?'up':'dn')+'">'+(d>0?'+':'')+d+'</span>':''))+'</span></div>'
       +'<div class="rcG"><div><span>Next day</span><b>'+r(c.e1,c.r1)+'</b></div><div><span>3+ days</span><b>'+r(c.e3,c.r3)+'</b></div><div><span>Week</span><b>'+r(c.e7,c.r7)+'</b></div><div><span>First day</span><b>'+Math.round(c.min/c.n)+'m</b></div></div></div>'}).join('')+'</div>';
-  return h+'<p class="note">A version only gets a score once its players are a day old. Small groups swing a lot: give a new version a few days before comparing.</p></div>'}
+  return h+'<p class="note">A day only counts once it is over (the stats day ends at 7 PM Eastern), so a new version shows “too new” for its first day. Small groups swing a lot: give a new version a few days before comparing.</p></div>'}
 // day by day: who played, who came back
 function anaDays(c){const inst=anaInst(),out={};for(const d of c.days){const b=c.byDay[d];out[d]={ret:b.players-b.newp,mpp:b.players?Math.round(b.min/b.players):0,e:0,r:0,vers:{}}}
   for(const p of S.plays){const o=out[p.day];if(o){const v=verKey(p.v);o.vers[v]=(o.vers[v]||0)+1}}
@@ -2445,8 +2659,252 @@ Object.assign(ACT,{ovRemove:()=>ovRemove(),ovBack:()=>ovBack(),ovAllT:()=>{S.ov.
 @media(max-width:460px){.plSecs button{padding:9px 8px;font-size:12.5px;gap:5px}.plSecs button .i{display:none}}
 `;document.head.appendChild(st)})();
 
+/* =====================================================================
+   LAYOUT 2 (Nov 2026): five sections, each with its own pages.
+     Home · Stats (Players, Retention, Progress, Message stats) · Live ops (Messages, Library, Meteor events, Store sales,
+     Monuments, Game updates) · Players (Profiles, Leaderboards, Names, Tags) · Inbox (Support, Feedback, Reports)
+   Phones: a bottom bar like the game's and page chips under the header. Desktop: a sidebar with every page.
+   The old tab names still work (#overview, #players, go('messages') …): pageFor() maps them.
+   ===================================================================== */
+Object.assign(ICP,{"home":"<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /> <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />","chart":"<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />","rocket":"<path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\" /> <path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\" /> <path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\" /> <path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\" />","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <path d=\"M16 3.128a4 4 0 0 1 0 7.744\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" />","chat":"<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" />","bell":"<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />","gift":"<path d=\"M12 7v14\" /> <path d=\"M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8\" /> <path d=\"M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5\" /> <rect x=\"3\" y=\"7\" width=\"18\" height=\"4\" rx=\"1\" />","trophy":"<path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\" /> <path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\" /> <path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\" /> <path d=\"M4 22h16\" /> <path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\" /> <path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\" />","flag":"<path d=\"M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528\" />","settings":"<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />","refresh":"<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\" /> <path d=\"M21 3v5h-5\" /> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\" /> <path d=\"M8 16H3v5\" />","search":"<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />","planet":"<path d=\"M21.54 15H17a2 2 0 0 0-2 2v4.54\" /> <path d=\"M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17\" /> <path d=\"M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />","shop":"<path d=\"m2.05 2.05 1.099-.028a1 1 0 0 1 1.008.815l2.69 14.347A1 1 0 0 0 7.83 18H18\" /> <path d=\"M4.563 5h16.435a1 1 0 0 1 .981 1.204l-1.026 6.226A2 2 0 0 1 18.962 14H6.25\" /> <circle cx=\"18\" cy=\"20\" r=\"2\" /> <circle cx=\"8\" cy=\"20\" r=\"2\" />","crown":"<path d=\"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z\" /> <path d=\"M5 21h14\" />","sparkle":"<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" />","star":"<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />","check":"<path d=\"M20 6 9 17l-5-5\" />","alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />","info":"<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 16v-4\" /> <path d=\"M12 8h.01\" />","calendar":"<path d=\"M8 2v3\" /> <path d=\"M16 2v3\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M3 9h18\" />","list":"<path d=\"M3 5h.01\" /> <path d=\"M3 12h.01\" /> <path d=\"M3 19h.01\" /> <path d=\"M8 5h13\" /> <path d=\"M8 12h13\" /> <path d=\"M8 19h13\" />","gem":"<path d=\"M10.5 3 8 9l4 13 4-13-2.5-6\" /> <path d=\"M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3z\" /> <path d=\"M2 9h20\" />","coins":"<path d=\"M13.744 17.736a6 6 0 1 1-7.48-7.48\" /> <path d=\"M15 6h1v4\" /> <path d=\"m6.134 14.768.866-.5 2 3.464\" /> <circle cx=\"16\" cy=\"8\" r=\"6\" />","package":"<path d=\"M12 22v-9\" /> <path d=\"M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z\" /> <path d=\"M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13\" /> <path d=\"M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z\" />","globe":"<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\" /> <path d=\"M2 12h20\" />","satellite":"<path d=\"m13.5 6.5-3.148-3.148a1.205 1.205 0 0 0-1.704 0L6.352 5.648a1.205 1.205 0 0 0 0 1.704L9.5 10.5\" /> <path d=\"M16.5 7.5 19 5\" /> <path d=\"m17.5 10.5 3.148 3.148a1.205 1.205 0 0 1 0 1.704l-2.296 2.296a1.205 1.205 0 0 1-1.704 0L13.5 14.5\" /> <path d=\"M9 21a6 6 0 0 0-6-6\" /> <path d=\"M9.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l4.296-4.296a1.205 1.205 0 0 0 0-1.704l-2.296-2.296a1.205 1.205 0 0 0-1.704 0z\" />","telescope":"<path d=\"m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44\" /> <path d=\"m13.56 11.747 4.332-.924\" /> <path d=\"m16 21-3.105-6.21\" /> <path d=\"M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z\" /> <path d=\"m6.158 8.633 1.114 4.456\" /> <path d=\"m8 21 3.105-6.21\" /> <circle cx=\"12\" cy=\"13\" r=\"2\" />","hourglass":"<path d=\"M5 22h14\" /> <path d=\"M5 2h14\" /> <path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\" /> <path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\" />","shield":"<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\" />","map":"<path d=\"M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z\" /> <path d=\"M15 5.764v15\" /> <path d=\"M9 3.236v15\" />","gauge":"<path d=\"m12 14 4-4\" /> <path d=\"M3.34 19a10 10 0 1 1 17.32 0\" />","route":"<circle cx=\"6\" cy=\"19\" r=\"3\" /> <path d=\"M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15\" /> <circle cx=\"18\" cy=\"5\" r=\"3\" />","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /> <circle cx=\"12\" cy=\"7\" r=\"4\" />","eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />","clock":"<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\" /> <line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\" /> <circle cx=\"12\" cy=\"14\" r=\"8\" />","play":"<path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\" />","pause":"<rect x=\"14\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" /> <rect x=\"5\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" />","back":"<path d=\"m15 18-6-6 6-6\" />","next":"<path d=\"m9 18 6-6-6-6\" />","plus":"<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />","x":"<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />","trash":"<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />","bolt":"<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />","phone":"<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" />","layers":"<path d=\"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z\" /> <path d=\"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12\" /> <path d=\"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17\" />","crate":"<path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\" /> <path d=\"m3.3 7 8.7 5 8.7-5\" /> <path d=\"M12 22V12\" />","radio":"<path d=\"M4.9 16.1C1 12.2 1 5.8 4.9 1.9\" /> <path d=\"M7.8 4.7a6.14 6.14 0 0 0-.8 7.5\" /> <circle cx=\"12\" cy=\"9\" r=\"2\" /> <path d=\"M16.2 4.8c2 2 2.26 5.11.8 7.47\" /> <path d=\"M19.1 1.9a9.96 9.96 0 0 1 0 14.1\" /> <path d=\"M9.5 18h5\" /> <path d=\"m8 22 4-11 4 11\" />"});
+const SECTIONS=[
+  {k:'home',n:'Home',ic:'home',pages:[['home','Home','home']]},
+  {k:'stats',n:'Stats',ic:'chart',pages:[['stats','Players','users'],['retention','Retention','refresh'],['progress','Progress','route'],['perf','Message stats','msg']]},
+  {k:'live',n:'Live ops',ic:'rocket',pages:[['messages','Messages','msg'],['library','Library','book'],['events','Meteor events','comet'],['store','Store sales','shop'],['monuments','Monuments','trophy'],['updates','Game updates','up']]},
+  {k:'players',n:'Players',ic:'users',pages:[['profiles','Profiles','user'],['boards','Leaderboards','crown'],['names','Names','list'],['tags','Tags','tag']]},
+  {k:'inbox',n:'Inbox',ic:'bell',pages:[['support','Support','chat'],['feedback','Feedback','star'],['reports','Reports','flag']]}];
+const PAGE={};SECTIONS.forEach(s=>s.pages.forEach(p=>{PAGE[p[0]]={sec:s.k,n:p[1],ic:p[2]}}));
+const SEC={};SECTIONS.forEach(s=>{SEC[s.k]=s});
+S.ov2={mF:'all',mQ:'',plF:'all',plSort:'recent',suF:'all',menu:false,last:{}};
+function pageFor(t){if(PAGE[t])return t;if(t==='overview')return 'home';
+  if(t==='players'){if(S.prof||S.mail)return 'profiles';const s=S.plSec;return s==='reports'?'reports':PAGE[s]?s:'profiles'}return 'home'}
+go=function(tab){const p=pageFor(tab);S.tab=p;S.ov2.menu=false;try{history.replaceState(null,'','#'+p)}catch(e){}S.ov2.last[PAGE[p].sec]=p;render();window.scrollTo(0,0)};
+
+/* ---- badges ---- */
+function bdg(p){const t=Date.now();
+  if(p==='messages'){if(S.draft)return '<span class="bd gold" title="Draft in progress">✎</span>';const n=S.motd.filter(m=>mStatus(m,t)==='live').length;return n?'<span class="bd" title="'+n+' live">'+n+'</span>':''}
+  if(p==='events')return S.live.events.some(e=>itemSt(e,t)==='live')?'<span class="bd dot" title="Event live"></span>':'';
+  if(p==='store')return S.live.sales.some(s=>itemSt(s,t)==='live')?'<span class="bd dot" title="Sale live"></span>':'';
+  if(p==='support'){const n=supWaiting();return n?'<span class="bd red" title="'+n+' waiting">'+n+'</span>':''}
+  if(p==='reports'){const n=S.rep.length;return n?'<span class="bd red" title="'+n+' open">'+(n>99?'99+':n)+'</span>':''}
+  if(p==='feedback'){const n=fbNew();return n?'<span class="bd" title="'+n+' in the last day">'+n+'</span>':''}
+  return ''}
+function supWaiting(){try{return (S.sup.rows||[]).filter(x=>supUnread(x.data)&&!x.data.muted).length}catch(e){return 0}}
+function fbNew(){const t=Date.now();return (S.fb||[]).filter(f=>(+f.at||0)>t-DAY).length}
+function secBdg(k){if(k==='inbox'){const n=supWaiting()+S.rep.length;return n?'<span class="bd red">'+(n>99?'99+':n)+'</span>':''}
+  if(k==='live'){if(S.draft)return '<span class="bd gold">✎</span>';const t=Date.now();return S.motd.some(m=>mStatus(m,t)==='live')||S.live.events.some(e=>itemSt(e,t)==='live')||S.live.sales.some(s=>itemSt(s,t)==='live')?'<span class="bd dot"></span>':''}
+  return ''}
+
+/* ---- shell ---- */
+render=function(){if(!PAGE[S.tab])S.tab=pageFor(S.tab);renderHead();const v=$('#view');
+  const g=gate();$('#nav').hidden=!!g;$('#side').hidden=!!g;$('#subnav').hidden=true;
+  if(g){v.innerHTML=g;S.mounted=null;return}
+  renderNav();
+  if(S.tab==='messages'&&S.draft){if(S.mounted===S.draft&&$('#comp')){pvSoon();updateLive();return}v.innerHTML=banner()+composerHTML(S.draft);S.mounted=S.draft;mountComposer();return}
+  S.mounted=null;
+  if(S.tab==='stats')S.cw=chartWidth();
+  let h='';try{h=(VIEWS[S.tab]||VIEWS.home)()}catch(e){console.error(e);h='<div class="card errc"><b>This page hit an error</b><p class="sub">'+esc(e.message||e)+'</p></div>'}
+  v.innerHTML=banner()+h;
+  if(S.tab==='stats')bindChart();
+  if(S.flash){const el=$('[data-mid="'+S.flash+'"]');if(el){el.classList.add('flash');try{el.scrollIntoView({block:'nearest'})}catch(e){}}S.flash=null}};
+renderNav=function(){const cur=PAGE[S.tab]||PAGE.home,sec=SEC[cur.sec];
+  $('#nav').innerHTML=SECTIONS.map(s=>'<button data-sec2="'+s.k+'"'+(s.k===cur.sec?' aria-current="page"':'')+'>'+ic(s.ic)+'<span class="l">'+s.n+'</span>'+secBdg(s.k)+'</button>').join('');
+  const sn=$('#subnav');if(sec.pages.length>1){sn.hidden=false;sn.innerHTML=sec.pages.map(p=>'<button data-tab="'+p[0]+'"'+(p[0]===S.tab?' aria-current="page"':'')+'>'+ic(p[2])+'<span>'+p[1]+'</span>'+bdg(p[0])+'</button>').join('');
+    const on=sn.querySelector('[aria-current=page]');if(on){const l=on.offsetLeft-sn.clientWidth/2+on.clientWidth/2;if(Math.abs(sn.scrollLeft-l)>20)sn.scrollLeft=l}}else{sn.hidden=true;sn.innerHTML=''}
+  $('#side').innerHTML=SECTIONS.map(s=>s.pages.length===1?'<div class="sgrp"><button class="sgh'+(s.k===cur.sec?' on':'')+'" data-tab="'+s.pages[0][0]+'"'+(s.k===cur.sec?' aria-current="page"':'')+'>'+ic(s.ic)+'<span>'+s.n+'</span></button></div>'
+    :'<div class="sgrp"><div class="sgh'+(s.k===cur.sec?' on':'')+'">'+ic(s.ic)+'<span>'+s.n+'</span>'+secBdg(s.k)+'</div><div class="sgl">'+s.pages.map(p=>'<button data-tab="'+p[0]+'"'+(p[0]===S.tab?' aria-current="page"':'')+'>'+ic(p[2])+'<span>'+p[1]+'</span>'+bdg(p[0])+'</button>').join('')+'</div></div>').join('')
+    +'<div class="sfoot">'+(DB.mode==='mock'?'Preview data · nothing reaches players':'Firestore · orbitalforge-81f30')+'</div>'};
+renderHead=function(){const u=S.user,cur=PAGE[S.tab]||PAGE.home,sec=SEC[cur.sec];let h='';
+  $('#crumb').innerHTML=u&&S.admin&&innerWidth<960&&sec.pages.length>1?esc(sec.n):'Orbital Forge';
+  $('#ttl').textContent=u&&S.admin&&innerWidth<960&&cur.sec!=='home'?cur.n:'Command Center';
+  if(u&&S.admin&&S.loadedAt)h+='<span class="upd">Updated '+esc(agoShort(S.loadedAt))+'</span>';
+  if(DB.mode==='mock')h+='<button class="pchip" data-act="mockReset" title="Made-up data kept in this browser. Click to start it over.">Preview</button>';
+  if(u&&S.admin)h+='<button class="ib" data-act="reload" aria-label="Reload data" title="Reload data">'+ic('refresh')+'</button>';
+  if(u)h+='<button class="avatar" data-act="menu" aria-label="Account" aria-expanded="'+!!S.ov2.menu+'">'+esc((u.name||u.email||'?').trim()[0].toUpperCase())+'</button>';
+  if(u&&S.ov2.menu)h+='<div class="menu" role="menu"><div class="me"><b>'+esc(u.name||'Signed in')+'</b><span>'+esc(u.email)+'</span></div>'
+    +(S.admin?'<button data-act="reload" role="menuitem">'+ic('refresh')+'Reload all data</button>':'')
+    +(DB.mode==='mock'?'<button data-act="mockReset" role="menuitem">'+ic('sparkle')+'Start the preview data over</button>':'')
+    +'<button data-act="out" role="menuitem">'+ic('out')+'Sign out</button></div>';
+  $('#acct').innerHTML=h};
+function agoShort(t){const d=Math.max(0,Date.now()-t);return d<60e3?'just now':d<HOUR?Math.round(d/60e3)+' min ago':Math.round(d/HOUR)+' h ago'}
+{const la=loadAll;loadAll=function(){S.loadedAt=Date.now();return la.apply(this,arguments)}}
+// the bottom bar opens the page you were last on in that section
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sec2]');if(!b)return;const s=SEC[b.dataset.sec2];if(!s)return;
+  const cur=PAGE[S.tab];const p=cur&&cur.sec===s.k?s.pages[0][0]:(S.ov2.last[s.k]||s.pages[0][0]);go(p)});
+// the account menu closes on any click outside it
+document.addEventListener('click',e=>{if(!S.ov2.menu)return;if(e.target.closest&&e.target.closest('[data-act="menu"]'))return;
+  if(e.target.closest&&e.target.closest('.menu')){if(e.target.closest('.menu button'))setTimeout(()=>{S.ov2.menu=false;renderHead()},0);return}S.ov2.menu=false;renderHead()},true);
+// long page descriptions fold to two lines on phones; tap to read the rest
+document.addEventListener('click',e=>{const s=e.target.closest&&e.target.closest('.pagehead .sub');if(s)s.classList.toggle('open')});
+window.addEventListener('hashchange',()=>{const t=location.hash.slice(1);if(t&&t!==S.tab&&(PAGE[t]||t==='overview'||t==='players'))go(t)});
+window.addEventListener('resize',()=>{clearTimeout(S.ov2.rz);S.ov2.rz=setTimeout(()=>{if(S.user)renderHead()},120)});
+
+/* ---- counting fix: a "next day" counts once that next day is over, so the numbers don't drop to 0 at 7 PM ---- */
+// (applied in compute() and anaRet(): eligible from 2 days after the first day; 3+ days from 4; a week from 8)
+
+/* =====================================================================
+   HOME
+   ===================================================================== */
+function todayNums(){const today=dstr(Date.now()),yd=addDays(today,-1);const td=S.plays.filter(p=>p.day===today),yy=S.plays.filter(p=>p.day===yd);
+  const n=td.length,nw=td.filter(p=>p.day===(p.d0||p.day)).length,min=td.reduce((a,p)=>a+(+p.min||0),0);
+  const vs=[...new Set(td.map(p=>verKey(p.v)))].filter(v=>v!=='?').sort(verCmp),lv=vs[0]||'',onL=lv?td.filter(p=>verKey(p.v)===lv).length:0;
+  const yNew=new Set(yy.filter(p=>p.day===(p.d0||p.day)).map(p=>p.iid)),back=td.filter(p=>yNew.has(p.iid)).length;
+  return {n,nw,ret:n-nw,mpp:n?Math.round(min/n):0,lv,onL,yN:yy.length,yNew:yNew.size,back}}
+VIEWS.home=()=>{const t=Date.now();let h='';
+  const hr=new Date().getHours(),hi=hr<5?'Late shift':hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+  // today at a glance
+  if(S.loaded.plays&&!S.errs.plays){const T=todayNums();
+    h+='<div class="hero"><div class="hk"><span class="live"></span>Today in the galaxy<span class="t">'+esc(hi)+', Commander</span></div>'
+      +'<div class="hmain"><div class="hbig">'+nf(T.n)+'</div><div class="hcap">players today<br><span class="sub">Yesterday: <b>'+nf(T.yN)+'</b> · the day resets at '+esc(resetTime())+'</span></div></div>'
+      +'<div class="hgrid">'+hst('sparkle','New',nf(T.nw),'first time today')+hst('refresh','Returning',nf(T.ret),'played before today')+hst('clock','Min / player',T.mpp,'today so far')
+      +hst('up',T.lv?'On v'+esc(T.lv):'Latest version',T.n?Math.round(T.onL/T.n*100)+'%':'–',T.onL+' of '+T.n)+'</div>'
+      +'<div class="hfoot"><span class="ht">'+(T.yNew?'Yesterday\'s new players back today: <b>'+T.back+' of '+T.yNew+'</b> ('+Math.round(T.back/T.yNew*100)+'%) so far':'')+'</span>'+'<button class="btn sm sec" data-tab="stats">'+ic('chart')+'All stats</button></div></div>'}
+  else h+='<div class="hero">'+(secState('plays')||'<div class="load">Loading…</div>')+'</div>';
+  h+='<div class="home2"><div>';
+  // what needs you
+  const A=[];const sw=supWaiting();if(sw)A.push(['support','chat','#5aa9ff',sw+' player'+(sw>1?'s':'')+' waiting for an answer','Support · '+esc(supFirstName())]);
+  if(S.rep.length)A.push(['reports','flag','#f87171',S.rep.length+' open report'+(S.rep.length>1?'s':''),'Players reported a name']);
+  const fn=fbNew();if(fn)A.push(['feedback','star','#ffd166',fn+' new feedback','In the last 24 hours']);
+  if(S.draft)A.push(['messages','edit','#ffd166','A message draft is waiting','“'+esc(S.draft.t||'Untitled')+'”']);
+  const vm=S.ver&&S.ver.min;
+  h+='<div class="sech"><h2>'+ic('bell')+'Needs you</h2></div><div class="alerts">'+(A.length?A.map(a=>'<button class="alr" data-tab="'+a[0]+'" style="--c:'+a[2]+'"><span class="ai">'+ic(a[1])+'</span><span class="at"><b>'+a[3]+'</b><span>'+a[4]+'</span></span>'+ic('chev','ch')+'</button>').join('')
+    :'<div class="alr ok" style="--c:#4ade80"><span class="ai">'+ic('check')+'</span><span class="at"><b>All caught up</b><span>No one waiting, no reports, no new feedback.</span></span></div>')+'</div>';
+  // quick actions
+  h+='<div class="sech"><h2>'+ic('bolt')+'Quick actions</h2></div><div class="qgrid">'
+    +qbtn('new','plus','#38e1c6','New message','data-v="blank"')+qbtn('qaMsg','chat','#5aa9ff','Message a player')+qbtn('qaFind','search','#c084fc','Find a player')
+    +qbtn('qaEv','comet','#ff6fb5','Meteor shower')+qbtn('qaSa','shop','#ffd166','Store sale')+qbtn('qaUpd','up','#4ade80','Game updates')+'</div>';
+  h+='</div><div>';
+  // live right now
+  h+='<div class="sech"><h2>'+ic('radio')+'Live right now</h2></div>'+liveStrip().replace(/<button class="lv rep"[\s\S]*?<\/button>/,'');
+  // the version game players must have
+  if(S.loaded.ver)h+='<button class="alr" data-tab="updates" style="--c:'+(vm?'#4ade80':'#7f8bb8')+'"><span class="ai">'+ic('shield')+'</span><span class="at"><b>'+(vm?'Required update: '+esc(vm)+' or newer':'Required update: off')+'</b><span>'+(vm?'Older 1.22+ games show “Update to keep playing”.':'Any version can play. Turn it on in Game updates.')+'</span></span>'+ic('chev','ch')+'</button>';
+  h+='</div></div>';
+  return h};
+function hst(i,k,v,d){return '<div class="hst"><div class="k">'+ic(i)+esc(k)+'</div><div class="v">'+v+'</div><div class="d">'+esc(d)+'</div></div>'}
+function qbtn(act,i,c,l,extra){return '<button class="qbtn" data-act="'+act+'" '+(extra||'')+' style="--c:'+c+'"><span class="qi">'+ic(i)+'</span><span>'+esc(l)+'</span></button>'}
+function resetTime(){try{const d=new Date();d.setUTCHours(24,0,0,0);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}catch(e){return 'midnight UTC'}}
+function supFirstName(){try{const r=(S.sup.rows||[]).find(x=>supUnread(x.data)&&!x.data.muted);if(!r)return '';const n=S.sup.names[r.id];return (n||'Guest '+shortUid(r.id))+(r.data.last?': '+String(r.data.last).slice(0,60):'')}catch(e){return ''}}
+function focusSoon(sel){setTimeout(()=>{const el=$(sel);if(el){try{el.focus();el.scrollIntoView({block:'center'})}catch(e){}}},60)}
+Object.assign(ACT,{
+  menu:()=>{S.ov2.menu=!S.ov2.menu;renderHead()},
+  qaMsg:()=>{S.sup.open=null;go('support');focusSoon('#su-q')},
+  qaFind:()=>{S.prof=null;S.mail=null;go('profiles');focusSoon('#plQ')},
+  qaEv:()=>{go('events');ACT.evNew()},
+  qaSa:()=>{go('store');ACT.saNew()},
+  qaUpd:()=>go('updates'),
+  relUr:()=>{go('updates');setTimeout(()=>{urF().open=true;render();const c=document.getElementById('urCard');if(c)try{c.scrollIntoView({block:'start'})}catch(e){}},50)},
+  mF:el=>{S.ov2.mF=el.dataset.v;render()},
+  plF:el=>{S.ov2.plF=el.dataset.v;const L=$('#plList');if(L){L.innerHTML=plListHTML();$$('#plFbar button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.ov2.plF))}else render()},
+  suF:el=>{S.ov2.suF=el.dataset.v;render()}});
+
+/* =====================================================================
+   STATS
+   ===================================================================== */
+function rangeHTML(){return '<div class="range" role="group" aria-label="Range">'+[7,14,30].map(n=>'<button class="'+(S.range===n?'on':'')+'" aria-pressed="'+(S.range===n)+'" data-range="'+n+'">'+n+' days</button>').join('')+'</div>'}
+VIEWS.stats=()=>{let h=head('Players','Who is playing, day by day. Days are UTC days: a new one starts at '+esc(resetTime())+' your time.',rangeHTML());
+  const st=secState('plays');if(st)return h+st;const c=compute();S.chart=c;
+  const td=S.plays.filter(p=>p.day===c.today),vs=[...new Set(td.map(p=>verKey(p.v)))].filter(v=>v!=='?').sort(verCmp),lv=vs[0];
+  h+='<div class="tiles">'+tile('Playing today',c.todayP,'unique players, UTC day')+(lv?tile('On v'+esc(lv)+' today',pct(td.filter(p=>verKey(p.v)===lv).length,td.length),td.filter(p=>verKey(p.v)===lv).length+' of '+td.length+' players'):'')
+    +tile('Players',c.players,'in the last '+S.range+' days')+tile('New players',c.newp,'first seen in this range')+tile('Minutes a day',c.avg,'average per player per day')
+    +tile('Came back next day',pct(c.r1,c.c1),c.r1+' of '+c.c1+' (finished days)')+tile('Still playing after a week',pct(c.r7,c.c7),c.r7+' of '+c.c7+' players')+'</div>';
+  h+='<div class="card"><div class="ph"><div><h2>Players per day</h2><div class="sub">'+(S.table?'Who came back, minutes per player and the top version each day.':'Tap a column for details.')+'</div></div><button class="btn sm sec" data-act="tbl">'+ic(S.table?'chart':'list')+(S.table?'Chart':'Table')+'</button></div>';
+  if(S.table){const D=anaDays(c),yd=addDays(c.today,-1);h+='<div class="tw"><table class="tbl day"><thead><tr><th>Day</th><th>Players</th><th>New</th><th>Returning</th><th>Min / player</th><th>New came back</th><th>Top version</th></tr></thead><tbody>'
+      +c.days.slice().reverse().map(d=>{const b=c.byDay[d],o=D[d];const back=o.e?(d===yd?'<span class="sub">'+o.r+' of '+o.e+' so far</span>':pct(o.r,o.e)+' <small>'+o.r+'/'+o.e+'</small>'):'<span class="sub">—</span>';
+        return '<tr><td>'+short(d)+(d===c.today?' <span class="chip st live">today</span>':'')+'</td><td>'+b.players+'</td><td>'+b.newp+'</td><td>'+o.ret+'</td><td>'+o.mpp+'</td><td>'+back+'</td><td>'+topVer(o.vers)+'</td></tr>'}).join('')+'</tbody></table></div>'}
+  else h+='<div class="chart" id="chart">'+columns(c)+'<div class="tip" id="tip" hidden></div></div>';
+  h+='</div><p class="note">Players only appear once their game is on version 1.10.2 or newer. A player who reinstalls counts as a new one.</p>';
+  return h};
+VIEWS.retention=()=>{let h=head('Retention','How well each version keeps new players. A day only counts once it is over, so today never drags the numbers down.');
+  const st=secState('plays');if(st)return h+st;return h+retCardHTML()};
+VIEWS.progress=()=>{let h=head('Progress','How far players get, and where players in the guided ranks are right now.',rangeHTML());
+  const st=secState('plays');if(st)return h+st;const c=compute();S.chart=c;const maxB=Math.max(1,...c.buckets.map(b=>b.c));
+  h+='<div class="cols2"><div class="card"><h2>How far players get</h2><div class="sub">Highest Commander Level reached by each player active in the last '+S.range+' days</div>'+c.buckets.map(b=>'<div class="hb"><span class="lb">'+b.n+'</span><span class="tr"><i style="width:'+(b.c/maxB*100)+'%"></i></span><span class="n">'+b.c+' · '+pct(b.c,c.players)+'</span></div>').join('')
+    +'<p class="note">'+c.acct+' of '+c.players+' players are signed in to an account.</p><div class="vers">'+Object.keys(c.vers).sort().reverse().map(v=>'<span>v'+esc(v)+' <b>'+c.vers[v]+'</b></span>').join('')+'</div></div>';
+  const rk=Object.keys(c.ranks).map(Number).sort((a,b)=>a-b),maxR=Math.max(1,...rk.map(r=>c.ranks[r].n));
+  h+='<div class="card"><h2>Guided ranks</h2><div class="sub">Where each player active in the last '+S.range+' days is now. Gray: hasn\'t played for 2+ days (likely stopped there).</div>'
+    +(rk.length?rk.map(r=>{const o=c.ranks[r],tk=Object.keys(o.tasks).sort().map(t=>(t==='0'?'no tasks done yet':t+' task'+(t==='1'?'':'s')+' done')+': <b>'+o.tasks[t]+'</b>').join(' · ');return '<div class="hb rk"><span class="lb">Rank '+r+'<small>'+esc(RN[r]||'')+'</small></span><span class="tr"><i style="width:'+(o.n/maxR*100)+'%"></i><i class="gone" style="width:'+(o.gone/maxR*100)+'%"></i></span><span class="n">'+o.n+(o.gone?' · '+o.gone+' gone':'')+'</span></div>'+(tk?'<div class="rkT">'+tk+'</div>':'')}).join(''):'<div class="empty">No one is in the guided ranks right now.</div>')
+    +'<p class="note">Finished the ranks: <b>'+c.rdone+'</b> · Turned guidance off: <b>'+c.roff+'</b>.</p></div></div>';
+  return h};
+VIEWS.perf=()=>{const keep=S.perfAll;S.perfAll=true;let h=head('Message stats','Seen, button taps and gifts claimed for your latest 25 messages. Tap rate = taps ÷ seen.')+perfCard();S.perfAll=keep;
+  return h.replace(/<button class="btn sm sec" data-tab="messages">[\s\S]*?<\/button>/,'<button class="btn sm sec" data-tab="messages">'+ic('msg')+'Messages</button>').replace(/<div class="more">[\s\S]*?<\/div>/,'')};
+
+/* =====================================================================
+   LIVE OPS
+   ===================================================================== */
+VIEWS.updates=()=>{let h=head('Game updates','Getting players onto the newest version: the update message for older games, and the version players must have.');
+  let rc='';try{rc=relCardHTML()}catch(e){}
+  return h+rc+urCardHTML()+verCardHTML()+'<button class="alr" data-tab="boards" style="--c:#ffd166;margin-top:4px"><span class="ai">'+ic('crown')+'</span><span class="at"><b>Old versions on the leaderboards</b><span>Take players on old versions off the boards, put updated ones back.</span></span>'+ic('chev','ch')+'</button>'};
+// Messages: templates fold away, filter chips with counts, and a search
+VIEWS.messages=()=>{let h=head('Messages','The cards players see when they open the game. Order in game: priority, then newest start.','<button class="btn" data-act="new" data-v="blank">'+ic('plus')+'New message</button>');
+  h+='<details class="tdr"'+(S.ov2.tpl?' open':'')+' id="tplBox"><summary>'+ic('sparkle')+'<span style="flex:1">Start from a template</span>'+ic('chev','chv')+'</summary><div class="tdgrid">'
+    +TPL_ORDER.filter(k=>k!=='blank').map(k=>'<button class="tdb" style="--pc:'+TAGS[TPL[k].tag].c+'" data-act="new" data-v="'+k+'"><b>'+esc(TPL[k].n)+'</b><span>'+esc(TPL[k].d||'')+'</span></button>').join('')+'</div></details>';
+  const st=secState('motd');if(st)return h+st;
+  const t=Date.now(),G={live:[],sched:[],paused:[],ended:[]};S.motd.forEach(m=>G[mStatus(m,t)].push(m));
+  G.live.sort(gameOrder);G.sched.sort((a,b)=>a.start-b.start);G.paused.sort((a,b)=>(b.up||0)-(a.up||0));G.ended.sort((a,b)=>b.end-a.end);
+  const F=S.ov2.mF,q=(S.ov2.mQ||'').trim().toLowerCase();
+  const fb=[['all','All',S.motd.length],['live','Live',G.live.length],['sched','Scheduled',G.sched.length],['paused','Paused',G.paused.length],['ended','Ended',G.ended.length]];
+  h+='<div class="fbar" role="group" aria-label="Show">'+fb.map(x=>'<button class="'+(F===x[0]?'on':'')+'" data-act="mF" data-v="'+x[0]+'">'+x[1]+'<span class="n">'+x[2]+'</span></button>').join('')+'</div>';
+  if(S.motd.length>4)h+='<div class="tools"><div class="srch">'+ic('search')+'<input class="inp" id="mQ" value="'+esc(S.ov2.mQ||'')+'" placeholder="Search messages" aria-label="Search messages" autocomplete="off"></div></div>';
+  h+='<div id="mList">'+msgListHTML(G)+'</div>';
+  return h};
+function msgListHTML(G){const F=S.ov2.mF,q=(S.ov2.mQ||'').trim().toLowerCase();
+  const mt=m=>!q||(String(m.t||'')+' '+String(m.b||'')+' '+String(m.k||'')).toLowerCase().indexOf(q)>=0;
+  const grp=(k,label,note)=>{const L=G[k].filter(mt);return L.length?'<section class="mgroup" aria-label="'+label+'"><h3 class="gh"><span class="chip st '+k+'">'+label+'</span><span class="n">'+L.length+'</span><span class="gl">'+note+'</span></h3>'+L.slice(0,k==='ended'?60:999).map(m=>msgRow(m,k)).join('')+'</section>':''};
+  let h='';
+  if(F==='all'||F==='live')h+=grp('live','Live','in game order');
+  if(F==='all'||F==='sched')h+=grp('sched','Scheduled','next first');
+  if(F==='all'||F==='paused')h+=grp('paused','Paused','hidden in game');
+  if(F==='ended')h+=grp('ended','Ended','most recent first');
+  else if(F==='all'){const L=G.ended.filter(mt);if(L.length)h+='<details class="mgroup" id="endedGrp"'+(S.openEnded||q?' open':'')+'><summary class="gh">'+ic('chev')+'<span class="chip st ended">Ended</span><span class="n">'+L.length+'</span><span class="gl">most recent first</span></summary>'+L.slice(0,40).map(m=>msgRow(m,'ended')).join('')+'</details>'}
+  if(!h)h='<div class="card mempty">'+(S.motd.length?(q?'No message matches “'+esc(q)+'”.':'Nothing here.'):'No messages yet. Start from a template above.')+'</div>';
+  return h}
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='mQ'){S.ov2.mQ=e.target.value;clearTimeout(S.ov2.mT);S.ov2.mT=setTimeout(()=>{const t=Date.now(),G={live:[],sched:[],paused:[],ended:[]};S.motd.forEach(m=>G[mStatus(m,t)].push(m));G.live.sort(gameOrder);G.sched.sort((a,b)=>a.start-b.start);G.paused.sort((a,b)=>(b.up||0)-(a.up||0));G.ended.sort((a,b)=>b.end-a.end);const L=$('#mList');if(L){L.innerHTML=msgListHTML(G);if(S.ov2.mQ&&S.motd.some(m=>m.img==='doc'))loadImgs(S.motd)}},120)}});
+document.addEventListener('toggle',e=>{if(e.target&&e.target.id==='tplBox')S.ov2.tpl=e.target.open},true);
+
+/* =====================================================================
+   PLAYERS
+   ===================================================================== */
+VIEWS.profiles=()=>{let h=head('Profiles','Everyone with a cloud save, most recently active first. Open one for their wallet, play time, purchases and gifts, to message them, or to change their account.');
+  h+=profHTML();if(S.mail)h+=mailPanelHTML();return h+plCardHTML().replace(/(<h2>Player profiles<\/h2>)<div class="sub">[\s\S]*?<\/div>/,'$1')};
+VIEWS.boards=()=>head('Leaderboards','The all-time and weekly boards, players kept off them, and players on old versions.')+ovCardHTML()
+  +'<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div></div>'+hidHTML()+'</div>';
+VIEWS.names=()=>head('Names','Display names players picked, and names you took away.')
+  +'<div class="card"><div class="ph"><div><h2>Display names</h2><div class="sub">Newest first. Search matches the start of the name (spaces, _ . - ignored).</div></div></div><div class="srch">'+ic('search')+'<input class="inp" id="dnQ" data-f="dnQ" value="'+esc(S.dnQ)+'" placeholder="Search names, e.g. star" aria-label="Search display names" autocomplete="off"></div><div id="dnList">'+dnListHTML()+'</div></div>'
+  +'<div class="card" id="blkCard"><div class="ph"><div><h2>Blocked names</h2><div class="sub">Names taken away by a reset. Nobody can pick them, including the player who had it. Newest first.</div></div></div><div id="blkList">'+blockedHTML()+'</div></div>';
+VIEWS.reports=()=>head('Reports','Names players reported from the leaderboards. Reset a name, or dismiss the report.')+repCardHTML();
+// Profiles: filter and sort the loaded players
+{const p0=plCardHTML;plCardHTML=function(){let h=p0.apply(this,arguments);if(secState('pl')||!S.pl)return h;
+  const L=S.pl||[],F=S.ov2.plF,cnt={all:L.length,old:L.filter(plOld).length,lic:L.filter(x=>x.lic).length,flag:L.filter(x=>x.flags).length,today:L.filter(x=>x.at>Date.now()-DAY).length};
+  const bar='<div class="fbar" id="plFbar" role="group" aria-label="Show">'+[['all','All'],['today','Active today'],['old','Old version'],['lic','License'],['flag','Flagged']].map(x=>'<button class="'+(F===x[0]?'on':'')+'" data-act="plF" data-v="'+x[0]+'">'+x[1]+'<span class="n">'+cnt[x[0]]+'</span></button>').join('')+'</div>';
+  const sort='<select class="inp" id="plSort" aria-label="Sort players">'+[['recent','Recently active'],['lv','Highest level'],['play','Most time played'],['dm','Most Dark Matter']].map(o=>'<option value="'+o[0]+'"'+(S.ov2.plSort===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>';
+  return h.replace(/<div class="srch">([\s\S]*?)<\/div>/,'<div class="tools"><div class="srch">$1</div>'+sort+'</div>'+bar)}}
+function plOld(x){return !!(x.v&&verLt(x.v,GAME_VER))}
+{const l0=plListHTML;plListHTML=function(){const keep=S.pl;const F=S.ov2.plF,so=S.ov2.plSort;let L=(keep||[]).slice();
+  if(F==='old')L=L.filter(plOld);else if(F==='lic')L=L.filter(x=>x.lic);else if(F==='flag')L=L.filter(x=>x.flags);else if(F==='today')L=L.filter(x=>x.at>Date.now()-DAY);
+  if(so==='lv')L.sort((a,b)=>b.lv-a.lv);else if(so==='play')L.sort((a,b)=>b.play-a.play);else if(so==='dm')L.sort((a,b)=>b.dm-a.dm);
+  S.pl=L;try{let h=l0.apply(this,arguments);if(F!=='all'&&keep&&keep.length)h='<div class="note" style="margin:0 0 8px">Showing '+L.length+' of the '+keep.length+' most recently active. Show more loads older players.</div>'+h;return h}finally{S.pl=keep}}}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='plSort'){S.ov2.plSort=e.target.value;const L=$('#plList');if(L)L.innerHTML=plListHTML()}});
+
+/* =====================================================================
+   INBOX
+   ===================================================================== */
+// Feedback: filter by rating, or only the ones that say what was confusing
+{const f0=VIEWS.feedback;VIEWS.feedback=()=>{if(secState('feedback'))return f0();const all=S.fb||[],F=S.ov2.fbF||'all';
+  const pick={all:()=>true,low:f=>f.stars>=1&&f.stars<=2,mid:f=>f.stars===3,high:f=>f.stars>=4,prob:f=>!!String(f.confuse||'').trim()};
+  S.fb=all.filter(pick[F]||pick.all);let h;try{h=f0()}finally{S.fb=all}
+  if(!all.length)return h;
+  const bar='<div class="fbar" role="group" aria-label="Show">'+[['all','All'],['prob','Something confused them'],['low','1–2 ★'],['mid','3 ★'],['high','4–5 ★']].map(x=>'<button class="'+(F===x[0]?'on':'')+'" data-act="fbF" data-v="'+x[0]+'">'+x[1]+'<span class="n">'+all.filter(pick[x[0]]).length+'</span></button>').join('')+'</div>';
+  return h.replace(/(<div class="card"><div class="ph"><div><h2>Feedback)/,bar+'$1')}}
+Object.assign(ACT,{fbF:el=>{S.ov2.fbF=el.dataset.v;render()}});
+{const s0=VIEWS.support;VIEWS.support=()=>{if(S.sup.open)return s0();let h=s0();if(secState('sup'))return h;
+  const R=S.sup.rows||[],F=S.ov2.suF,cnt={all:R.length,wait:R.filter(x=>supUnread(x.data)&&!x.data.muted).length,answered:R.filter(x=>!supUnread(x.data)).length,muted:R.filter(x=>x.data.muted).length};
+  const keep=(id)=>{const r=R.find(x=>x.id===id);if(!r)return true;const d=r.data;return F==='all'||(F==='wait'&&supUnread(d)&&!d.muted)||(F==='answered'&&!supUnread(d))||(F==='muted'&&d.muted)};
+  h=h.replace(/<button class="suRow[^"]*" data-act="supOpen" data-v="([^"]+)">[\s\S]*?<\/button>/g,(all,id)=>keep(id)?all:'');
+  const bar='<div class="fbar" role="group" aria-label="Show">'+[['all','All'],['wait','Waiting'],['answered','Answered'],['muted','Muted']].map(x=>'<button class="'+(F===x[0]?'on':'')+'" data-act="suF" data-v="'+x[0]+'">'+x[1]+'<span class="n">'+cnt[x[0]]+'</span></button>').join('')+'</div>';
+  return h.replace(/(<div class="card"><div class="ph"><div><h2>Conversations)/,bar+'$1')}}
+
 /* ---------- boot ---------- */
-(function(){const h=location.hash.slice(1);if(TABS.some(x=>x[0]===h))S.tab=h})();
+S.tab=pageFor(location.hash.slice(1)||'home');
 render();
 loadLibrary();
 DB.init().catch(e=>{if(DB.mode!=='live')throw e;console.warn('[cc] Firebase unavailable, using preview data',e);S.fallback=e&&e.message||String(e);DB=mockDB();return DB.init()}).then(()=>{
