@@ -708,6 +708,55 @@ h1,h2,h3,.pagehead h2,.card h2,.sech h2,.tile .v,.btn,.chip,.range button,.lv .v
 .tdb span{font-size:12px;color:var(--mu2)}
 .mempty{padding:26px 10px;text-align:center;color:var(--mu)}
 @media(max-width:959px){.abar{bottom:calc(var(--bn) + var(--sab) + 10px)}}
+
+/* ---- ANALYTICS 2 ---- */
+.hb.a2b{grid-template-columns:minmax(96px,34%) minmax(0,1fr) auto;gap:10px;margin-top:8px}
+.hb.a2b.w{grid-template-columns:minmax(130px,46%) minmax(0,1fr) auto}
+.hb.a2b .lb{color:var(--tx);font-size:13px;line-height:1.25;overflow-wrap:anywhere}
+.hb.a2b .n{font-size:12.5px;white-space:nowrap}.hb.a2b .n small{color:var(--mu2)}
+.a2ins{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;margin:8px 0 6px;border-radius:12px;background:rgba(255,209,102,.07);border:1px solid rgba(255,209,102,.28);font-size:13.5px;line-height:1.45;color:#f3e7c4}
+.a2ins .i{flex:none;color:var(--yl);margin-top:1px}.a2ins b{color:#fff}
+.a2segs{display:grid;grid-template-columns:minmax(0,1fr);gap:4px 22px;margin-top:6px}
+@media(min-width:760px){.a2segs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.a2seg h3{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu2);margin:14px 0 2px}
+.a2fr{display:grid;grid-template-columns:minmax(104px,32%) minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(37,49,94,.55)}
+.a2fr:last-child{border-bottom:0}
+.a2fr .lb{display:flex;flex-direction:column;font-size:13px;line-height:1.2}.a2fr .lb small{font-size:11px;color:var(--mu2)}
+.a2fr.worst{background:linear-gradient(90deg,rgba(248,113,113,.12),transparent 70%);border-radius:8px;padding-left:6px;margin-left:-6px}
+.a2fr.worst .lb{color:#ffb4b4}
+.a2fb{display:flex;flex-direction:column;gap:4px}
+.a2fb .tr{position:relative;height:14px;border-radius:0 5px 5px 0;background:var(--grid)}
+.a2fb .tr i{position:absolute;left:0;top:0;bottom:0;border-radius:0 5px 5px 0;opacity:.9}
+.a2fb .tr em{position:absolute;right:4px;top:-1px;font-style:normal;font-size:11px;font-weight:700;color:var(--tx);text-shadow:0 1px 2px #000}
+.a2leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 4px;font-size:12.5px;color:var(--mu)}
+.a2leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.a2line{display:block;width:100%;height:auto;margin-top:8px;overflow:visible}
+.tbl.heat td,.tbl.heat th{text-align:center;padding:6px 4px;font-variant-numeric:tabular-nums}
+.tbl.heat td:first-child,.tbl.heat th:first-child{text-align:left}
+.tbl.heat td{border-radius:4px;font-size:12.5px}
+.tbl.heat td.na{color:var(--mu2)}
+.a2hours{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:3px;height:140px;align-items:end;margin-top:10px}
+.a2hours span{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.a2hours i{display:block;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#5cf0d6,#1fb9a0)}
+.a2hours b{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--mu2);white-space:nowrap}
+.a2hours{margin-bottom:22px}
+.a2src{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:20px 0 12px;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-size:13px;color:var(--mu)}
+.a2src>.i{color:var(--ac)}.a2src span{flex:1;min-width:200px}.a2src b{color:var(--tx)}
+.a2gate{margin-top:18px;border-style:dashed;border-color:var(--line2)}
+.a2gate .btn{margin-top:12px}
+/* a player's history */
+.hist h3 small{font-family:var(--body);font-size:12px;font-weight:500;color:var(--mu2);margin-left:6px;text-transform:none;letter-spacing:0}
+.hist .fbar{margin:8px 0 10px}
+.hs{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;background:var(--card2)}
+.hsh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:9px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--line)}
+.hsh b{font-family:var(--display);font-size:13.5px}.hsh span{font-size:12px;color:var(--mu2)}
+.hsl{display:flex;flex-direction:column;padding:4px 0}
+.he{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 12px;font-size:13px}
+.he .hi{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent)}
+.he .hi .i{width:13px;height:13px}
+.he .ht{min-width:0;overflow-wrap:anywhere}
+.he .hw{font-size:11.5px;color:var(--mu2);white-space:nowrap}
+.hsn{padding:8px 12px}
 </style></head><body>
 <div class="app" id="app">
   <header class="top">
@@ -1784,8 +1833,7 @@ function profHTML(){const P=S.prof;if(!P)return '';const head='<div class="card 
     +((pf.gifts||[]).length?'<div class="tw"><table class="tbl"><thead><tr><th>When</th><th>From</th><th>What</th></tr></thead><tbody>'+pf.gifts.slice().reverse().slice(0,25).map(x=>'<tr><td>'+esc(rel(x[0]))+'</td><td>'+esc(x[1])+'</td><td>'+esc(x[2])+'</td></tr>').join('')+'</tbody></table></div>':'')
     +(P.mail.length?'<div class="sub" style="margin-top:6px">Mail you sent: '+P.mail.length+' · gifts claimed '+P.mail.filter(m=>m.data.got).length+' · read '+P.mail.filter(m=>m.data.seen).length+'</div>':'')+'</section>';
   h+='<section class="pcard"><h3>'+ic('chart')+'Where Dark Matter comes from</h3>'+srcTbl(pf.dm,'Dark Matter')+'<h3 style="margin-top:10px">'+ic('chart')+'Star Shards</h3>'+srcTbl(pf.sh,'Star Shards')+'</section>';
-  const ev=(pf.ev||[]).slice().reverse().slice(0,S.pfEvAll?200:40);
-  h+='<section class="pcard wide"><h3>'+ic('chart')+'Recent activity</h3>'+(ev.length?'<div class="evl">'+ev.map(e=>'<div><span>'+esc(new Date(e[0]).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}))+'</span><b>'+esc(evTxt(e))+'</b></div>').join('')+'</div>'+((pf.ev||[]).length>40&&!S.pfEvAll?'<button class="btn sm sec" data-act="pfEvAll">Show all '+pf.ev.length+'</button>':''):'<div class="sub">No activity log yet (game 1.21+).</div>')+'</section>';
+  h+=histHTML(pf);
   h+=profOpsHTML(P,old)+'</div></div>';return h}
 function profOpsHTML(P,old){const F=S.pfF;const isN=F.k!=='items0'&&F.k!=='lic';
   let h='<section class="pcard wide" id="pfOps"><h3>'+ic('tag')+'Change this account</h3><p class="sub" style="margin-top:0">Give, take or set. The game applies it the next time the player has it open (game 1.21+), saves it, and it shows here as done with the before and after.</p>';
@@ -2812,7 +2860,7 @@ VIEWS.stats=()=>{let h=head('Players','Who is playing, day by day. Days are UTC 
       +c.days.slice().reverse().map(d=>{const b=c.byDay[d],o=D[d];const back=o.e?(d===yd?'<span class="sub">'+o.r+' of '+o.e+' so far</span>':pct(o.r,o.e)+' <small>'+o.r+'/'+o.e+'</small>'):'<span class="sub">—</span>';
         return '<tr><td>'+short(d)+(d===c.today?' <span class="chip st live">today</span>':'')+'</td><td>'+b.players+'</td><td>'+b.newp+'</td><td>'+o.ret+'</td><td>'+o.mpp+'</td><td>'+back+'</td><td>'+topVer(o.vers)+'</td></tr>'}).join('')+'</tbody></table></div>'}
   else h+='<div class="chart" id="chart">'+columns(c)+'<div class="tip" id="tip" hidden></div></div>';
-  h+='</div><p class="note">Players only appear once their game is on version 1.10.2 or newer. A player who reinstalls counts as a new one.</p>';
+  h+='</div><p class="note">Players only appear once their game is on version 1.10.2 or newer. A player who reinstalls counts as a new one.'+(S.plRead!=null&&S.plCached?' This visit read '+nf(S.plRead)+' new check-in'+(S.plRead===1?'':'s')+'; the other '+nf(S.plCached)+' were kept in this browser.':'')+'</p>';
   return h};
 VIEWS.retention=()=>{let h=head('Retention','How well each version keeps new players. A day only counts once it is over, so today never drags the numbers down.');
   const st=secState('plays');if(st)return h+st;return h+retCardHTML()};
@@ -2902,6 +2950,300 @@ Object.assign(ACT,{fbF:el=>{S.ov2.fbF=el.dataset.v;render()}});
   h=h.replace(/<button class="suRow[^"]*" data-act="supOpen" data-v="([^"]+)">[\s\S]*?<\/button>/g,(all,id)=>keep(id)?all:'');
   const bar='<div class="fbar" role="group" aria-label="Show">'+[['all','All'],['wait','Waiting'],['answered','Answered'],['muted','Muted']].map(x=>'<button class="'+(F===x[0]?'on':'')+'" data-act="suF" data-v="'+x[0]+'">'+x[1]+'<span class="n">'+cnt[x[0]]+'</span></button>').join('')+'</div>';
   return h.replace(/(<div class="card"><div class="ph"><div><h2>Conversations)/,bar+'$1')}}
+
+/* =====================================================================
+   ANALYTICS 2 (Nov 2026): what players do, where they stop, and who comes back.
+   From the daily check-ins (plays, every player, the last 35 days) and, on demand, the play history inside the cloud
+   saves (users/{uid}.save → G.pf: sessions, the Shop, videos, gifts, Dark Matter by source, the last 200 events).
+   Stats pages: Players · Retention · Where they stop · Sessions · Activity · Shop & videos · Message stats.
+   ===================================================================== */
+SEC.stats.pages.splice(0,SEC.stats.pages.length,['stats','Players','users'],['retention','Retention','refresh'],['funnel','Where they stop','route'],['sessions','Sessions','clock'],['activity','Activity','list'],['shop','Shop & videos','shop'],['perf','Message stats','msg']);
+delete PAGE.progress;SEC.stats.pages.forEach(p=>{PAGE[p[0]]={sec:'stats',n:p[1],ic:p[2]}});
+{const p0=pageFor;pageFor=function(t){return t==='progress'?'funnel':p0(t)}}
+S.a2={mode:'exact',vs:'',src:null,I:null};RN[10]='The Upgrades tab';
+const A2_TODAY=()=>dstr(Date.now());
+/* ---------- every install, from the daily check-ins ---------- */
+function instAll(){if(S.a2.src===S.plays&&S.a2.I)return S.a2.I;const I={};
+  for(const p of S.plays){if(!p||!p.iid||!p.day)continue;const o=I[p.iid]||(I[p.iid]={iid:p.iid,d0:p.d0||p.day,v0:'',v0Day:'9999',days:{},acct:false,maxLv:0,maxTut:null,last:''});
+    if(p.d0&&p.d0<o.d0)o.d0=p.d0;o.days[p.day]={min:+p.min||0,sess:+p.sess||0,lv:+p.lv||0,tut:typeof p.tut==='number'?p.tut:null};
+    if(p.day<o.v0Day){o.v0Day=p.day;o.v0=verKey(p.v)}if(p.acct)o.acct=true;o.maxLv=Math.max(o.maxLv,+p.lv||0);
+    if(typeof p.tut==='number'&&p.tut>0)o.maxTut=Math.max(o.maxTut||0,p.tut);if(p.day>o.last)o.last=p.day}
+  S.a2.src=S.plays;S.a2.I=I;return I}
+// new players we saw from their first day, started in the last 35 days
+function cohort(){const t=A2_TODAY(),w=addDays(t,-35);return Object.values(instAll()).filter(o=>o.v0Day===o.d0&&o.d0>=w)}
+// day N is over (the stats day is a UTC day)
+function doneDay(o,n){return addDays(o.d0,n)<A2_TODAY()}
+function playedOn(o,n,roll){const d=addDays(o.d0,n);return roll?Object.keys(o.days).some(x=>x>=d):!!o.days[d]}
+function rateN(L,n,roll){const e=L.filter(o=>doneDay(o,n));const r=e.filter(o=>playedOn(o,n,roll));return {e:e.length,r:r.length,p:e.length?r.length/e.length:null}}
+function pctx(x){return x==null?'—':Math.round(x*100)+'%'}
+function verList(L,min){const c={};L.forEach(o=>{if(o.v0&&o.v0!=='?')c[o.v0]=(c[o.v0]||0)+1});return Object.keys(c).filter(v=>c[v]>=(min||1)).sort(verCmp)}
+function heat(p){if(p==null)return '';const a=Math.round(8+Math.min(1,p/0.6)*52);return 'background:color-mix(in srgb,var(--ac) '+a+'%,transparent)'}
+function a2bar(lbl,p,txt,cls){return '<div class="hb a2b'+(cls?' '+cls:'')+'"><span class="lb">'+lbl+'</span><span class="tr"><i style="width:'+Math.round(Math.max(0,Math.min(1,p||0))*100)+'%"></i></span><span class="n">'+txt+'</span></div>'}
+function a2card(title,sub,body,id){return '<div class="card"'+(id?' id="'+id+'"':'')+'><div class="ph"><div><h2>'+title+'</h2>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div></div>'+body+'</div>'}
+function insight(txt){return '<div class="a2ins">'+ic('sparkle')+'<span>'+txt+'</span></div>'}
+// a line chart: series [{n,c,pts:[[x,y]...]}], x 1..X, y 0..1
+function lineChart(series,X,yMax){const vw=(($('#view')||{}).clientWidth||640)-60,W=Math.max(300,Math.min(700,vw)),H=Math.round(Math.max(200,Math.min(240,W*.42))),L=34,R=10,T=12,B=24;yMax=yMax||Math.max(.1,...series.flatMap(s=>s.pts.map(p=>p[1])));yMax=Math.min(1,Math.ceil(yMax*10)/10);
+  const x=v=>L+(W-L-R)*(v-1)/Math.max(1,X-1),y=v=>T+(H-T-B)*(1-v/yMax);let s='<svg viewBox="0 0 '+W+' '+H+'" class="a2line" role="img" aria-label="Retention curves">';
+  [0,.5,1].forEach(f=>{const yy=y(yMax*f);s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="rgba(255,255,255,.07)"/><text x="'+(L-6)+'" y="'+(yy+4)+'" text-anchor="end" font-size="11" fill="#7f8bb8">'+Math.round(yMax*f*100)+'%</text>'});
+  for(let d=1;d<=X;d++)if(d===1||d%2===0||d===X)s+='<text x="'+x(d)+'" y="'+(H-6)+'" text-anchor="middle" font-size="11" fill="#7f8bb8">D'+d+'</text>';
+  series.forEach(se=>{if(!se.pts.length)return;s+='<polyline fill="none" stroke="'+se.c+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="'+se.pts.map(p=>x(p[0])+','+y(p[1])).join(' ')+'"/>'+se.pts.map(p=>'<circle cx="'+x(p[0])+'" cy="'+y(p[1])+'" r="3" fill="'+se.c+'"><title>'+esc(se.n)+' · day '+p[0]+': '+Math.round(p[1]*100)+'%</title></circle>').join('')});
+  return s+'</svg><div class="a2leg">'+series.map(se=>'<span><i style="background:'+se.c+'"></i>'+esc(se.n)+'</span>').join('')+'</div>'}
+const A2C=['#38e1c6','#ffd166','#c084fc','#5aa9ff','#ff6fb5'];
+
+/* =====================================================================
+   RETENTION
+   ===================================================================== */
+VIEWS.retention=()=>{let h=head('Retention','Who comes back, day by day, by version and by what they did on their first day. A day only counts once it is over, so today never drags the numbers down.');
+  const st=secState('plays');if(st)return h+st;const C=cohort(),roll=S.a2.mode==='roll',t=A2_TODAY();
+  if(!C.length)return h+'<div class="card empty">No new players in the last 35 days.</div>';
+  const recent=C.filter(o=>o.d0>=addDays(t,-28));
+  h+='<div class="fbar" role="group" aria-label="Count"><button class="'+(roll?'':'on')+'" data-act="a2mode" data-v="exact">Came back that day</button><button class="'+(roll?'on':'')+'" data-act="a2mode" data-v="roll">That day or later</button></div>';
+  h+='<div class="tiles">'+[1,3,7,14].map(n=>{const r=rateN(recent,n,roll);return tile('Day '+n,pctx(r.p),r.e?r.r+' of '+r.e+' new players':'too new')}).join('')+'</div>';
+  // cohort grid
+  const days=[];for(let i=1;i<=21;i++)days.push(addDays(t,-i));const cols=[1,2,3,4,5,6,7,14];
+  h+=a2card('Every day\'s new players','Each row is the new players who started that day; each column is how many '+(roll?'were still playing on that day or later':'came back on exactly that day')+'. Brighter is better. A dot means that day isn\'t over yet.',
+    '<div class="tw"><table class="tbl heat"><thead><tr><th>Started</th><th>New</th>'+cols.map(c=>'<th>D'+c+'</th>').join('')+'</tr></thead><tbody>'+days.map(d=>{const L=C.filter(o=>o.d0===d);if(!L.length)return '';
+      return '<tr><td>'+short(d)+'</td><td>'+L.length+'</td>'+cols.map(c=>{if(addDays(d,c)>=t)return '<td class="na">·</td>';const r=L.filter(o=>playedOn(o,c,roll)).length,p=r/L.length;return '<td style="'+heat(p)+'" title="'+r+' of '+L.length+'">'+Math.round(p*100)+'%</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>');
+  // curves by version
+  const vs=verList(C,8).slice(0,4);
+  if(vs.length){const series=vs.map((v,i)=>{const L=C.filter(o=>o.v0===v);const pts=[];for(let n=1;n<=14;n++){const r=rateN(L,n,true);if(r.e>=5)pts.push([n,r.p])}return {n:'v'+v+' ('+L.length+')',c:A2C[i],pts}}).filter(s=>s.pts.length);
+    h+=a2card('Still playing, by version','Share of each version\'s new players still playing on that day or later. Lines stop where too few players are old enough yet.',series.length?lineChart(series,14):'<div class="empty sm">Not enough players yet.</div>')}
+  // what goes with coming back
+  const seg=(name,fn,order)=>{const g={};C.forEach(o=>{if(!doneDay(o,1))return;const k=fn(o);if(k==null)return;(g[k]=g[k]||[]).push(o)});const ks=order.filter(k=>g[k]&&g[k].length);if(!ks.length)return null;
+    const rows=ks.map(k=>{const L=g[k],r=L.filter(o=>playedOn(o,1,false)).length;return {k,n:L.length,r,p:r/L.length}});return {name,rows}};
+  const d0=o=>o.days[o.d0]||{min:0,sess:0,lv:0,tut:null};
+  const S1=[
+    seg('Minutes played on their first day',o=>{const m=d0(o).min;return m<5?'Under 5 min':m<15?'5–14 min':m<30?'15–29 min':'30+ min'},['Under 5 min','5–14 min','15–29 min','30+ min']),
+    seg('Commander Level on their first day',o=>{const l=d0(o).lv;return l<=2?'Lv 1–2':l<=5?'Lv 3–5':l<=9?'Lv 6–9':'Lv 10+'},['Lv 1–2','Lv 3–5','Lv 6–9','Lv 10+']),
+    seg('Guided rank on their first day',o=>{const u=d0(o).tut;if(u==null)return null;if(u>=1000)return 'Finished';const r=Math.floor(u/10);return r<=2?'Rank 1–2':r<=4?'Rank 3–4':r<=8?'Rank 5–8':'Rank 9+'},['Rank 1–2','Rank 3–4','Rank 5–8','Rank 9+','Finished']),
+    seg('Sessions on their first day',o=>{const s=d0(o).sess;return s<=1?'1 session':s===2?'2 sessions':'3+ sessions'},['1 session','2 sessions','3+ sessions']),
+    seg('Signed in to an account',o=>o.acct?'Signed in':'Guests',['Signed in','Guests'])].filter(Boolean);
+  let ins=[];S1.forEach(sg=>{const big=sg.rows.filter(r=>r.n>=5);if(big.length<2)return;const hi=big.reduce((a,b)=>b.p>a.p?b:a),lo=big.reduce((a,b)=>b.p<a.p?b:a);if(hi.p-lo.p>=.08)ins.push({d:hi.p-lo.p,t:'<b>'+esc(sg.name)+'</b>: '+esc(hi.k)+' → <b>'+pctx(hi.p)+'</b> came back the next day; '+esc(lo.k)+' → only <b>'+pctx(lo.p)+'</b>.'})});
+  ins.sort((a,b)=>b.d-a.d);
+  h+=a2card('What goes with coming back the next day','New players split by what happened on their first day. The bar is how many came back the next day.',
+    (ins.length?ins.slice(0,3).map(x=>insight(x.t)).join(''):'')+'<div class="a2segs">'+S1.map(sg=>'<div class="a2seg"><h3>'+esc(sg.name)+'</h3>'+sg.rows.map(r=>a2bar(esc(r.k),r.p,pctx(r.p)+' <small>'+r.r+'/'+r.n+'</small>')).join('')+'</div>').join('')+'</div>');
+  return h+retCardHTML()};
+Object.assign(ACT,{a2mode:el=>{S.a2.mode=el.dataset.v;render()},a2v:el=>{S.a2.vs=el.dataset.v;render()},a2load:()=>histLoad(),a2more:()=>{S.a2.lim=(S.a2.lim||200)+200;histLoad()}});
+
+/* =====================================================================
+   WHERE THEY STOP
+   ===================================================================== */
+VIEWS.funnel=()=>{let h=head('Where they stop','How far new players get through the guided ranks and Commander Levels, by version, and where the ones who left stopped.');
+  const st=secState('plays');if(st)return h+st;const C=cohort();if(!C.length)return h+'<div class="card empty">No new players in the last 35 days.</div>';
+  const vs=verList(C,5);const pick=S.a2.vs&&vs.indexOf(S.a2.vs)>=0?S.a2.vs:'';const show=pick?[pick]:vs.slice(0,2);
+  h+='<div class="fbar" role="group" aria-label="Versions"><button class="'+(pick?'':'on')+'" data-act="a2v" data-v="">Newest two</button>'+vs.map(v=>'<button class="'+(pick===v?'on':'')+'" data-act="a2v" data-v="'+esc(v)+'">v'+esc(v)+'<span class="n">'+C.filter(o=>o.v0===v).length+'</span></button>').join('')+'</div>';
+  // rank funnel
+  const G=show.map(v=>C.filter(o=>o.v0===v&&o.maxTut!=null&&!(o.maxTut>1000)));
+  const reach=(o,r)=>o.maxTut>=1000||Math.floor(o.maxTut/10)>=r;
+  const RK=[];for(let r=1;r<=16;r++)RK.push(r);
+  let worst=null;if(G[0]&&G[0].length>=5)for(let r=2;r<=16;r++){const a=G[0].filter(o=>reach(o,r-1)).length,b=G[0].filter(o=>reach(o,r)).length;if(a>=5){const d=(a-b)/a;if(!worst||d>worst.d)worst={r,d,a,b}}}
+  const off=C.filter(o=>o.maxTut>1000).length;
+  h+=a2card('Guided ranks reached','Share of each version\'s new players who reached each rank. '+(worst?'':'')+(off?off+' players turned guidance off and aren\'t counted.':''),
+    (worst?insight('Biggest drop'+(show[0]?' on v'+esc(show[0]):'')+': <b>Rank '+(worst.r-1)+' → Rank '+worst.r+'</b> ('+esc(RN[worst.r]||'')+'): '+Math.round(worst.d*100)+'% of players who got to rank '+(worst.r-1)+' stopped there.'):'')
+    +'<div class="a2leg">'+show.map((v,i)=>'<span><i style="background:'+A2C[i]+'"></i>v'+esc(v)+' · '+G[i].length+' players</span>').join('')+'</div>'
+    +RK.concat(['done']).map(r=>{const lbl=r==='done'?'Finished<small>all ranks</small>':'Rank '+r+'<small>'+esc(RN[r]||'')+'</small>';
+      return '<div class="a2fr'+(worst&&worst.r===r?' worst':'')+'"><span class="lb">'+lbl+'</span><span class="a2fb">'+G.map((L,i)=>{const n=L.filter(o=>r==='done'?o.maxTut>=1000:reach(o,r)).length,p=L.length?n/L.length:0;return '<span class="tr"><i style="width:'+Math.round(p*100)+'%;background:'+A2C[i]+'"></i><em>'+pctx(L.length?p:null)+'</em></span>'}).join('')+'</span></div>'}).join(''));
+  // level milestones
+  const LVs=[2,3,5,8,10,15,20,30],GL=show.map(v=>C.filter(o=>o.v0===v));
+  h+=a2card('Commander Level reached','Share of each version\'s new players who reached each level so far.',
+    LVs.map(l=>'<div class="a2fr"><span class="lb">Lv '+l+'</span><span class="a2fb">'+GL.map((L,i)=>{const n=L.filter(o=>o.maxLv>=l).length,p=L.length?n/L.length:0;return '<span class="tr"><i style="width:'+Math.round(p*100)+'%;background:'+A2C[i]+'"></i><em>'+pctx(L.length?p:null)+'</em></span>'}).join('')+'</span></div>').join(''));
+  // where the ones who left stopped
+  const t=A2_TODAY(),left=C.filter(o=>o.last<=addDays(t,-3)&&(!pick||o.v0===pick));
+  if(left.length){const by={};left.forEach(o=>{const k=o.maxTut==null?'Lv '+Math.max(1,o.maxLv):o.maxTut>=1000?'Finished the ranks':'Rank '+Math.floor(o.maxTut/10)+(RN[Math.floor(o.maxTut/10)]?' · '+RN[Math.floor(o.maxTut/10)]:'');by[k]=(by[k]||0)+1});
+    const top=Object.keys(by).sort((a,b)=>by[b]-by[a]).slice(0,8),mx=Math.max(...top.map(k=>by[k]));
+    const one=left.filter(o=>Object.keys(o.days).length===1).length;
+    h+=a2card('Where the players who left stopped','New players who haven\'t played for 3 days or more'+(pick?' (v'+esc(pick)+')':'')+': '+left.length+'. Where they were the last time they played.',
+      insight('<b>'+pctx(one/left.length)+'</b> of them only ever played on their first day.')+top.map(k=>a2bar(esc(k),by[k]/mx,by[k]+' · '+pctx(by[k]/left.length))).join(''))}
+  return h+'<div class="sech"><h2>'+ic('users')+'Everyone active right now</h2>'+rangeHTML()+'</div>'+VIEWS.progress().replace(/^[\s\S]*?<div class="cols2">/,'<div class="cols2">')};
+
+/* =====================================================================
+   SESSIONS
+   ===================================================================== */
+VIEWS.sessions=()=>{let h=head('Sessions','How long and how often people play. The top part counts every player; the bottom part reads the play history in cloud saves.');
+  const st=secState('plays');if(st)return h+st;const I=Object.values(instAll()),C=cohort(),t=A2_TODAY();
+  let pd=0,ss=0,mm=0;I.forEach(o=>{for(const d in o.days){if(d<addDays(t,-14))continue;pd++;ss+=o.days[d].sess;mm+=o.days[d].min}});
+  const wk=C.filter(o=>doneDay(o,6)),dpw=wk.length?wk.reduce((a,o)=>a+Object.keys(o.days).filter(d=>d<=addDays(o.d0,6)).length,0)/wk.length:null;
+  const vs=verList(C,5).slice(0,2);const med=a=>{if(!a.length)return null;const s=a.slice().sort((x,y)=>x-y);return s[Math.floor(s.length/2)]};
+  h+='<div class="tiles">'+tile('Sessions a day',pd?(ss/pd).toFixed(1):'—','per player per day played (14 days)')+tile('Minutes a session',ss?(mm/ss).toFixed(1):'—','average (14 days)')+tile('Days played in week one',dpw==null?'—':dpw.toFixed(1),'of the first 7, new players '+(wk.length?'('+wk.length+')':''))
+    +vs.map(v=>{const m=med(C.filter(o=>o.v0===v).map(o=>(o.days[o.d0]||{}).min||0));return tile('First day · v'+esc(v),m==null?'—':m+' min','half of new players play less')}).join('')+'</div>';
+  // first-day minutes by version
+  const B=[['Under 2',0,1],['2–4',2,4],['5–9',5,9],['10–19',10,19],['20–39',20,39],['40+',40,1e9]];
+  if(vs.length)h+=a2card('Minutes on the first day','How long new players played on their first day, by the version they started on.',
+    '<div class="a2leg">'+vs.map((v,i)=>'<span><i style="background:'+A2C[i]+'"></i>v'+esc(v)+'</span>').join('')+'</div>'+B.map(b=>'<div class="a2fr"><span class="lb">'+b[0]+' min</span><span class="a2fb">'+vs.map((v,i)=>{const L=C.filter(o=>o.v0===v),n=L.filter(o=>{const m=(o.days[o.d0]||{}).min||0;return m>=b[1]&&m<=b[2]}).length,p=L.length?n/L.length:0;return '<span class="tr"><i style="width:'+Math.round(p*100)+'%;background:'+A2C[i]+'"></i><em>'+pctx(p)+'</em></span>'}).join('')+'</span></div>').join(''));
+  if(wk.length){const D=[['1 day',1,1],['2 days',2,2],['3 days',3,3],['4–5 days',4,5],['6–7 days',6,7]],mx=Math.max(1,...D.map(d=>wk.filter(o=>{const n=Object.keys(o.days).filter(x=>x<=addDays(o.d0,6)).length;return n>=d[1]&&n<=d[2]}).length));
+    h+=a2card('Days played in the first week','New players whose first week is over: on how many of those 7 days they played.',D.map(d=>{const n=wk.filter(o=>{const k=Object.keys(o.days).filter(x=>x<=addDays(o.d0,6)).length;return k>=d[1]&&k<=d[2]}).length;return a2bar(d[0],n/mx,n+' · '+pctx(n/wk.length))}).join(''))}
+  h+=histGate();if(!histReady())return h;
+  const H=S.a2.H;const lens=[],hours=new Array(24).fill(0);H.forEach(x=>{(x.ev||[]).forEach(e=>{if(e[1]==='bg'){const s=parseInt(e[2],10);if(s>0)lens.push(s/60)}else if(e[1]==='open'){hours[new Date(e[0]).getHours()]++}})});
+  if(lens.length){const LB=[['Under 1 min',0,1],['1–3 min',1,3],['3–10 min',3,10],['10–30 min',10,30],['30 min or more',30,1e9]],mx=Math.max(1,...LB.map(b=>lens.filter(m=>m>=b[1]&&m<b[2]).length));
+    h+=a2card('How long a session lasts','From '+nf(lens.length)+' sessions in the play history (time from opening the game until it went to the background). Half last under <b>'+(Math.round(med(lens)*10)/10)+' min</b>.',LB.map(b=>{const n=lens.filter(m=>m>=b[1]&&m<b[2]).length;return a2bar(b[0],n/mx,n+' · '+pctx(n/lens.length))}).join(''))}
+  const ho=Math.max(1,...hours);if(hours.some(Boolean))h+=a2card('When players open the game','Game opens by hour, in your time zone ('+esc(Intl.DateTimeFormat().resolvedOptions().timeZone||'local')+'). Good times for events and messages.',
+    '<div class="a2hours">'+hours.map((n,i)=>'<span title="'+n+' opens at '+i+':00"><i style="height:'+Math.max(3,Math.round(n/ho*100))+'%"></i><b>'+(i%3===0?(i===0?'12a':i<12?i+'a':i===12?'12p':(i-12)+'p'):'')+'</b></span>').join('')+'</div>');
+  return h};
+
+/* =====================================================================
+   PLAYER HISTORIES (cloud saves), read on demand
+   ===================================================================== */
+function histReady(){return S.a2.hst==='done'&&S.a2.H}
+function histGate(){const n=S.a2.lim||200;if(S.a2.hst==='loading')return '<div class="card a2gate"><div class="load">Reading play histories… '+(S.a2.hn||0)+'</div></div>';
+  if(S.a2.hst==='err')return '<div class="card errc"><b>Couldn\'t read the histories</b><p class="sub">'+esc(S.a2.herr||'')+'</p><button class="btn sm sec" data-act="a2load">Try again</button></div>';
+  if(histReady())return '<div class="a2src">'+ic('users')+'<span>Play history of the <b>'+S.a2.H.length+'</b> most recently active players with a cloud save · read '+esc(agoShort(S.a2.hAt))+'</span><button class="btn sm sec" data-act="a2load">'+ic('refresh')+'Read again</button>'+(S.a2.hMore?'<button class="btn sm sec" data-act="a2more">Read '+200+' more</button>':'')+'</div>';
+  return '<div class="card a2gate"><div class="ph"><div><h2>'+ic('list')+' Play history</h2><div class="sub">The rest of this page reads the play history inside the cloud saves of your '+n+' most recently active players (about '+n+' Firestore reads, a few MB). Players without a cloud save aren\'t included.</div></div></div><button class="btn" data-act="a2load">'+ic('chart')+'Read play histories</button></div>'}
+async function histLoad(){const lim=S.a2.lim||200;S.a2.hst='loading';S.a2.hn=0;soonRender();
+  try{await histSeedMock();const out=[];let after=null;
+    // newest saves first; the documents are big, so 50 at a time
+    let r=await DB.query('users',{order:['updatedAt','desc'],limit:lim+1});S.a2.hMore=r.length>lim;r=r.slice(0,lim);
+    for(const x of r){const g=parseSave(x.data);S.a2.hn=out.length;if(!g||!g.pf)continue;const pf=g.pf;
+      out.push({uid:x.id,v:g.appVer||x.data.version||'',lv:lvOf(g.cmd&&g.cmd.xp),at:+x.data.updatedAt||0,first:+pf.first||+g.createdAt||0,sess:pf.sess&&pf.sess.n||0,c:pf.c||{},dm:pf.dm||{},sh:pf.sh||{},ev:Array.isArray(pf.ev)?pf.ev:[],play:+(g.stats&&g.stats.playSec)||0,lic:!!(g.bought&&g.bought.lic)})}
+    S.a2.H=out;S.a2.hst='done';S.a2.hAt=Date.now()}catch(e){S.a2.hst='err';S.a2.herr=fsErr(e)}soonRender()}
+
+/* =====================================================================
+   ACTIVITY: the history across players
+   ===================================================================== */
+const EV_CAT={level_up:'prog',planet_unlock:'prog',system_reach:'prog',research:'prog',ascend:'prog',feature_new:'prog',vet_claim:'prog',
+  shop:'shop',tab:'shop',need_dm:'shop',pack:'shop','iap+':'shop','iap✓':'shop','iap×':'shop','iap!':'shop',lic_chip:'shop',lic_why:'shop',lic_hide:'shop',
+  'ad+':'gift','ad✓':'gift','ad×':'gift',ad_reward:'gift',daily:'gift',wkgift:'gift',gift:'gift',mail:'gift',chest:'gift',spin:'gift',use:'gift',adm:'gift',
+  tour:'help',help_shown:'help',help_used:'help',skip_offer:'help',skip_ahead:'help',skip_no:'help',next_open:'help',best_upgrade:'help',optimal_buy:'help',ob_mode:'help',tips_off:'help',feature_show:'help',reminder:'help',reminder_tap:'help',notif_ask:'help'};
+const EV_CN={prog:['Progress','up','#4ade80'],shop:['Shop & money','shop','#ffd166'],gift:['Videos & gifts','gift','#c084fc'],help:['Help & guides','info','#5aa9ff'],other:['Other','list','#7f8bb8']};
+Object.assign(EV_TXT,{level_up:d=>'Reached Commander Level '+(evP(d).level||evP(d).lv||'?'),planet_unlock:d=>{const o=evP(d);return 'Unlocked a planet'+(o.planet!=null?' (#'+(+o.planet+1)+(o.system!=null?', system '+(+o.system+1):'')+')':'')},
+  system_reach:d=>'Reached star system '+((+evP(d).system||0)+1),research:d=>'Researched '+String(evP(d).step||'').replace(/_/g,' '),ascend:()=>'Ascended',feature_new:d=>'New feature: '+String(evP(d).id||'').replace(/_/g,' '),feature_show:d=>'Saw '+String(evP(d).id||'').replace(/_/g,' ')+' for the first time',
+  vet_claim:()=>'Claimed the Veteran\'s Package',pack:d=>{const id=String(d||'').replace(/^[a-z]+:/,'');return 'Bought with Dark Matter: '+(BMAP2[id]?bName(id):id.replace(/_/g,' '))},tour:d=>'Guided tour: '+String(evP(d).screen||'').replace(/_/g,' '),help_shown:d=>'Got a hint'+(evP(d).next?' (next: '+evP(d).next+')':''),help_used:()=>'Followed a hint',
+  skip_offer:()=>'Was offered a time skip',skip_ahead:()=>'Skipped ahead',skip_no:()=>'Said no to a time skip',ad_reward:d=>'Video reward ('+(evP(d).kind||'')+')',reminder:()=>'Got a reminder',reminder_tap:()=>'Opened the game from a reminder',notif_ask:()=>'Was asked to allow notifications',
+  next_open:()=>'Opened the next goal',best_upgrade:()=>'Took the best-upgrade tip',optimal_buy:()=>'Used the best buy',ob_mode:()=>'Changed how much guidance they get',tips_off:()=>'Turned tips off',top_down:()=>'Switched to the top-down view',battery_saver:()=>'Battery saver',
+  planets_view:()=>'Opened the planets list',planets_pill:()=>'Tapped the planets button',priority:()=>'Changed a priority',lic_chip:()=>'Tapped the License chip',lic_why:()=>'Read why to get the License',lic_hide:()=>'Hid the License chip',mon_buy:()=>'Used a monument'});
+function evP(d){if(d&&typeof d==='object')return d;try{const o=JSON.parse(d);return o&&typeof o==='object'?o:{}}catch(e){return {}}}
+function evCat(e){return EV_CAT[e[1]]||'other'}
+// a readable label without the player's own numbers, so the same action groups together
+function evKind(e){const c=e[1],o=evP(e[2]);if(c==='level_up')return 'Reached a new Commander Level';if(c==='planet_unlock')return 'Unlocked a planet';if(c==='research')return 'Researched something';if(c==='feature_new')return 'New feature: '+String(o.id||'').replace(/_/g,' ');
+  if(c==='tour')return 'Guided tour: '+String(o.screen||'').replace(/_/g,' ');if(c==='shop')return 'Opened the Shop';if(c==='tab')return 'Shop tab: '+e[2];if(c==='need_dm')return 'Wanted something, too little Dark Matter';
+  if(c==='ad+'||c==='ad✓'||c==='ad×')return {'ad+':'Started a video','ad✓':'Watched a video','ad×':'Gave up a video'}[c]+(e[2]?' ('+e[2]+')':'');if(c==='use')return 'Used '+bName(e[2]);if(c==='iap+')return 'Started buying '+skuName(e[2]);if(c==='iap✓')return 'Bought '+skuName(e[2]);if(c==='iap×')return 'Cancelled buying '+skuName(e[2]);
+  if(c==='pack')return 'Bought with Dark Matter';if(c==='need_dm')return 'Wanted something, too little Dark Matter';if(c==='daily')return 'Daily reward';if(c==='gift')return 'Message gift';if(c==='mail')return 'Mail gift';if(c==='help_shown')return 'Got a hint';return evTxt([0,c,e[2]]).replace(/ \(v[\d.]+\)$/,'')}
+VIEWS.activity=()=>{let h=head('Activity','What players do, read from the play history in their cloud saves: the most common actions, the first session, and the last things players did before they stopped.');
+  h+=histGate();if(!histReady())return h;const H=S.a2.H,t=Date.now();if(!H.length)return h+'<div class="card empty">No play history yet (game 1.21 and newer).</div>';
+  // what players do
+  const cnt={},who={};H.forEach(x=>{const seen={};x.ev.forEach(e=>{if(e[1]==='open'||e[1]==='bg'||e[1]==='clock')return;const k=evKind(e);cnt[k]=(cnt[k]||0)+1;if(!seen[k]){seen[k]=1;who[k]=(who[k]||0)+1}})});
+  const top=Object.keys(who).sort((a,b)=>who[b]-who[a]).slice(0,15);
+  h+=a2card('What players do','Share of players who did each thing at least once in their recent history (the last 200 actions each).',top.map(k=>a2bar(esc(k),who[k]/H.length,pctx(who[k]/H.length)+' <small>'+nf(cnt[k])+'×</small>','w')).join(''));
+  // the first session
+  const fs=H.map(x=>{const o=x.ev.findIndex(e=>e[1]==='open');if(o<0)return null;const L=[];for(let i=o+1;i<x.ev.length;i++){if(x.ev[i][1]==='open')break;L.push(x.ev[i])}return L}).filter(Boolean).filter(L=>L.length);
+  const firstOk=H.filter(x=>x.ev.length&&x.ev[0][1]==='open'&&x.ev.length<200);
+  if(firstOk.length>=3){const F={};firstOk.forEach(x=>{const seen={};for(let i=1;i<x.ev.length;i++){const e=x.ev[i];if(e[1]==='open')break;if(e[1]==='bg'||e[1]==='clock')continue;const k=evKind(e);if(!seen[k]){seen[k]=1;F[k]=(F[k]||0)+1}}});
+    const fk=Object.keys(F).sort((a,b)=>F[b]-F[a]).slice(0,12);
+    h+=a2card('The first session','Players whose whole history fits in the log ('+firstOk.length+'): what they did before they first left the game.',fk.length?fk.map(k=>a2bar(esc(k),F[k]/firstOk.length,pctx(F[k]/firstOk.length))).join(''):'<div class="empty sm">Nothing recorded.</div>')}
+  // the last things before leaving
+  const gone=H.filter(x=>x.at&&x.at<t-3*DAY);
+  if(gone.length){const Lc={},base={};let bt=0,lt=0;H.forEach(x=>x.ev.forEach(e=>{if(e[1]==='bg'||e[1]==='open'||e[1]==='clock')return;const k=evKind(e);base[k]=(base[k]||0)+1;bt++}));
+    gone.forEach(x=>{const L=x.ev.filter(e=>e[1]!=='bg'&&e[1]!=='open'&&e[1]!=='clock').slice(-3);const seen={};L.forEach(e=>{const k=evKind(e);lt++;if(!seen[k]){seen[k]=1;Lc[k]=(Lc[k]||0)+1}})});
+    const lift=k=>{const a=Lc[k]/Math.max(1,gone.length),b=(base[k]||0)/Math.max(1,bt)*3;return b?a/b:0};
+    const lk=Object.keys(Lc).filter(k=>Lc[k]>=2).sort((a,b)=>lift(b)-lift(a)).slice(0,10);
+    const hot=lk.filter(k=>lift(k)>=1.5&&Lc[k]>=3);
+    h+=a2card('The last things players did before they stopped','Players with a cloud save who haven\'t played for 3 days or more ('+gone.length+'): their last 3 actions, the ones that show up there more than usual first. Those may be where the game loses people.',
+      (hot.length?insight('More common right before players stop: <b>'+hot.slice(0,3).map(k=>esc(k)).join('</b>, <b>')+'</b>.'):'')
+      +lk.map(k=>a2bar(esc(k)+(lift(k)>=1.5?' <span class="chip gold">'+(Math.round(lift(k)*10)/10)+'× usual</span>':''),Lc[k]/gone.length,pctx(Lc[k]/gone.length))).join('')+'<p class="note">Open a player in Profiles to read their whole history.</p>')}
+  // help and guides
+  const hs=H.filter(x=>x.ev.some(e=>e[1]==='help_shown')).length,hu=H.filter(x=>x.ev.some(e=>e[1]==='help_used')).length,to=H.filter(x=>x.ev.some(e=>e[1]==='tips_off')).length;
+  if(hs||to)h+=a2card('Hints and tips','How players use the hints.',a2bar('Got a hint',hs/H.length,hs+' players')+a2bar('Followed a hint',hu/H.length,hu+' players')+a2bar('Turned tips off',to/H.length,to+' players'));
+  return h};
+
+/* =====================================================================
+   SHOP & VIDEOS
+   ===================================================================== */
+VIEWS.shop=()=>{let h=head('Shop & videos','How players use the Shop and rewarded videos, read from the play history in their cloud saves.');
+  h+=histGate();if(!histReady())return h;const H=S.a2.H;if(!H.length)return h+'<div class="card empty">No play history yet (game 1.21 and newer).</div>';
+  const has=(x,k)=>{const v=x.c[k];return v&&(typeof v==='object'?sumO(v)>0:v>0)};const sum=(k)=>{const o={};H.forEach(x=>{const v=x.c[k];if(v&&typeof v==='object')for(const s in v)o[s]=(o[s]||0)+(+v[s]||0)});return o};
+  const op=H.filter(x=>has(x,'shop')),tr=H.filter(x=>has(x,'iapStart')),bo=H.filter(x=>has(x,'iapDone')),nd=H.filter(x=>has(x,'needDm')),ad=H.filter(x=>has(x,'adStart'));
+  h+='<div class="tiles">'+tile('Opened the Shop',pctx(op.length/H.length),op.length+' of '+H.length+' players')+tile('Shop visits',op.length?(op.reduce((a,x)=>a+(+x.c.shop||0),0)/op.length).toFixed(1):'—','per player who opened it')
+    +tile('Started a purchase',pctx(tr.length/H.length),tr.length+' players')+tile('Bought something',pctx(bo.length/H.length),bo.length+' players')+tile('Too little Dark Matter',pctx(nd.length/H.length),nd.length+' players wanted something')+tile('Watched videos',pctx(ad.length/H.length),ad.length+' players')+'</div>';
+  // time to the first Shop visit
+  const ft=H.map(x=>{const e=x.ev.find(e=>e[1]==='shop');return e&&x.first&&x.ev.length<200?(e[0]-x.first)/60e3:null}).filter(v=>v!=null&&v>=0).sort((a,b)=>a-b);
+  if(ft.length>=3)h+=insight('Half the players who opened the Shop did it within <b>'+fmtMin(ft[Math.floor(ft.length/2)])+'</b> of starting the game.');
+  h+='<p class="note" style="margin:-4px 0 12px">The game doesn\'t record how long the Shop stays open yet. The next update can add that, along with the leaner Firebase format.</p>';
+  const tabs=sum('tabs'),tk=Object.keys(tabs).sort((a,b)=>tabs[b]-tabs[a]),tm=Math.max(1,...tk.map(k=>tabs[k]));
+  h+='<div class="cols2">'+a2card('Shop tabs opened','All visits added together.',tk.length?tk.map(k=>a2bar(esc(k),tabs[k]/tm,nf(tabs[k]))).join(''):'<div class="empty sm">No tab visits recorded.</div>');
+  const st=sum('iapStart'),dn=sum('iapDone'),cn=sum('iapCancel'),fl=sum('iapFail');const sk=[...new Set([].concat(Object.keys(st),Object.keys(dn)))].sort((a,b)=>(st[b]||0)-(st[a]||0));
+  h+=a2card('Real-money purchases','Every purchase started, finished, cancelled or failed.',sk.length?'<div class="tw"><table class="tbl"><thead><tr><th>Product</th><th>Started</th><th>Bought</th><th>Cancelled</th><th>Failed</th></tr></thead><tbody>'+sk.map(k=>'<tr><td>'+esc(skuName(k))+'</td><td>'+nf(st[k]||0)+'</td><td>'+nf(dn[k]||0)+'</td><td>'+nf(cn[k]||0)+'</td><td>'+nf(fl[k]||0)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty sm">No purchases started yet.</div>')+'</div>';
+  const as=sum('adStart'),aw=sum('adDone'),aq=sum('adQuit'),ak=Object.keys(as).sort((a,b)=>as[b]-as[a]);
+  h+='<div class="cols2">'+a2card('Rewarded videos','By reward. Finished = watched to the end and got the reward.',ak.length?'<div class="tw"><table class="tbl"><thead><tr><th>Reward</th><th>Started</th><th>Finished</th><th>Gave up</th><th>Finish rate</th></tr></thead><tbody>'+ak.map(k=>'<tr><td>'+esc(k)+'</td><td>'+nf(as[k])+'</td><td>'+nf(aw[k]||0)+'</td><td>'+nf(aq[k]||0)+'</td><td>'+pctx(as[k]?(aw[k]||0)/as[k]:null)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty sm">No videos recorded.</div>');
+  const pk=sum('packs'),pkk=Object.keys(pk).sort((a,b)=>pk[b]-pk[a]).slice(0,10),pm=Math.max(1,...pkk.map(k=>pk[k]));
+  h+=a2card('Bought with Dark Matter','Packs and items bought with Dark Matter.',pkk.length?pkk.map(k=>{const id=k.replace(/^[a-z]+:/,'');return a2bar(esc(BMAP2[id]?bName(id):id.replace(/_/g,' ')),pk[k]/pm,nf(pk[k]))}).join(''):'<div class="empty sm">Nothing bought with Dark Matter yet.</div>')+'</div>';
+  // Dark Matter in and out
+  const din={},dout={};H.forEach(x=>{for(const k in (x.dm.in||{}))din[k]=(din[k]||0)+(+x.dm.in[k]||0);for(const k in (x.dm.out||{}))dout[k]=(dout[k]||0)+(+x.dm.out[k]||0)});
+  const ik=Object.keys(din).sort((a,b)=>din[b]-din[a]),ok=Object.keys(dout).sort((a,b)=>dout[b]-dout[a]),im=Math.max(1,...ik.map(k=>din[k])),om=Math.max(1,...ok.map(k=>dout[k]));
+  const SRC={ad:'Videos',daily:'Daily rewards',gift:'Message gifts',pack:'Dark Matter packs',iap:'Purchases',chest:'Supply Chests',spin:'Wheel',adm:'You (Command Center)',wkgift:'Weekly gift',other:'Everything else (play)'};
+  h+='<div class="cols2">'+a2card('Where Dark Matter comes from','All players added together.',ik.map(k=>a2bar(esc(SRC[k]||k),din[k]/im,fmtBig(din[k]))).join('')||'<div class="empty sm">Nothing recorded.</div>')
+    +a2card('Where Dark Matter goes','All players added together.',ok.map(k=>a2bar(esc(SRC[k]||k),dout[k]/om,fmtBig(dout[k]))).join('')||'<div class="empty sm">Nothing spent yet.</div>')+'</div>';
+  const us=sum('use'),uk=Object.keys(us).sort((a,b)=>us[b]-us[a]).slice(0,10),um=Math.max(1,...uk.map(k=>us[k]));
+  if(uk.length)h+=a2card('Boosters used','Most used first.',uk.map(k=>a2bar(esc(bName(k)),us[k]/um,nf(us[k]))).join(''));
+  return h};
+function fmtMin(m){return m<1?'a minute':m<60?Math.round(m)+' minutes':m<48*60?(Math.round(m/6)/10)+' hours':Math.round(m/1440)+' days'}
+
+/* =====================================================================
+   A PLAYER'S HISTORY, readable: sessions, plain words, filters
+   ===================================================================== */
+function histHTML(pf){const ev=(pf.ev||[]).slice();if(!ev.length)return '<section class="pcard wide"><h3>'+ic('list')+'History</h3><div class="sub">No history yet (game 1.21+).</div></section>';
+  // sessions: each "open" starts one; "bg" ends it with its length
+  const S2=[];let cur=null;ev.forEach(e=>{if(e[1]==='open'||!cur){cur={at:e[0],v:e[1]==='open'?e[2]:'',ev:[],len:null};S2.push(cur);if(e[1]==='open')return}
+    if(e[1]==='bg'){const s=parseInt(e[2],10);cur.len=isFinite(s)?s:null;cur.end=e[0];cur=null;return}cur.ev.push(e)});
+  const F=S.a2.hf||'all',cats=['all','prog','shop','gift','help'];
+  let h='<section class="pcard wide hist"><h3>'+ic('list')+'History <small>'+ev.length+' actions · '+S2.length+' sessions</small></h3>';
+  h+='<div class="fbar" role="group" aria-label="Show">'+cats.map(c=>{const n=c==='all'?ev.filter(e=>e[1]!=='open'&&e[1]!=='bg').length:ev.filter(e=>evCat(e)===c).length;return '<button class="'+(F===c?'on':'')+'" data-act="hf" data-v="'+c+'">'+(c==='all'?'All':EV_CN[c][0])+'<span class="n">'+n+'</span></button>'}).join('')+'</div>';
+  const show=S2.slice().reverse().slice(0,S.pfEvAll?999:6);
+  h+=show.map((s,i)=>{const L=s.ev.filter(e=>F==='all'||evCat(e)===F);const dt=new Date(s.at);
+    return '<div class="hs"><div class="hsh"><b>'+esc(dt.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}))+' · '+esc(dt.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}))+'</b><span>'+(s.len!=null?fmtSec(s.len):'still playing or unknown')+(s.v?' · v'+esc(s.v):'')+'</span></div>'
+      +(L.length?'<div class="hsl">'+L.map(e=>{const c=EV_CN[evCat(e)];return '<div class="he" style="--c:'+c[2]+'"><span class="hi">'+ic(c[1])+'</span><span class="ht">'+esc(evTxt(e))+'</span><span class="hw">'+esc(new Date(e[0]).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}))+'</span></div>'}).join('')+'</div>':'<div class="sub hsn">'+(s.ev.length?'Nothing of this kind.':'Nothing recorded in this session.')+'</div>')+'</div>'}).join('');
+  if(S2.length>6&&!S.pfEvAll)h+='<button class="btn sm sec" data-act="pfEvAll">Show all '+S2.length+' sessions</button>';
+  return h+'</section>'}
+function fmtSec(s){return s<60?s+' s':s<3600?Math.round(s/60)+' min':(Math.round(s/360)/10)+' h'}
+Object.assign(ACT,{hf:el=>{S.a2.hf=el.dataset.v;render()}});
+
+/* ---------- preview data: 70 players with a play history, added once when histories are read ---------- */
+function histSeedMock(){if(DB.mode!=='mock')return Promise.resolve();const all=DB.dump();if(Object.keys(all).some(k=>/^users\/hs/.test(k)))return Promise.resolve();
+  let r=23;const rnd=()=>{r=(r*9301+49297)%233280;return r/233280};const t=Date.now(),ops=[];
+  for(let i=0;i<70;i++){const v=i%3===0?'1.21.0':'1.22.0',first=t-Math.round(rnd()*18*DAY)-HOUR,ev=[],c={shop:0,tabs:{},iapStart:{},iapDone:{},iapCancel:{},adStart:{},adDone:{},adQuit:{},needDm:0,daily:0,use:{},packs:{}},dm={in:{},out:{}};
+    let at=first,lv=1,sess=0;const n=1+Math.floor(Math.pow(rnd(),2.2)*14)+(v==='1.21.0'?1:0);const E=(code,d)=>{at+=Math.round(20e3+rnd()*170e3);ev.push([at,code,d==null?'':typeof d==='string'?d:JSON.stringify(d)])};
+    for(let s=0;s<n&&at<t-HOUR;s++){sess++;const s0=at;ev.push([at,'open',v]);
+      if(s===0){E('tour',{screen:'planet'});if(rnd()<.7)E('help_shown',{why:'idle',next:'smelt'});if(rnd()<.5)E('help_used',{next:'smelt'})}
+      const k=2+Math.floor(rnd()*7);for(let j=0;j<k;j++){const x=rnd();
+        if(x<.32){lv++;E('level_up',{level:lv,character:'commander'});if(lv%4===0)E('feature_new',{id:['smelter','crafter','cargo','missions','shop','rover','crew'][Math.min(6,lv/4|0)]})}
+        else if(x<.42){E('planet_unlock',{planet:lv,system:0})}
+        else if(x<.56){c.shop++;const tb=['boosters','gems','bundles','crates'][Math.floor(rnd()*4)];E('shop',tb);c.tabs[tb]=(c.tabs[tb]||0)+1;if(rnd()<.35){c.needDm++;E('need_dm','120 DM')}
+          if(rnd()<.08){const sku=['of_commander_license','of_gems_100','of_starter_pack'][Math.floor(rnd()*3)];c.iapStart[sku]=(c.iapStart[sku]||0)+1;E('iap+',sku);if(rnd()<.3){c.iapDone[sku]=(c.iapDone[sku]||0)+1;E('iap✓',sku);dm.in.iap=(dm.in.iap||0)+100}else{c.iapCancel[sku]=(c.iapCancel[sku]||0)+1;E('iap×',sku)}}
+          else if(rnd()<.25){const p='boost:'+['mine_rare','prod_rare','trade_epic'][Math.floor(rnd()*3)];c.packs[p]=(c.packs[p]||0)+1;E('pack',p);dm.out.pack=(dm.out.pack||0)+40}}
+        else if(x<.72){const kd=['gems','skip','double'][Math.floor(rnd()*3)];c.adStart[kd]=(c.adStart[kd]||0)+1;E('ad+',kd);if(rnd()<.8){c.adDone[kd]=(c.adDone[kd]||0)+1;E('ad✓',kd);if(kd==='gems')dm.in.ad=(dm.in.ad||0)+5}else{c.adQuit[kd]=(c.adQuit[kd]||0)+1;E('ad×',kd)}}
+        else if(x<.8){c.daily++;E('daily','day '+(c.daily%7+1));dm.in.daily=(dm.in.daily||0)+10}
+        else if(x<.88){const b=['mine_rare','prod_rare'][Math.floor(rnd()*2)];c.use[b]=(c.use[b]||0)+1;E('use',b)}
+        else E('research',{step:'adv_mining'})}
+      const len=Math.round((at-s0)/1000+60+rnd()*400);ev.push([s0+len*1000,'bg',len+'s']);at=s0+len*1000+Math.round((rnd()<.5?2:10+rnd()*30)*HOUR)}
+    dm.in.other=Math.round(50+rnd()*400);
+    const last=ev.length?ev[ev.length-1][0]:first;const g={appVer:v,createdAt:first,cmd:{xp:lv*lv*60},stats:{playSec:Math.round((last-first)/20e3)},pf:{v:1,first,last,iid:'hs'+i,sess:{n:sess},c,dm,sh:{in:{},out:{}},big:[],clock:0,ev:ev.slice(-200),gifts:[],adm:{}}};
+    ops.push({op:'set',path:'users/hs'+String(i).padStart(3,'0')+'Preview'+String(i*7919).padStart(12,'0'),data:{save:JSON.stringify(g),updatedAt:last,version:v}})}
+  return DB.batch(ops)}
+
+/* =====================================================================
+   LEAN READS (Nov 2026): the Command Center reads only what the page you open needs, and keeps the daily check-ins in
+   this browser, so each visit reads only the ones written since the last visit instead of all 35 days again.
+   ===================================================================== */
+const CORE=['plays','motd','stat','live','rep','sup','ver','fbN'];
+const NEEDS={home:[],stats:['plays'],retention:['plays'],funnel:['plays'],sessions:['plays'],activity:[],shop:[],perf:['motd','stat'],
+  messages:['motd','stat'],library:['motd'],events:['live'],store:['live'],monuments:['mon'],updates:['motd','ver','mon','tags','plays'],
+  profiles:['pl','tags'],boards:['lb','lbw','hid','dn'],names:['dn','blk'],tags:['tags'],support:['sup'],feedback:['feedback'],reports:['rep']};
+Object.assign(LBL,{fbN:'new feedback'});S.busyK={};S.fbN=[];
+// feedback from the last day, for the Inbox badge and Home (the full list loads when you open Feedback)
+LOAD.fbN=()=>DB.query('feedback',{where:[['at','>',new Date(Date.now()-DAY)]],limit:100}).then(r=>{S.fbN=r.map(x=>x.data)});
+fbNew=function(){const t=Date.now();return (S.loaded.feedback?S.fb:S.fbN||[]).filter(f=>(+f.at||0)>t-DAY).length};
+function need(keys){const k=(keys||[]).filter(x=>LOAD[x]&&!S.loaded[x]&&!S.busyK[x]);if(!k.length)return;k.forEach(x=>{S.busyK[x]=1});load(k).finally(()=>k.forEach(x=>{delete S.busyK[x]}))}
+loadAll=function(){S.loadedAt=Date.now();const keep=new Set(CORE.concat(NEEDS[S.tab]||[]));S.errs={};Object.keys(LOAD).forEach(k=>{S.loaded[k]=false});soonRender();return load([...keep].filter(k=>LOAD[k]))};
+{const g0=go;go=function(tab){g0.apply(this,arguments);if(S.admin)need(NEEDS[S.tab])}}
+// the check-ins: the whole window once, then only what changed (each check-in carries the server time it was written)
+const PLC='cc_plays_v1';
+function plcGet(){try{const o=JSON.parse(localStorage.getItem(PLC)||'null');return o&&o.v===1&&o.docs&&o.up?o:null}catch(e){return null}}
+function plcPut(o){try{localStorage.setItem(PLC,JSON.stringify(o))}catch(e){try{localStorage.removeItem(PLC)}catch(x){}}}
+{const p0=LOAD.plays;LOAD.plays=async function(){if(DB.mode!=='live'){S.plRead=null;return p0()}
+  const from=addDays(dstr(Date.now()),-35);let c=plcGet();
+  if(c){try{const r=await DB.query('plays',{where:[['up','>',new Date(c.up-5*60e3)]]});r.forEach(x=>{c.docs[x.id]=x.data;c.up=Math.max(c.up,+x.data.up||0)});
+      for(const id in c.docs)if((c.docs[id].day||'')<from)delete c.docs[id];plcPut(c);S.plays=Object.values(c.docs);S.plRead=r.length;S.plCached=S.plays.length-r.length;return}
+    catch(e){console.warn('[cc] check-ins since last visit failed, reading them all',e);c=null;try{localStorage.removeItem(PLC)}catch(x){}}}
+  {const r=await DB.query('plays',{where:[['day','>=',from],['day','<=',dstr(Date.now()+DAY)]]});const o={v:1,up:0,docs:{}};r.forEach(x=>{o.docs[x.id]=x.data;o.up=Math.max(o.up,+x.data.up||0)});
+    if(!o.up)o.up=Date.now()-HOUR;plcPut(o);S.plays=Object.values(o.docs);S.plRead=r.length;S.plCached=0}}}
 
 /* ---------- boot ---------- */
 S.tab=pageFor(location.hash.slice(1)||'home');
