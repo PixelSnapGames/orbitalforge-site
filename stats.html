@@ -709,6 +709,35 @@ h1,h2,h3,.pagehead h2,.card h2,.sech h2,.tile .v,.btn,.chip,.range button,.lv .v
 .mempty{padding:26px 10px;text-align:center;color:var(--mu)}
 @media(max-width:959px){.abar{bottom:calc(var(--bn) + var(--sab) + 10px)}}
 
+/* ---- TARGETS ---- */
+.gtbl td,.gtbl th{white-space:nowrap}
+.gtbl td.gt{font-weight:600;font-variant-numeric:tabular-nums}
+.gtbl td.gt.good{color:var(--gn);background:rgba(74,222,128,.08)}
+.gtbl td.gt.warn{color:var(--yl);background:rgba(255,209,102,.08)}
+.gtbl td.gt.bad{color:var(--rd);background:rgba(248,113,113,.08)}
+.gtbl small{font-size:11px}
+.gbm{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:12.5px;color:var(--mu2)}
+.gbm b{color:var(--mu)}
+.gcalc{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;margin-top:6px}
+@media(max-width:820px){.gcalc{grid-template-columns:minmax(0,1fr)}}
+.gins{display:flex;flex-direction:column;gap:12px}
+.gins .btn{align-self:flex-start}
+.gsl{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:4px 10px;align-items:center;font-size:13.5px}
+.gsl span{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline}
+.gsl small{font-size:11.5px;color:var(--mu2)}
+.gsl input{width:100%;accent-color:var(--ac)}
+.gsl b{text-align:right;font-variant-numeric:tabular-nums}
+.gout{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.gbig span{font-size:12.5px;color:var(--mu2);text-transform:uppercase;letter-spacing:.08em}
+.gbig>b{display:block;font-size:34px;line-height:1.1;color:var(--ac);font-variant-numeric:tabular-nums}
+.gbar{position:relative;height:10px;border-radius:6px;background:var(--grid);margin:8px 0 6px}
+.gbar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,#1fb9a0,#5cf0d6)}
+.gbar em{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--yl);opacity:.8}
+.gbig small{font-size:12px;color:var(--mu)}
+.gsm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.gsm div{display:flex;flex-direction:column;gap:2px}
+.gsm span{font-size:11.5px;color:var(--mu2)}
+.gsm b{font-size:18px;font-variant-numeric:tabular-nums}
 /* ---- ANALYTICS 2 ---- */
 .hb.a2b{grid-template-columns:minmax(96px,34%) minmax(0,1fr) auto;gap:10px;margin-top:8px}
 .hb.a2b.w{grid-template-columns:minmax(130px,46%) minmax(0,1fr) auto}
@@ -2957,7 +2986,7 @@ Object.assign(ACT,{fbF:el=>{S.ov2.fbF=el.dataset.v;render()}});
    saves (users/{uid}.save → G.pf: sessions, the Shop, videos, gifts, Dark Matter by source, the last 200 events).
    Stats pages: Players · Retention · Where they stop · Sessions · Activity · Shop & videos · Message stats.
    ===================================================================== */
-SEC.stats.pages.splice(0,SEC.stats.pages.length,['stats','Players','users'],['retention','Retention','refresh'],['funnel','Where they stop','route'],['sessions','Sessions','clock'],['activity','Activity','list'],['shop','Shop & videos','shop'],['perf','Message stats','msg']);
+SEC.stats.pages.splice(0,SEC.stats.pages.length,['stats','Players','users'],['retention','Retention','refresh'],['funnel','Where they stop','route'],['goals','Targets','flag'],['sessions','Sessions','clock'],['activity','Activity','list'],['shop','Shop & videos','shop'],['perf','Message stats','msg']);
 delete PAGE.progress;SEC.stats.pages.forEach(p=>{PAGE[p[0]]={sec:'stats',n:p[1],ic:p[2]}});
 {const p0=pageFor;pageFor=function(t){return t==='progress'?'funnel':p0(t)}}
 S.a2={mode:'exact',vs:'',src:null,I:null};RN[10]='The Upgrades tab';
@@ -2966,7 +2995,7 @@ const A2_TODAY=()=>dstr(Date.now());
 function instAll(){if(S.a2.src===S.plays&&S.a2.I)return S.a2.I;const I={};
   for(const p of S.plays){if(!p||!p.iid||!p.day)continue;const o=I[p.iid]||(I[p.iid]={iid:p.iid,d0:p.d0||p.day,v0:'',v0Day:'9999',days:{},acct:false,maxLv:0,maxTut:null,last:''});
     if(p.d0&&p.d0<o.d0)o.d0=p.d0;o.days[p.day]={min:+p.min||0,sess:+p.sess||0,lv:+p.lv||0,tut:typeof p.tut==='number'?p.tut:null};
-    if(p.day<o.v0Day){o.v0Day=p.day;o.v0=verKey(p.v)}if(p.acct)o.acct=true;o.maxLv=Math.max(o.maxLv,+p.lv||0);
+    if(p.day<o.v0Day){o.v0Day=p.day;o.v0=verKey(p.v)}if(p.acct)o.acct=true;o.maxLv=Math.max(o.maxLv,+p.lv||0);o.tot=Math.max(o.tot||0,+p.tot||0);
     if(typeof p.tut==='number'&&p.tut>0)o.maxTut=Math.max(o.maxTut||0,p.tut);if(p.day>o.last)o.last=p.day}
   S.a2.src=S.plays;S.a2.I=I;return I}
 // new players we saw from their first day, started in the last 35 days
@@ -3033,14 +3062,17 @@ VIEWS.funnel=()=>{let h=head('Where they stop','How far new players get through 
   const vs=verList(C,5);const pick=S.a2.vs&&vs.indexOf(S.a2.vs)>=0?S.a2.vs:'';const show=pick?[pick]:vs.slice(0,2);
   h+='<div class="fbar" role="group" aria-label="Versions"><button class="'+(pick?'':'on')+'" data-act="a2v" data-v="">Newest two</button>'+vs.map(v=>'<button class="'+(pick===v?'on':'')+'" data-act="a2v" data-v="'+esc(v)+'">v'+esc(v)+'<span class="n">'+C.filter(o=>o.v0===v).length+'</span></button>').join('')+'</div>';
   // rank funnel
-  const G=show.map(v=>C.filter(o=>o.v0===v&&o.maxTut!=null&&!(o.maxTut>1000)));
+  const usable=v=>{const L=C.filter(o=>o.v0===v);return L.length&&L.filter(o=>o.maxTut!=null&&o.maxTut>0&&o.maxTut<=1000).length/L.length>=.3};
+  const showR=show.filter(usable);
+  if(showR.length<show.length)h+='<div class="note" style="margin:0 0 10px">'+(showR.length?'':'')+'Since the new lessons (1.18), most games no longer report a guided rank'+(showR.length?'; the rank chart below only shows v'+showR.map(esc).join(', v')+'.':', so the rank chart is hidden. Commander Level shows how far players get.')+'</div>';
+  const G=showR.map(v=>C.filter(o=>o.v0===v&&o.maxTut!=null&&!(o.maxTut>1000)));
   const reach=(o,r)=>o.maxTut>=1000||Math.floor(o.maxTut/10)>=r;
   const RK=[];for(let r=1;r<=16;r++)RK.push(r);
   let worst=null;if(G[0]&&G[0].length>=5)for(let r=2;r<=16;r++){const a=G[0].filter(o=>reach(o,r-1)).length,b=G[0].filter(o=>reach(o,r)).length;if(a>=5){const d=(a-b)/a;if(!worst||d>worst.d)worst={r,d,a,b}}}
   const off=C.filter(o=>o.maxTut>1000).length;
-  h+=a2card('Guided ranks reached','Share of each version\'s new players who reached each rank. '+(worst?'':'')+(off?off+' players turned guidance off and aren\'t counted.':''),
-    (worst?insight('Biggest drop'+(show[0]?' on v'+esc(show[0]):'')+': <b>Rank '+(worst.r-1)+' → Rank '+worst.r+'</b> ('+esc(RN[worst.r]||'')+'): '+Math.round(worst.d*100)+'% of players who got to rank '+(worst.r-1)+' stopped there.'):'')
-    +'<div class="a2leg">'+show.map((v,i)=>'<span><i style="background:'+A2C[i]+'"></i>v'+esc(v)+' · '+G[i].length+' players</span>').join('')+'</div>'
+  if(showR.length)h+=a2card('Guided ranks reached','Share of each version\'s new players who reached each rank. '+(worst?'':'')+(off?off+' players turned guidance off and aren\'t counted.':''),
+    (worst?insight('Biggest drop'+(showR[0]?' on v'+esc(showR[0]):'')+': <b>Rank '+(worst.r-1)+' → Rank '+worst.r+'</b> ('+esc(RN[worst.r]||'')+'): '+Math.round(worst.d*100)+'% of players who got to rank '+(worst.r-1)+' stopped there.'):'')
+    +'<div class="a2leg">'+showR.map((v,i)=>'<span><i style="background:'+A2C[i]+'"></i>v'+esc(v)+' · '+G[i].length+' players</span>').join('')+'</div>'
     +RK.concat(['done']).map(r=>{const lbl=r==='done'?'Finished<small>all ranks</small>':'Rank '+r+'<small>'+esc(RN[r]||'')+'</small>';
       return '<div class="a2fr'+(worst&&worst.r===r?' worst':'')+'"><span class="lb">'+lbl+'</span><span class="a2fb">'+G.map((L,i)=>{const n=L.filter(o=>r==='done'?o.maxTut>=1000:reach(o,r)).length,p=L.length?n/L.length:0;return '<span class="tr"><i style="width:'+Math.round(p*100)+'%;background:'+A2C[i]+'"></i><em>'+pctx(L.length?p:null)+'</em></span>'}).join('')+'</span></div>'}).join(''));
   // level milestones
@@ -3049,12 +3081,83 @@ VIEWS.funnel=()=>{let h=head('Where they stop','How far new players get through 
     LVs.map(l=>'<div class="a2fr"><span class="lb">Lv '+l+'</span><span class="a2fb">'+GL.map((L,i)=>{const n=L.filter(o=>o.maxLv>=l).length,p=L.length?n/L.length:0;return '<span class="tr"><i style="width:'+Math.round(p*100)+'%;background:'+A2C[i]+'"></i><em>'+pctx(L.length?p:null)+'</em></span>'}).join('')+'</span></div>').join(''));
   // where the ones who left stopped
   const t=A2_TODAY(),left=C.filter(o=>o.last<=addDays(t,-3)&&(!pick||o.v0===pick));
-  if(left.length){const by={};left.forEach(o=>{const k=o.maxTut==null?'Lv '+Math.max(1,o.maxLv):o.maxTut>=1000?'Finished the ranks':'Rank '+Math.floor(o.maxTut/10)+(RN[Math.floor(o.maxTut/10)]?' · '+RN[Math.floor(o.maxTut/10)]:'');by[k]=(by[k]||0)+1});
-    const top=Object.keys(by).sort((a,b)=>by[b]-by[a]).slice(0,8),mx=Math.max(...top.map(k=>by[k]));
-    const one=left.filter(o=>Object.keys(o.days).length===1).length;
-    h+=a2card('Where the players who left stopped','New players who haven\'t played for 3 days or more'+(pick?' (v'+esc(pick)+')':'')+': '+left.length+'. Where they were the last time they played.',
-      insight('<b>'+pctx(one/left.length)+'</b> of them only ever played on their first day.')+top.map(k=>a2bar(esc(k),by[k]/mx,by[k]+' · '+pctx(by[k]/left.length))).join(''))}
+  if(left.length){const BK=[['Lv 1',1,1],['Lv 2',2,2],['Lv 3',3,3],['Lv 4',4,4],['Lv 5–7',5,7],['Lv 8–10',8,10],['Lv 11–20',11,20],['Lv 21+',21,1e9]];
+    const by=BK.map(b=>left.filter(o=>Math.max(1,o.maxLv)>=b[1]&&Math.max(1,o.maxLv)<=b[2]).length),mx=Math.max(1,...by);
+    const one=left.filter(o=>Object.keys(o.days).length===1).length,tots=left.map(o=>o.tot||0).sort((a,b)=>a-b),medT=tots[Math.floor(tots.length/2)];
+    h+=a2card('Where the players who left stopped','New players who haven\'t played for 3 days or more'+(pick?' (v'+esc(pick)+')':'')+': '+left.length+'. The highest Commander Level they reached.',
+      insight('<b>'+pctx(one/left.length)+'</b> of them only ever played on their first day, and half of them played <b>'+medT+' minutes or less</b> in all.')+BK.map((b,i)=>a2bar(b[0],by[i]/mx,by[i]+' · '+pctx(by[i]/left.length))).join(''))}
   return h+'<div class="sech"><h2>'+ic('users')+'Everyone active right now</h2>'+rangeHTML()+'</div>'+VIEWS.progress().replace(/^[\s\S]*?<div class="cols2">/,'<div class="cols2">')};
+
+/* =====================================================================
+   TARGETS (Nov 5): each version against top games, what brings players back the next day, and a calculator
+   for the next update. Benchmarks: GameAnalytics 2026 (all mobile games) and 2020 (idle games).
+   ===================================================================== */
+const BM={d1:[['Top 25% of mobile games',.30],['Top 25% of idle games',.39],['Top 10% of mobile games',.40]],d7:[['Top 25% of mobile games',.065],['Top 10% of mobile games',.115]]};
+const GM={early:.05,mid:.20,deep:.45,ratio:.30,boost:1};   // the Playtest Lab's starting guesses
+function gTag(p,lo,hi){if(p==null)return '';return p>=hi?'good':p>=lo?'warn':'bad'}
+function gCell(r,lo,hi,minN){if(!r||r.e<(minN||8))return '<td class="na" title="'+(r?r.e:0)+' players old enough">too new</td>';return '<td class="gt '+gTag(r.p,lo,hi)+'" title="'+r.r+' of '+r.e+'">'+pctx(r.p)+'</td>'}
+function gDay0(o){return o.days[o.d0]||{min:0,sess:0,lv:0}}
+function gMed(a){if(!a.length)return null;const s=a.slice().sort((x,y)=>x-y);return s[Math.floor(s.length/2)]}
+function gLife(d1,d7){if(!(d1>0))return null;const r=d7>0?Math.min(.6,Math.max(.1,d7/d1)):GM.ratio;const b=Math.log(1/r)/Math.log(7);let t=1;for(let d=1;d<90;d++)t+=d1*Math.pow(d,-b);return t}
+// return the next day by how far they got on day one
+function gDepth(L){const out={early:{e:0,r:0},mid:{e:0,r:0},deep:{e:0,r:0}};L.forEach(o=>{if(!doneDay(o,1))return;const lv=gDay0(o).lv||1;const k=lv>=8?'deep':lv>=3?'mid':'early';out[k].e++;if(playedOn(o,1,false))out[k].r++});
+  for(const k in out)out[k].p=out[k].e?out[k].r/out[k].e:null;return out}
+VIEWS.goals=()=>{let h=head('Targets','How each version scores against top games, what brings players back the next day, and what the next update needs to reach.');
+  const st=secState('plays');if(st)return h+st;const C=cohort();if(!C.length)return h+'<div class="card empty">No new players in the last 35 days.</div>';
+  const vs=verList(C,5).slice(0,4);
+  // 1. scoreboard
+  const rows=vs.map(v=>{const L=C.filter(o=>o.v0===v);const d1=rateN(L,1,false),d3=rateN(L,3,false),d7=rateN(L,7,false);const z=L.map(gDay0);
+    const life=d1.e>=8?gLife(d1.p,d7.e>=8?d7.p:null):null;
+    return {v,n:L.length,d1,d3,d7,min:gMed(z.map(x=>x.min)),ses:z.length?z.reduce((a,x)=>a+(x.sess||1),0)/z.length:0,lv3:z.filter(x=>x.lv>=3).length/L.length,lv8:z.filter(x=>x.lv>=8).length/L.length,life}});
+  h+=a2card('Scoreboard','New players from the last 35 days, by the version they started on. Green: as good as the top quarter of mobile games. Yellow: close. Red: below.',
+    '<div class="tw"><table class="tbl gtbl"><thead><tr><th>Version</th><th>New</th><th>Back day 1</th><th>Day 3</th><th>Day 7</th><th>Day-one minutes</th><th>Day-one sessions</th><th>Lv 3 on day one</th><th>Lv 8 on day one</th><th>Days per install</th></tr></thead><tbody>'
+    +rows.map(r=>'<tr><td><b>v'+esc(r.v)+'</b></td><td>'+r.n+'</td>'+gCell(r.d1,.25,.30)+gCell(r.d3,-1,-1).replace(' good','')+gCell(r.d7,.04,.065)
+      +'<td>'+(r.min==null?'—':r.min+' min')+'</td><td>'+r.ses.toFixed(1)+'</td><td>'+pctx(r.lv3)+'</td><td>'+pctx(r.lv8)+'</td><td title="Estimated days played in the first 90, per install">'+(r.life?r.life.toFixed(1):'—')+'</td></tr>').join('')
+    +'</tbody></table></div><div class="gbm">'+BM.d1.map(b=>'<span>'+esc(b[0])+': <b>'+pctx(b[1])+'</b> back on day 1</span>').join('')+BM.d7.map(b=>'<span>'+esc(b[0])+': <b>'+(b[1]*100).toFixed(b[1]<.1?1:0)+'%</b> on day 7</span>').join('')+'</div>');
+  // 2. coming back by depth
+  const all=gDepth(C),per=vs.map(v=>({v,d:gDepth(C.filter(o=>o.v0===v))}));
+  const lab={early:'Stopped before Lv 3',mid:'Got to Lv 3–7',deep:'Reached Lv 8'};
+  const meas={};for(const k of ['early','mid','deep'])meas[k]=all[k].e>=10?all[k].p:null;
+  const lift=meas.deep!=null&&meas.early!=null&&meas.early>0?meas.deep/meas.early:null;
+  h+=a2card('Back the next day, by how far they got on day one','The deeper a new player gets on their first day, the more likely they come back. These three numbers drive the calculator below.',
+    (lift&&lift>1.5?insight('Players who reach <b>Lv 8</b> on day one come back <b>'+lift.toFixed(1)+'×</b> as often as players who stop before Lv 3. Every fix that moves players deeper on day one raises tomorrow\'s number.'):'')
+    +'<div class="tw"><table class="tbl gtbl"><thead><tr><th></th><th>All versions</th>'+per.map(x=>'<th>v'+esc(x.v)+'</th>').join('')+'<th class="mu2">Playtest Lab guess</th></tr></thead><tbody>'
+    +['early','mid','deep'].map(k=>'<tr><td>'+lab[k]+'</td><td>'+(all[k].e?'<b>'+pctx(all[k].p)+'</b> <small class="mu2">'+all[k].r+'/'+all[k].e+'</small>':'—')+'</td>'+per.map(x=>'<td>'+(x.d[k].e>=5?pctx(x.d[k].p)+' <small class="mu2">'+x.d[k].e+'</small>':'<span class="mu2">—</span>')+'</td>').join('')+'<td class="mu2">'+pctx(GM[k])+'</td></tr>').join('')
+    +'</tbody></table></div>');
+  // 3. calculator
+  const nv=rows[0]||{lv3:.6,lv8:.3};const c=S.a2.calc||(S.a2.calc={});
+  const dflt={s3:Math.round(nv.lv3*100),s8:Math.round(nv.lv8*100),re:Math.round((meas.early!=null?meas.early:GM.early)*100),rm:Math.round((meas.mid!=null?meas.mid:GM.mid)*100),rd:Math.round((meas.deep!=null?meas.deep:GM.deep)*100),bo:100};
+  for(const k in dflt)if(c[k]==null)c[k]=dflt[k];
+  const sl=(k,lbl,min,max,unit,hint)=>'<label class="gsl"><span>'+lbl+(hint?'<small>'+hint+'</small>':'')+'</span><input type="range" min="'+min+'" max="'+max+'" step="1" value="'+c[k]+'" data-gc="'+k+'" aria-label="'+esc(lbl)+'"><b id="gv-'+k+'">'+c[k]+unit+'</b></label>';
+  h+=a2card('Calculator: what the next update needs','Move the sliders to see what tomorrow\'s number and days per install would be. It starts from v'+esc(nv.v||'')+' as it is today.',
+    '<div class="gcalc"><div class="gins">'
+    +sl('s3','Reach Lv 3 on day one',10,100,'%','v'+esc(nv.v||'')+' now: '+dflt.s3+'%')
+    +sl('s8','Reach Lv 8 on day one',0,100,'%','now: '+dflt.s8+'%')
+    +sl('re','Back next day, stopped before Lv 3',0,60,'%','measured: '+dflt.re+'%')
+    +sl('rm','Back next day, got to Lv 3–7',0,80,'%','measured: '+dflt.rm+'%')
+    +sl('rd','Back next day, reached Lv 8',0,95,'%','measured: '+dflt.rd+'%')
+    +sl('bo','Reason to come back (offline payoff, notifications)',100,160,'%','100% = as today')
+    +'<button class="btn sm" data-act="gcReset">Back to today</button></div><div class="gout" id="gOut"></div></div>');
+  // 4. what 1.23 should send
+  const has123=S.plays.some(p=>p&&p.pl!=null);
+  h+=a2card('First-session steps (from 1.23)','Second planet, Smelter, first bar, Crafter, Iron Bar: when each new player gets there.',
+    has123?gSteps(C):'<div class="empty sm">Starts when the game sends them. 1.23\'s check-in needs three small fields: planets owned (<code>pl</code>), Path steps done (<code>res</code>) and bars made (<code>bars</code>). Then this card fills itself in, by version.</div>');
+  setTimeout(gCalc,0);
+  return h};
+function gSteps(C){const vs=verList(C.filter(o=>o.ps),5).slice(0,3);if(!vs.length)return '<div class="empty sm">No players with the new fields yet.</div>';
+  const ST=[['2nd planet',o=>o.ps.pl>=2],['Smelter',o=>o.ps.res>=1],['First bar',o=>o.ps.bars>=1],['Crafter',o=>o.ps.res>=2],['Iron Bar',o=>o.ps.res>=3]];
+  return '<div class="a2leg">'+vs.map((v,i)=>'<span><i style="background:'+A2C[i]+'"></i>v'+esc(v)+'</span>').join('')+'</div>'+ST.map(([n,f])=>'<div class="a2fr"><span class="lb">'+n+'<small>on day one</small></span><span class="a2fb">'+vs.map((v,i)=>{const L=C.filter(o=>o.v0===v&&o.ps);const p=L.length?L.filter(f).length/L.length:0;return '<span class="tr"><i style="width:'+Math.round(p*100)+'%;background:'+A2C[i]+'"></i><em>'+pctx(L.length?p:null)+'</em></span>'}).join('')+'</span></div>').join('')}
+function gCalc(){const box=document.getElementById('gOut');if(!box)return;const c=S.a2.calc;const s3=c.s3/100,s8=Math.min(c.s8,c.s3)/100;
+  const d1=Math.min(.95,(c.bo/100)*((1-s3)*c.re/100+(s3-s8)*c.rm/100+s8*c.rd/100));const d7=d1*GM.ratio,life=gLife(d1,d7);
+  const base=S.a2.calcBase||(S.a2.calcBase=life);
+  const next=BM.d1.find(b=>b[1]>d1);
+  box.innerHTML='<div class="gbig"><span>Back the next day</span><b>'+pctx(d1)+'</b><div class="gbar"><i style="width:'+Math.round(d1/.7*100)+'%"></i>'+BM.d1.map(b=>'<em style="left:'+(b[1]/.7*100)+'%" title="'+esc(b[0])+'"></em>').join('')+'</div><small>'+(next?'Next mark: '+esc(next[0])+' ('+pctx(next[1])+')':'Top-10% territory')+'</small></div>'
+   +'<div class="gsm"><div><span>Day 7 (est.)</span><b>'+(d7*100).toFixed(1)+'%</b></div><div><span>Days per install</span><b>'+life.toFixed(1)+'</b></div><div><span>Play per ad dollar</span><b>'+(life>=base?'+':'')+Math.round((life/base-1)*100)+'%</b></div></div>'
+   +'<p class="sub" style="margin-top:8px">Day 7 assumes 30% of day-1 players are still there a week later, the ratio in the benchmarks. Days per install counts the first 90 days.</p>'}
+document.addEventListener('input',e=>{const k=e.target&&e.target.dataset&&e.target.dataset.gc;if(!k||!S.a2.calc)return;S.a2.calc[k]=+e.target.value;const b=document.getElementById('gv-'+k);if(b)b.textContent=e.target.value+'%';gCalc()});
+Object.assign(ACT,{gcReset:()=>{S.a2.calc=null;S.a2.calcBase=null;render()}});
+// the check-in fields 1.23 sends (pl, res, bars) are kept per install when they arrive
+{const i0=instAll;instAll=function(){const fresh=!(S.a2.src===S.plays&&S.a2.I);const I=i0.apply(this,arguments);if(fresh)for(const p of S.plays){if(!p||p.pl==null||!p.iid)continue;const o=I[p.iid];if(!o||p.day!==o.d0)continue;o.ps={pl:+p.pl||0,res:+p.res||0,bars:+p.bars||0}}return I}}
 
 /* =====================================================================
    SESSIONS
@@ -3223,7 +3326,7 @@ function histSeedMock(){if(DB.mode!=='mock')return Promise.resolve();const all=D
    this browser, so each visit reads only the ones written since the last visit instead of all 35 days again.
    ===================================================================== */
 const CORE=['plays','motd','stat','live','rep','sup','ver','fbN'];
-const NEEDS={home:[],stats:['plays'],retention:['plays'],funnel:['plays'],sessions:['plays'],activity:[],shop:[],perf:['motd','stat'],
+const NEEDS={home:[],stats:['plays'],retention:['plays'],funnel:['plays'],goals:['plays'],sessions:['plays'],activity:[],shop:[],perf:['motd','stat'],
   messages:['motd','stat'],library:['motd'],events:['live'],store:['live'],monuments:['mon'],updates:['motd','ver','mon','tags','plays'],
   profiles:['pl','tags'],boards:['lb','lbw','hid','dn'],names:['dn','blk'],tags:['tags'],support:['sup'],feedback:['feedback'],reports:['rep']};
 Object.assign(LBL,{fbN:'new feedback'});S.busyK={};S.fbN=[];
