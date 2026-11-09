@@ -803,6 +803,402 @@ h1,h2,h3,.pagehead h2,.card h2,.sech h2,.tile .v,.btn,.chip,.range button,.lv .v
 <input type="file" id="fileIn" accept="image/*" hidden>
 <noscript><p style="padding:20px">The Command Center needs JavaScript.</p></noscript>
 <script>
+/* CCX-CORE START: made by w123/tools/cc_sync.py from the game (don't edit here) */
+/* =========================================================
+   1.23: SHOP CONTENT CODE: THE CHECKER
+   Shared word for word by the game and the Command Center (tools/cc_sync.py copies it into stats.html), so both
+   accept exactly the same things.
+   A content code is JSON: one item {"of":"content", ...} or a list of them. Each is a new item for the Shop, or a
+   change to one that's already in the game (same kind and id). Every field is checked, so nothing harmful or broken
+   gets in:
+   - drawings (plaques, themes, interface patterns) are SVG, cleaned: only drawing and animation tags; no scripts,
+     no event handlers, no style sheets, no links out (pictures only inside, as data:image/...). Every id and every
+     reference to one gets {u} in front, which the game turns into a fresh name each time it draws it, so two copies
+     on one screen don't clash and a drawing can never reach anything outside itself;
+   - colours are #rrggbb; numbers are kept in range; names and descriptions are plain text.
+   Where the items live: config/cc {items:{"<kind>:<id>":{...}}} (names, prices, colours: small), and
+   cc_art/<kind>-<id> {v, svg | sky (+ img)} for the drawings (downloaded once per version). sky is kept there as JSON
+   text (Firestore can't keep a list inside a list, which a sky's colour stops are).
+   ========================================================= */
+const CCX_KINDS={pq:'Plaque',th:'Theme',hull:'Hull',trail:'Engine trail',probe:'Probe paint',ptrail:'Probe trail',star:'Star',sky:'Space',orbit:'Orbit lines',ui:'Interface'};
+// kind -> the game's Hangar slot
+const CCX_SLOT={hull:'hull',trail:'trail',probe:'probe',ptrail:'ptrail',star:'star',sky:'sky',orbit:'orbit',ui:'theme'};
+const CCX_TIERS=['r','e','l','m'],CCX_RARS=['common','rare','epic','legendary'];
+const CCX_UIK=['bg','bg2','panel','panel2','line','line2','muted','hi','hud'];
+const CCX_COMP=['source-over','lighter','screen','multiply','overlay','soft-light'];
+const CCX_FIELDS={all:['of','k','id','n','d','sh','how','tier','rar','off','show','svg','sky','img','v','av','note'],
+  pq:['rc'],th:['c','lg'],hull:['c','a'],trail:['c','cyc','per'],probe:['c','b','cyc','cycB','per'],ptrail:['c','glitter','cyc','per'],
+  star:['c','a','pulse','shape','path','path2','spin'],sky:['dim','twinkle'],orbit:['c','glow','dash'],ui:['c','a','style']};
+function ccxKey(k,id){return k+':'+id}
+function ccxDoc(k,id){return k+'-'+id}
+function ccxTxt(v,max){if(v==null)return '';return String(v).replace(/[<>"'`\\{}]/g,'').replace(/\s+/g,' ').trim().slice(0,max)}
+function ccxCol(v){if(typeof v!=='string')return null;v=v.trim().toLowerCase();if(/^#[0-9a-f]{6}$/.test(v))return v;
+  if(/^#[0-9a-f]{3}$/.test(v))return '#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3];return null}
+function ccxCols(a,lo,hi){if(!Array.isArray(a)||a.length<lo||a.length>hi)return null;const o=a.map(ccxCol);return o.some(x=>!x)?null:o}
+function ccxNum(v,lo,hi,int){if(v===''||v==null||typeof v==='boolean')return null;v=+v;if(!isFinite(v))return null;v=Math.max(lo,Math.min(hi,v));return int?Math.round(v):Math.round(v*1000)/1000}
+function ccxPath(d){return typeof d==='string'&&d.length<=3000&&/^\s*[Mm][MmLlHhVvCcSsQqTtAaZz0-9\s,.\-+eE]*$/.test(d)?d.replace(/\s+/g,' ').trim():null}
+function ccxImg(v){return typeof v==='string'&&v.length<=900000&&/^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/]+=*$/.test(v)?v:null}
+
+/* ---- how to get it: a price, or an earn code ----
+   An earn code is one goal {"g":"shiny","n":100}, or several: {"all":[goal, goal]} (every one) / {"any":[…]} (one of them).
+   "w": what players read instead of the goal's own words. "from" / "to": dates (the player's own days) it can be earned
+   between; "during": true counts only what's done between them. The older forms ({"lv":30}, {"stat":"shiny","n":100,"w":…})
+   still work. The goals the game knows (the game counts them; the Command Center lists them): */
+const CCX_GOALS=[
+  ['lv','Progress','Reach Commander Level {n}'],['asc','Progress','Ascend {n} time{s}'],['sys','Progress','Reach star system {n}'],
+  ['hours','Progress','Play for {n} hour{s}'],['days','Progress','Play on {n} different day{s}'],['sessions','Progress','Start the game {n} time{s}'],
+  ['age','Progress','Be a commander for {n} day{s}'],['play','Progress','Play the game'],['joinedby','Progress','Start playing by {d}'],
+  ['chap','Progress','Finish {n} story chapter{s}'],['quests','Progress','Claim {n} quest{s}'],['codex','Progress','Collect {n} codex entr{ies}'],
+  ['research','Galaxy','Finish {n} research project{s} in one galaxy'],['mastery','Progress','Reach {n} ore mastery tier{s}'],
+  ['planets','Galaxy','Own {n} planet{s} in one galaxy'],['fullsys','Galaxy','Own every planet in {n} star system{s} in one galaxy'],['value','Galaxy','Grow a galaxy worth ${n}'],
+  ['earned','Galaxy','Earn ${n} in one galaxy'],['colonies','Galaxy','Found {n} colon{ies}'],['shiplv','Galaxy','Have {n} ship system level{s} in one galaxy'],['keys','Galaxy','Earn {n} Upgrade Key{s}'],
+  ['mined','Mining','Mine {n} ore'],['asteroids','Mining','Collect {n} asteroid{s}'],['meteors','Mining','Catch {n} meteor{s}'],
+  ['crits','Mining','Bring home {n} critical haul{s}'],['lucky','Mining','Get {n} lucky bonus{es}'],['caches','Mining','Find {n} Fortune cache{s}'],
+  ['shiny','Exploring','Find {n} shiny planet{s}'],['rover','Exploring','Send the Rover on {n} expedition{s}'],['monuments','Exploring','Claim {n} monument gift{s}'],
+  ['smelted','Making','Smelt {n} bar{s}'],['crafted','Making','Craft {n} part{s}'],['recipes','Making','Research {n} recipe{s}'],
+  ['asm','Making','Finish {n} Assembly order{s}'],['forge','Making','Tap the Forge {n} time{s}'],['auto','Making','Unlock or upgrade machines {n} time{s}'],
+  ['hired','Crew','Hire {n} crew'],['crew','Crew','Have {n} crew at once'],['star3','Crew','Have {n} crew at 3 stars or more'],['star5','Crew','Have {n} crew at 5 stars'],['rooms','Crew','Build {n} ship room{s}'],
+  ['contracts','Trade','Deliver {n} contract{s}'],['credits','Trade','Earn {n} credits'],
+  ['crates','Rewards','Open {n} crate{s}'],['spins','Rewards','Spin the Prize Wheel {n} time{s}'],['found','Rewards','Get {n} booster{s}'],
+  ['boosts','Rewards','Use {n} booster{s}'],['videos','Rewards','Watch {n} video{s}'],['chests','Rewards','Open {n} Path chest{s}'],
+  ['dailies','Rewards','Claim {n} daily reward{s}'],['wkgifts','Rewards','Claim {n} weekly gift{s}'],['candy','Rewards','Collect {n} candy'],
+  ['perks','Shop','Buy {n} perk level{s}'],['gemups','Shop','Buy {n} Gem Upgrade level{s}'],
+  ['streak','Daily','Reach a {n}-day daily streak'],['laps','Daily','Finish {n} lap{s} of the daily calendar'],
+  ['tops','Leaderboards','Finish {n} week{s} in the weekly top 10'],['top3','Leaderboards','Finish {n} week{s} in the weekly top 3'],['top1','Leaderboards','Finish {n} week{s} at #1'],
+  ['looks','Collecting','Own {n} Hangar look{s}'],['cards','Collecting','Own {n} plaques and themes']];
+const CCX_GOALMAP=Object.create(null);for(const g of CCX_GOALS)CCX_GOALMAP[g[0]]={c:g[1],t:g[2]};
+// goals that are just "yes": n is 1 (play: playing at all, joinedby: started playing by a date "d")
+const CCX_YES=Object.assign(Object.create(null),{play:1,joinedby:1});
+// the older one-goal forms, as goals
+const CCX_HOW={lv:[1,999],asc:[1,999],streak:[1,3650],sys:[1,20],book:[1,999],quests:[1,99999],tops:[1,999],hours:[1,100000],chap:[1,99],top:[1,1]};
+const CCX_SUF=['','K','M','B','T','q','Q','s','S','O','N','d','U','D'];
+function ccxBig(n){n=+n||0;if(!isFinite(n))return '∞';if(n<1e5)return Math.round(n).toLocaleString('en-US');const e=Math.floor(Math.log10(n)/3);if(e>=CCX_SUF.length)return n.toExponential(2).replace('+','');const x=n/Math.pow(10,3*e);return (x>=100?Math.round(x):Math.round(x*10)/10)+CCX_SUF[e]}
+function ccxDay(s){try{const [y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch(e){return String(s)}}
+function ccxGoalText(g,n,d){const G=CCX_GOALMAP[g];if(!G)return '';const one=+n===1;
+  return G.t.replace('{n}',ccxBig(n)).replace('{d}',d?ccxDay(d):'a date').replace('{s}',one?'':'s').replace('{ies}',one?'y':'ies').replace('{es}',one?'':'es')}
+const ccxIsDay=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v))&&!isNaN(Date.parse(String(v)));
+// one goal. Beyond the named goals: any number the game keeps, counted with your own words:
+//   {"stat":"<a game stat>","n":…}, {"path":"<where in the save, like cmd.asc or monGot>","n":…,"w":…} (a number; a list or a
+//   set counts its entries), {"act":"<a button's action>","n":…,"w":…} (how many times the player tapped it)
+// o.lenient (the game): a goal it can't read is kept as one it doesn't know ("Update the game to earn this"), not an error
+function ccxGoal(h,o){o=o||{};if(!h||typeof h!=='object'||Array.isArray(h))return o.lenient?{how:{g:'_',n:1}}:{err:'a goal looks like {"g":"shiny","n":100}'};
+  const words=()=>{const w=ccxTxt(h.w,60);return w?{w}:{}};
+  if(h.stat!=null){if(!/^[a-zA-Z]{2,20}$/.test(String(h.stat)))return {err:'"stat" must be the name of a game stat, like "shiny"'};
+    const n=ccxNum(h.n,1,1e300,true);if(!n)return {err:'"n" (how many) is missing'};return {how:Object.assign({stat:String(h.stat),n},words())}}
+  if(h.path!=null){const p=String(h.path);if(!/^[a-zA-Z][a-zA-Z0-9_]{0,30}(\.[a-zA-Z0-9_]{1,40}){0,3}$/.test(p)||/(^|\.)(__proto__|prototype|constructor)(\.|$)/.test(p))return {err:'"path" must be a place in the save, like "cmd.asc" or "monGot"'};
+    const n=ccxNum(h.n,1,1e300,true);if(!n)return {err:'"n" (how many) is missing'};const w=words();if(!w.w)return {err:'"w" (what players read) is needed with "path"'};return {how:Object.assign({path:p,n},w)}}
+  if(h.act!=null){const a=String(h.act);if(!/^[a-zA-Z][a-zA-Z0-9_]{1,29}$/.test(a))return {err:'"act" must be the name of a button\'s action, like "spin"'};
+    const n=ccxNum(h.n,1,1e9,true);if(!n)return {err:'"n" (how many) is missing'};const w=words();if(!w.w)return {err:'"w" (what players read) is needed with "act"'};return {how:Object.assign({act:a,n},w)}}
+  if(h.g!=null){if(!/^[a-z][a-z0-9]{1,15}$/.test(String(h.g)))return o.lenient?{how:{g:'_',n:1}}:{err:'"g" must be a goal name, like "shiny"'};const g=String(h.g);
+    if(!CCX_GOALMAP[g])return o.lenient?{how:{g:'_',n:1}}:{err:'"'+g+'" is not a goal the game knows (pick one from the list, or count something with "stat", "path" or "act")'};
+    let n=CCX_YES[g]?1:ccxNum(h.n,1,1e300,true);if(!n)return {err:'"n" (how many) is missing for "'+g+'"'};const out=Object.assign({g,n},words());
+    if(g==='joinedby'){if(!ccxIsDay(h.d))return {err:'"joinedby" needs "d", a date like "2026-12-01"'};out.d=String(h.d)}
+    return {how:out}}
+  for(const key in CCX_HOW)if(h[key]!=null){const [lo,hi]=CCX_HOW[key];const v=ccxNum(h[key],lo,hi,true);if(v==null)return {err:`"${key}" must be a number`};return {how:{[key]:v}}}
+  return o.lenient?{how:{g:'_',n:1}}:{err:'it has no goal: use "g" with a goal name and "n", like {"g":"shiny","n":100}'}}
+function ccxHow(h,opt){const r=ccxHow0(h,opt);if(!r.err||!(opt&&opt.lenient)||!h||typeof h!=='object'||Array.isArray(h)||h.sh!=null)return r;
+  const o={g:'_',n:1};if(ccxIsDay(h.from))o.from=String(h.from);if(ccxIsDay(h.to))o.to=String(h.to);return {how:o}}
+function ccxHow0(h,opt){opt=opt||{};if(!h||typeof h!=='object'||Array.isArray(h))return {err:'"how" must look like {"g":"lv","n":30}'};
+  if(h.sh!=null){const v=ccxNum(h.sh,5,5000,true);return v?{how:{sh:v}}:{err:'"how.sh" must be a price in Star Shards'}}
+  let o;
+  if(h.all!=null||h.any!=null){const kind=h.all!=null?'all':'any',L=h[kind];if(!Array.isArray(L)||L.length<2||L.length>6)return {err:`"how.${kind}" must list 2 to 6 goals`};
+    const parts=[];for(const p of L){if(p&&(p.all||p.any||p.sh!=null||p.from||p.to))return {err:`each goal in "${kind}" is one goal, like {"g":"shiny","n":100}`};const r=ccxGoal(p,opt);if(r.err)return {err:'"how": '+r.err};parts.push(r.how)}
+    o={[kind]:parts}}
+  else{const r=ccxGoal(h,opt);if(r.err)return {err:'"how": '+r.err};o=r.how}
+  if(h.w!=null&&!o.w){const w=ccxTxt(h.w,60);if(w)o.w=w}
+  if(h.from!=null){if(!ccxIsDay(h.from))return {err:'"how.from" must be a date like "2026-12-01"'};o.from=String(h.from)}
+  if(h.to!=null){if(!ccxIsDay(h.to))return {err:'"how.to" must be a date like "2026-12-31"'};o.to=String(h.to)}
+  if(o.from&&o.to&&o.to<o.from)return {err:'"how.to" is before "how.from"'};
+  if(h.during){if(!o.from)return {err:'"how.during" needs a "from" date'};o.during=true}
+  return {how:o}}
+/* ---- a plaque's rank colours (the hexagon round the level): s stroke colours, f fill (2), n the number ---- */
+function ccxRc(r){if(!r||typeof r!=='object')return null;const s=ccxCols(r.s,2,8),f=ccxCols(r.f,2,2);if(!s||!f)return null;
+  let n=Array.isArray(r.n)?ccxCols(r.n,2,4):ccxCol(r.n);if(!n)return null;const o={s,f,n};
+  if(r.g!=null){const g=ccxCol(r.g);if(!g)return null;o.g=g}if(r.gp)o.gp=1;if(r.sw)o.sw=1;
+  if(r.a!=null){const a=ccxNum(r.a,1,10);if(a!=null)o.a=a}if(r.na!=null){const a=ccxNum(r.na,1,5);if(a!=null)o.na=a}return o}
+/* ---- an interface style: the colours of the whole game, and a pattern behind it ---- */
+function ccxUi(s){if(!s||typeof s!=='object')return {err:'"style" must be an object'};const o={};
+  for(const k of CCX_UIK){const c=ccxCol(s[k]);if(!c)return {err:`"style.${k}" must be a colour like #0e1830`};o[k]=c}
+  if(s.patSvg!=null){const r=ccxSvg(s.patSvg,{root:true,max:4000});if(r.err)return {err:'"style.patSvg": '+r.err};o.patSvg=r.svg}
+  else if(s.pat!=null){if(/^[a-z]{2,16}$/.test(String(s.pat)))o.pat=String(s.pat);else return {err:'"style.pat" must be a pattern name like "hex"'}}
+  return {style:o}}
+
+/* ---- the item's details (everything but the drawing) ----
+   o.isNew(k,id): true when the game has no such item yet (then a name, a price or goal, and the looks are needed) */
+function ccxMeta(raw,o){o=o||{};const E=[],W=[];const it={};
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return {item:null,errs:['This is not an item (it should be {"of":"content", ...})'],warns:W};
+  const k=raw.k;if(!CCX_KINDS[k])return {item:null,errs:['"k" (the kind) must be one of: '+Object.keys(CCX_KINDS).join(', ')],warns:W};
+  it.k=k;const card=k==='pq'||k==='th';const id=String(raw.id==null?'':raw.id);
+  if(card?!/^[a-z]{2,12}$/.test(id):!/^[a-z][a-z0-9_]{1,31}$/.test(id))E.push(card?'"id" must be 2 to 12 small letters (a to z only), like "neonkoi"':'"id" must start with a small letter and use only small letters, numbers and _ (up to 32), like "sky_lagoon"');
+  it.id=id;const isNew=o.isNew?!!o.isNew(k,id):true;
+  if(raw.n!=null){const n=ccxTxt(raw.n,30);if(n)it.n=n;else E.push('"n" (the name) is empty')}else if(isNew)E.push('"n" (the name) is missing');
+  if(raw.d!=null)it.d=ccxTxt(raw.d,140);
+  if(raw.sh!=null){const v=ccxNum(raw.sh,5,5000,true);if(v==null)E.push('"sh" (the price in Star Shards) must be a number from 5 to 5000');else it.sh=v}
+  if(raw.how!=null){const h=ccxHow(raw.how,{lenient:!!o.lenient});if(h.err)E.push(h.err);else if(h.how.sh){if(it.sh==null)it.sh=h.how.sh}else it.how=h.how}
+  if(it.sh!=null&&it.how){W.push('It has a price and a goal: it uses the price');delete it.how}
+  if(isNew&&it.sh==null&&!it.how)E.push('Give it a price ("sh") or a goal to earn it ("how")');
+  if(card){if(raw.tier!=null){if(CCX_TIERS.includes(raw.tier))it.tier=raw.tier;else E.push('"tier" must be r (Rare), e (Epic), l (Legendary) or m (Mythic)')}}
+  else if(raw.rar!=null){if(CCX_RARS.includes(raw.rar))it.rar=raw.rar;else E.push('"rar" must be common, rare, epic or legendary')}
+  if(raw.off!=null)it.off=!!raw.off;
+  // in the Shop only between two dates (the player's own days, both included); before and after, as if off
+  if(raw.show!=null){const sh=raw.show;if(!sh||typeof sh!=='object')E.push('"show" must look like {"from":"2026-12-01","to":"2026-12-31"}');
+    else{const o2={};if(sh.from!=null){if(ccxIsDay(sh.from))o2.from=String(sh.from);else E.push('"show.from" must be a date like "2026-12-01"')}
+      if(sh.to!=null){if(ccxIsDay(sh.to))o2.to=String(sh.to);else E.push('"show.to" must be a date like "2026-12-31"')}
+      if(o2.from&&o2.to&&o2.to<o2.from)E.push('"show.to" is before "show.from"');if(o2.from||o2.to)it.show=o2}}
+  const col=(f,req,extra)=>{if(raw[f]==null){if(req&&isNew)E.push(`"${f}" (a colour like #38e1c6) is missing`);return}
+    if(extra&&extra.includes(raw[f])){it[f]=raw[f];return}const c=ccxCol(raw[f]);if(c)it[f]=c;else E.push(`"${f}" must be a colour like #38e1c6`+(extra?` (or "${extra.join('", "')}")`:''))};
+  const flag=f=>{if(raw[f]!=null)it[f]=!!raw[f]};
+  const cyc=()=>{if(raw.cyc!=null){if(raw.cyc==='rainbow')it.cyc='rainbow';else{const a=ccxCols(raw.cyc,2,6);if(a)it.cyc=a;else E.push('"cyc" must be "rainbow" or 2 to 6 colours')}}
+    if(raw.per!=null){const v=ccxNum(raw.per,1000,60000,true);if(v!=null)it.per=v}};
+  switch(k){
+  case 'pq':if(raw.rc!=null){const r=ccxRc(raw.rc);if(r)it.rc=r;else E.push('"rc" (rank colours) needs s (2 to 8 colours), f (2 colours) and n (a colour, or 2 to 4)')}break;
+  case 'th':col('c',true);if(raw.lg!=null){const a=ccxCols(raw.lg,2,8);if(a)it.lg=a;else E.push('"lg" (the moving level colours) must be 2 to 8 colours')}break;
+  case 'hull':col('c',true,['prism']);col('a',true);break;
+  case 'trail':col('c',true,['rainbow']);cyc();break;
+  case 'probe':col('c',true);col('b',true);cyc();if(raw.cycB!=null){const a=ccxCols(raw.cycB,2,6);if(a)it.cycB=a;else E.push('"cycB" must be 2 to 6 colours')}break;
+  case 'ptrail':col('c',true,['rainbow']);flag('glitter');cyc();break;
+  case 'star':col('c',!raw.shape&&!raw.path);flag('pulse');col('a',false);
+    if(raw.shape!=null){if(/^[a-z]{2,16}$/.test(String(raw.shape)))it.shape=String(raw.shape);else E.push('"shape" must be the name of a star shape, like "moon"')}
+    if(raw.path!=null){const p=ccxPath(raw.path);if(p)it.path=p;else E.push('"path" must be SVG path data (M, L, C, Q, A, Z and numbers), drawn in a box from -1 to 1')}
+    if(raw.path2!=null){const p=ccxPath(raw.path2);if(p)it.path2=p;else E.push('"path2" must be SVG path data')}
+    if(raw.spin!=null){const v=ccxNum(raw.spin,-360,360);if(v!=null)it.spin=v}
+    if(it.shape&&it.path){W.push('It has a shape and a path: it uses the path');delete it.shape}
+    if(it.spin!=null&&!it.path&&!(o.prev&&o.prev.path)){W.push('"spin" only turns a star drawn with "path"')}break;
+  case 'sky':if(raw.dim!=null){const v=ccxNum(raw.dim,0,.9);if(v!=null)it.dim=v}if(raw.twinkle!=null){const v=ccxNum(raw.twinkle,0,1.5);if(v!=null)it.twinkle=v}break;
+  case 'orbit':col('c',true,['none']);flag('glow');flag('dash');break;
+  case 'ui':col('c',true);col('a',true);if(raw.style!=null){const s=ccxUi(raw.style);if(s.err)E.push(s.err);else it.style=s.style}break}
+  const known=new Set(CCX_FIELDS.all.concat(CCX_FIELDS[k]||[]));const extra=Object.keys(raw).filter(f=>!known.has(f));
+  if(extra.length)W.push('Not used: '+extra.slice(0,6).map(f=>'"'+f+'"').join(', '));
+  if(raw.v!=null){const v=ccxNum(raw.v,0,1e13,true);if(v!=null)it.v=v}if(raw.av!=null){const v=ccxNum(raw.av,0,1e13,true);if(v!=null)it.av=v}
+  return {item:it,errs:E,warns:W}}
+
+/* ---- the drawing: a plaque's or a theme's SVG, or a sky (a recipe, and maybe a painted picture) ---- */
+function ccxArt(k,raw,errs){
+  if(k==='pq'||k==='th'){if(raw.svg==null)return null;const r=ccxSvg(raw.svg,{max:900000,box:k==='pq'?[60,60]:[400,64]});if(r.err){errs.push('"svg": '+r.err);return null}return {svg:r.svg,dropped:r.dropped}}
+  if(k==='sky'){if(raw.sky==null&&raw.img==null)return null;let img=null;
+    if(raw.img!=null){img=ccxImg(raw.img);if(!img){errs.push('"img" must be a picture written as data:image/webp;base64,... (or png, jpeg), under 900 KB');return null}}
+    const s=ccxSky(raw.sky||{layers:[{t:'img'}]},!!img);if(s.err){errs.push('"sky": '+s.err);return null}return img?{sky:s.sky,img}:{sky:s.sky}}
+  return null}
+function ccxSky(s,hasImg){if(!s||typeof s!=='object'||Array.isArray(s))return {err:'it must be an object like {"base":[...],"layers":[...]}'};const o={};
+  o.base=s.base!=null?ccxCols(s.base,2,2):['#05070f','#020308'];if(!o.base)return {err:'"base" must be 2 colours (top, bottom)'};
+  if(!Array.isArray(s.layers)||s.layers.length>14)return {err:'"layers" must be a list of up to 14 layers'};
+  o.layers=[];for(const L of s.layers){const r=ccxLayer(L,hasImg);if(r.err)return {err:r.err};o.layers.push(r.L)}
+  if(o.layers.filter(L=>L.t==='neb').length>6)return {err:'up to 6 nebula layers (each one takes time to paint)'};
+  if(s.fx!=null){if(/^sky_[a-z0-9_]{1,30}$/.test(String(s.fx)))o.fx=String(s.fx);else return {err:'"fx" must be the id of a built-in sky that moves, like "sky_ember"'}}
+  return {sky:o}}
+function ccxLayer(L,hasImg){if(!L||typeof L!=='object')return {err:'a layer must be an object like {"t":"stars"}'};
+  const N=(v,lo,hi,d)=>{const x=ccxNum(v,lo,hi);return x==null?d:x};const out=o=>{for(const f in o)if(o[f]===undefined)delete o[f];return {L:o}};
+  const comp=CCX_COMP.includes(L.comp)?L.comp:undefined,alpha=L.alpha!=null?N(L.alpha,0,1,1):undefined;
+  switch(L.t){
+  case 'neb':{if(!Array.isArray(L.stops)||L.stops.length<2||L.stops.length>10)return {err:'a "neb" layer needs 2 to 10 stops like [0.5, 90,40,160, 0.45]'};const st=[];
+    for(const s of L.stops){if(!Array.isArray(s)||s.length!==5)return {err:'a nebula stop is [where 0-1, red, green, blue (0-255), opacity 0-1]'};
+      st.push([N(s[0],0,1,0),Math.round(N(s[1],0,255,0)),Math.round(N(s[2],0,255,0)),Math.round(N(s[3],0,255,0)),N(s[4],0,1,0)])}
+    st.sort((a,b)=>a[0]-b[0]);const lo=N(L.lo,0,.95,.3);let hi=N(L.hi,0,1,.75);if(hi<=lo)hi=Math.min(1,lo+.05);
+    return out({t:'neb',seed:Math.round(N(L.seed,1,99999,7)),scale:N(L.scale,.3,12,3),warp:N(L.warp,0,5,1.4),lo,hi,pow:L.pow!=null?N(L.pow,.2,5,1):undefined,alpha,comp,stops:st})}
+  case 'stars':{const o={t:'stars'};if(L.n!=null)o.n=Math.round(N(L.n,1,1500,100));else o.per=Math.round(N(L.per,200,20000,700));
+    if(L.colors!=null){const c=ccxCols(L.colors,1,8);if(!c)return {err:'"colors" in a stars layer must be 1 to 8 colours'};o.colors=c}
+    if(L.min!=null)o.min=N(L.min,.05,4,.25);if(L.max!=null)o.max=N(L.max,.1,6,1.7);if(L.a!=null)o.a=N(L.a,.05,1,.95);
+    if(L.at!=null){if(!Array.isArray(L.at)||L.at.length!==4)return {err:'"at" in a stars layer is [x, y, spread x, spread y], each 0 to 1'};o.at=[N(L.at[0],-.5,1.5,.5),N(L.at[1],-.5,1.5,.5),N(L.at[2],0,1,.05),N(L.at[3],0,1,.05)]}
+    return out(o)}
+  case 'glow':{const c=ccxCol(L.c);if(!c)return {err:'a "glow" layer needs "c", a colour'};return out({t:'glow',x:N(L.x,-.5,1.5,.5),y:N(L.y,-.5,1.5,.5),r:N(L.r,.01,2,.3),c,a:N(L.a,0,1,.3),comp})}
+  case 'grad':{if(!Array.isArray(L.stops)||L.stops.length<2||L.stops.length>8)return {err:'a "grad" layer needs 2 to 8 stops like [0.5, "#38e1c6", 0.4]'};const st=[];
+    for(const s of L.stops){const c=Array.isArray(s)&&ccxCol(s[1]);if(!c)return {err:'a gradient stop is [where 0-1, "#colour", opacity 0-1]'};st.push([N(s[0],0,1,0),c,N(s[2],0,1,1)])}
+    st.sort((a,b)=>a[0]-b[0]);const dir=['v','h','r'].includes(L.dir)?L.dir:'v';
+    return out({t:'grad',dir,x:dir==='r'?N(L.x,-.5,1.5,.5):undefined,y:dir==='r'?N(L.y,-.5,1.5,.5):undefined,r:dir==='r'?N(L.r,.05,2,.7):undefined,stops:st,alpha,comp})}
+  case 'img':if(!hasImg)return {err:'an "img" layer needs the picture in "img"'};return out({t:'img',fit:['cover','contain','stretch'].includes(L.fit)?L.fit:'cover',alpha,comp});
+  default:return {err:'a layer\'s "t" must be neb, stars, glow, grad or img'}}}
+
+/* ---- cleaning SVG ---- */
+const CCX_SVGNS='http://www.w3.org/2000/svg',CCX_XLINK='http://www.w3.org/1999/xlink';
+const CCX_TAGS=new Set(('svg g defs path circle ellipse rect line polyline polygon text tspan textPath linearGradient radialGradient stop clipPath mask pattern symbol use image '+
+  'filter feGaussianBlur feOffset feBlend feColorMatrix feComponentTransfer feFuncR feFuncG feFuncB feFuncA feComposite feFlood feMerge feMergeNode feMorphology '+
+  'feTurbulence feDisplacementMap feDropShadow feSpecularLighting feDiffuseLighting fePointLight feDistantLight feSpotLight feTile '+
+  'animate animateTransform animateMotion mpath set').split(' '));
+// no title, desc or foreignObject: inside a page, a browser reads what's in them as page HTML, not as drawing
+const CCX_TEXT=new Set(['text','tspan','textPath']);
+// the attributes a drawing may have (anything else is taken out: no name, src, class, pointer-events, cursor, overflow…)
+const CCX_ATTR=new Set(('x y x1 y1 x2 y2 cx cy r rx ry fx fy fr width height d points pathLength transform viewBox preserveAspectRatio offset '+
+  'gradientUnits gradientTransform spreadMethod patternUnits patternContentUnits patternTransform clipPathUnits maskUnits maskContentUnits filterUnits primitiveUnits '+
+  'fill fill-opacity fill-rule stroke stroke-width stroke-opacity stroke-linecap stroke-linejoin stroke-dasharray stroke-dashoffset stroke-miterlimit opacity '+
+  'stop-color stop-opacity clip-path clip-rule mask filter mix-blend-mode isolation paint-order vector-effect shape-rendering color color-interpolation '+
+  'color-interpolation-filters flood-color flood-opacity lighting-color visibility display transform-origin transform-box font-family font-size font-weight '+
+  'font-style font-variant letter-spacing word-spacing text-anchor dominant-baseline alignment-baseline baseline-shift text-decoration writing-mode image-rendering '+
+  'dx dy rotate textLength lengthAdjust startOffset method spacing side '+
+  'in in2 result stdDeviation edgeMode mode operator k1 k2 k3 k4 type values tableValues slope intercept amplitude exponent baseFrequency numOctaves seed '+
+  'stitchTiles scale xChannelSelector yChannelSelector radius surfaceScale diffuseConstant specularConstant specularExponent kernelUnitLength azimuth elevation '+
+  'pointsAtX pointsAtY pointsAtZ limitingConeAngle z '+
+  'attributeName attributeType begin dur end min max restart repeatCount repeatDur calcMode keyTimes keySplines from to by additive accumulate path keyPoints origin').split(' '));
+const CCX_NOANIM=new Set(['attributeName','attributeType','begin','end','values','from','to','by','id','style','href']);
+const CCX_LOCALREF=new Set(['use','mpath','textPath','linearGradient','radialGradient','pattern','filter']);
+const CCX_CSS=new Set(['fill','fill-opacity','fill-rule','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','stroke-miterlimit',
+  'opacity','mix-blend-mode','isolation','paint-order','transform-origin','transform-box','transform','stop-color','stop-opacity','filter','clip-path','mask','visibility','display',
+  'font-family','font-size','font-weight','font-style','letter-spacing','text-anchor','dominant-baseline','vector-effect','shape-rendering','color','image-rendering','flood-color','flood-opacity','lighting-color']);
+// a value may point only inside the drawing: url(#…). No other way of fetching anything (image-set, cross-fade…, // links)
+function ccxSafe(v){return !/javascript:|vbscript:|data:(?!image\/(png|jpe?g|webp|gif);base64,)|expression\s*\(|@import|image-set|cross-fade|\bimage\s*\(|\bsrc\s*\(|element\s*\(|\/\/|<|\\/i.test(v)&&!/url\(\s*['"]?\s*(?!['"]?#)/i.test(v)}
+// heavy filters slow every screen they're on: kept to sensible sizes
+const CCX_CAP={numOctaves:4,stdDeviation:25,radius:12,scale:80};
+function ccxCap(ln,v){const m=CCX_CAP[ln];if(!m)return v;return v.replace(/-?[\d.]+(e-?\d+)?/gi,x=>String(Math.max(-m,Math.min(m,+x||0))))}
+function ccxCss(v){const out=[];for(const d of String(v).split(';')){const i=d.indexOf(':');if(i<0)continue;const p=d.slice(0,i).trim().toLowerCase(),val=d.slice(i+1).trim();
+    if(CCX_CSS.has(p)&&val&&ccxSafe(val))out.push(p+':'+val)}return out.join(';')}
+// every id gets {u} in front (the game swaps it for a fresh name each time it draws), and so does every reference
+function ccxU(id){return id.startsWith('{u}')?id:'{u}'+id}
+function ccxRefs(v){return v.replace(/url\(\s*(['"]?)#(?!\{u\})/g,'url($1#{u}')}
+function ccxSvg(raw,o){o=o||{};raw=String(raw==null?'':raw);const max=o.max||900000;if(!raw.trim())return {err:'it is empty'};if(raw.length>max)return {err:'it is too big ('+Math.round(raw.length/1024)+' KB; the most is '+Math.round(max/1024)+' KB)'};
+  if(typeof DOMParser==='undefined')return {err:'this browser can\'t check drawings'};
+  raw=raw.replace(/^\s*<\?xml[^>]*\?>\s*/i,'').replace(/^\s*<!DOCTYPE[^>[]*>\s*/i,'');if(/<!DOCTYPE|<!ENTITY|<\?/i.test(raw))return {err:'it has a DOCTYPE or ENTITY in it: take that out'};
+  const src=o.root?raw:`<svg xmlns="${CCX_SVGNS}" xmlns:xlink="${CCX_XLINK}">${raw}</svg>`;
+  let doc;try{doc=new DOMParser().parseFromString(src,'image/svg+xml')}catch(e){return {err:'it can\'t be read as SVG'}}
+  const root=doc&&doc.documentElement;if(!root||root.localName!=='svg'||root.namespaceURI!==CCX_SVGNS||doc.getElementsByTagName('parsererror').length)
+    return {err:o.root?'it must be one <svg ...>...</svg> with xmlns="http://www.w3.org/2000/svg", written correctly (every tag closed)':'it is not written correctly as SVG (every tag must be closed, and quotes must match)'};
+  let dropped=0,count=0;const ids=new Map();
+  const clean=el=>{for(const ch of Array.from(el.childNodes)){
+      if(ch.nodeType===3){if(!CCX_TEXT.has(el.localName))el.removeChild(ch);continue}
+      if(ch.nodeType!==1){el.removeChild(ch);continue}
+      if(++count>20000){el.removeChild(ch);dropped++;continue}
+      const nm=ch.localName;if(ch.namespaceURI!==CCX_SVGNS||!CCX_TAGS.has(nm)){el.removeChild(ch);dropped++;continue}
+      if(!attrs(ch)){el.removeChild(ch);dropped++;continue}clean(ch)}};
+  // false: drop the whole element
+  const attrs=el=>{const nm=el.localName;let href=null;
+    for(const a of Array.from(el.attributes)){const ln=a.localName,ns=a.namespaceURI,v=a.value;
+      if((ns===CCX_XLINK||!ns)&&ln==='href'){el.removeAttributeNode(a);href=v.trim();continue}
+      if(ns&&ns!=='http://www.w3.org/XML/1998/namespace'){el.removeAttributeNode(a);continue}
+      if(/^xmlns/i.test(a.name)||/^on/i.test(ln)){el.removeAttributeNode(a);continue}
+      if(ln!=='style'&&ln!=='id'&&!CCX_ATTR.has(ln)){el.removeAttributeNode(a);continue}
+      if(ln==='attributeName'&&(!CCX_ATTR.has(v.trim())||CCX_NOANIM.has(v.trim())))return false;
+      if(ln==='style'){const s=ccxCss(v);if(s)el.setAttribute('style',ccxRefs(s));else el.removeAttribute('style');continue}
+      if(ln==='id'){const id=v.replace(/^\{u\}/,'');if(!/^[A-Za-z_][\w\-.]{0,60}$/.test(id)){el.removeAttribute('id');continue}ids.set(v,ccxU(v));el.setAttribute('id',ccxU(v));continue}
+      if(!ccxSafe(v)){el.removeAttributeNode(a);continue}
+      let nv=ccxCap(ln,ccxRefs(v));if(ln==='begin'||ln==='end')nv=nv.replace(/(^|[;\s+\-])(?!\{u\})([A-Za-z_][\w\-]*)\.(begin|end|repeat)/g,(m,p,id,ev)=>p+'{u}'+id+'.'+ev);
+      if(nv!==v)el.setAttribute(a.name,nv)}
+    if(href!=null){if(nm==='image'){const m=/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/\s]+=*$/.test(href);if(!m)return false;el.setAttribute('href',href.replace(/\s+/g,''))}
+      else if(CCX_LOCALREF.has(nm)&&/^#[A-Za-z_{][\w\-.{}]*$/.test(href))el.setAttribute('href','#'+ccxU(href.slice(1)))}
+    else if(nm==='image')return false;
+    return true};
+  if(o.root){const keep=['width','height','viewBox','fill','stroke','stroke-width','stroke-opacity','fill-opacity','opacity','preserveAspectRatio'];
+    for(const a of Array.from(root.attributes))if(!keep.includes(a.localName)||a.namespaceURI||!ccxSafe(a.value))root.removeAttributeNode(a)}
+  clean(root);
+  if(o.box&&!o.root)for(const s of Array.from(root.children))if(s.localName==='svg'){if(!s.getAttribute('width'))s.setAttribute('width',o.box[0]);if(!s.getAttribute('height'))s.setAttribute('height',o.box[1])}
+  if(!root.children.length)return {err:'nothing is left to draw after cleaning it'};
+  const ser=new XMLSerializer();let out;
+  if(o.root){out=ser.serializeToString(root)}else{out='';for(const ch of Array.from(root.childNodes))out+=ser.serializeToString(ch)}
+  out=out.replace(/ xmlns(:xlink)?="[^"]*"/g,'');if(o.root)out=out.replace(/^<svg/,`<svg xmlns="${CCX_SVGNS}"`);
+  if(out.length>max)return {err:'it is too big after cleaning'};
+  return {svg:out,dropped}}
+
+/* ---- reading what was pasted: one item or a list, as JSON (``` fences and a "const x =" in front are fine) ---- */
+function ccxParse(text){let t=String(text||'').trim();t=t.replace(/^```[a-z]*\s*/i,'').replace(/\s*```\s*$/,'').replace(/^(const|let|var)\s+\w+\s*=\s*/,'').replace(/;\s*$/,'');
+  if(!t)return {err:'Paste a content code first.'};let v;try{v=JSON.parse(t)}catch(e){return {err:'That isn\'t a content code: it must be JSON, exactly as Claude wrote it ('+String(e.message||e).slice(0,80)+').'}}
+  const L=Array.isArray(v)?v:[v];if(!L.length)return {err:'The list is empty.'};if(L.length>60)return {err:'Up to 60 items at once.'};
+  if(L.some(x=>!x||typeof x!=='object'||x.of!=='content'))return {err:'Each item must start with "of":"content".'};return {list:L}}
+// check a whole paste: o.isNew(k,id) as for ccxMeta
+function ccxCheck(text,o){const p=ccxParse(text);if(p.err)return {err:p.err};const seen=new Set();
+  return {list:p.list.map(raw=>{const m=ccxMeta(raw,o);const errs=m.errs.slice(),warns=m.warns.slice();let art=null;
+    if(m.item){art=ccxArt(m.item.k,raw,errs);const isNew=o&&o.isNew?!!o.isNew(m.item.k,m.item.id):true;
+      if(isNew&&!art&&(m.item.k==='pq'||m.item.k==='th'||m.item.k==='sky'))errs.push(m.item.k==='sky'?'A new sky needs "sky" (a recipe) or "img" (a picture)':'A new '+(m.item.k==='pq'?'plaque':'theme')+' needs its drawing in "svg"');
+      if(art&&art.dropped)warns.push(art.dropped+' part'+(art.dropped>1?'s':'')+' of the drawing were taken out (not allowed in the game)');
+      const key=ccxKey(m.item.k,m.item.id);if(seen.has(key))errs.push('This item is in the list twice');seen.add(key)}
+    return {raw,item:m.item,art,errs,warns,key:m.item?ccxKey(m.item.k,m.item.id):''}})}}
+
+/* =========================================================
+   1.23: SWITCHES AND A LIVE ECONOMY: the rules (the game and the Command Center use this file word for word)
+   Two small documents the Command Center writes and every 1.23+ game watches (within a minute, no update):
+   - config/off  {list:[switch], up}: what's switched off. A switch is {id, n (its name), r:[rule, …]}; a rule is
+       {"t":"proj","id":"smelter2"}                 a research project can't be researched
+       {"t":"rec","id":"copper_wire"}               an item can't be made (machines don't start it, it can't be picked)
+       {"t":"mu","k":"spd","kind":"refined"}        a machine upgrade can't be bought (kind "refined": smelters,
+                                                    "item": crafters, left out: every machine)
+       {"t":"act","act":"spin","a":…,"b":…,"c":…}   any button: its action, and (optional) what it's for
+   - config/econ {o:{"<where>":number}, up}: only the economy numbers that are changed from the built-in ones.
+     Where a number is (see LV_PATHS): "res.copper_bar.price", "res.copper_wire.ing.copper_bar", "proj.smelter2.cash",
+     "mu.spd.max", "ship.probe_bay.x" (what a cost formula asks for, times x) …
+   ========================================================= */
+// the kinds of number, with what's allowed (nothing that could make a price 0 or negative, a time 0, or a level list huge)
+const LV_KIND={
+  price:{lo:.01,hi:1e300,n:'sell price'},
+  cost:{lo:1,hi:1e300,int:true,n:'price'},
+  amt:{lo:1,hi:1e15,int:true,n:'amount'},
+  time:{lo:1,hi:864000,n:'seconds'},
+  max:{lo:0,hi:10000,int:true,n:'max level'},
+  maxm:{lo:0,hi:200,int:true,n:'max level'},
+  maxs:{lo:0,hi:50,int:true,n:'max level'},
+  grow:{lo:1,hi:5,n:'growth'},
+  x:{lo:.01,hi:100,n:'multiplier'},
+  effb:{lo:.05,hi:100,n:'effect'},
+  effp:{lo:0,hi:10,n:'effect'}};
+const LV_ID='[a-z0-9_]{1,40}';
+const LV_PATHS=[
+  [new RegExp('^res\\.'+LV_ID+'\\.price$'),'price'],[new RegExp('^res\\.'+LV_ID+'\\.time$'),'time'],[new RegExp('^res\\.'+LV_ID+'\\.unlock$'),'cost'],
+  [new RegExp('^res\\.'+LV_ID+'\\.ing\\.'+LV_ID+'$'),'amt'],
+  [new RegExp('^proj\\.'+LV_ID+'\\.cash$'),'cost'],[new RegExp('^proj\\.'+LV_ID+'\\.c\\.'+LV_ID+'$'),'amt'],
+  [/^mu\.(spd|bat|hold)\.max$/,'max'],[/^mu\.(spd|bat|hold)\.cost$/,'cost'],[/^mu\.(spd|bat|hold)\.grow$/,'grow'],
+  [new RegExp('^ship\\.'+LV_ID+'\\.max$'),'maxm'],[new RegExp('^ship\\.'+LV_ID+'\\.x$'),'x'],
+  [/^room\.buy\.\d{1,2}$/,'cost'],[new RegExp('^room\\.'+LV_ID+'\\.base$'),'effb'],[new RegExp('^room\\.'+LV_ID+'\\.per$'),'effp'],[new RegExp('^room\\.'+LV_ID+'\\.max$'),'maxm'],
+  [/^planet\.\d{1,3}\.cost$/,'cost'],
+  [/^crew\.hire\.(public|private|elite)$/,'cost'],[/^crew\.promote\.[1-4]$/,'cost'],
+  [new RegExp('^perk\\.'+LV_ID+'\\.max$'),'maxs'],
+  [/^boost\.[a-z]{1,12}\.(common|rare|epic|ultra)$/,'cost'],
+  [/^gup\.all\.x$/,'x']];
+// a room's effect stays sensible at every level: one that makes things cheaper or faster ("d") never reaches 5% or below 0
+function lvRoomOk(t,base,per,max){base=+base;per=+per;max=+max;if(!(base>=.05))return false;return t==='m'||base-per*Math.max(0,max-1)>=.05}
+function lvKindOf(path){if(typeof path!=='string'||path.length>140||/(^|\.)(__proto__|prototype|constructor)(\.|$)/.test(path))return null;for(const [re,k] of LV_PATHS)if(re.test(path))return k;return null}
+// a number for that kind, or null when it isn't one or is out of range
+function lvNum(kind,v){const K=LV_KIND[kind];if(!K||v===''||v==null||typeof v==='boolean')return null;v=+v;if(!isFinite(v)||v<K.lo||v>K.hi)return null;
+  if(K.int)return Math.round(v);return Math.round(v*1e6)/1e6}
+// the economy document's changes, checked: {o, bad:[where]}
+function lvEcon(o){const out={},bad=[];if(!o||typeof o!=='object'||Array.isArray(o))return {o:out,bad};let n=0;
+  for(const p of Object.keys(o)){if(++n>6000)break;const k=lvKindOf(p);const v=k?lvNum(k,o[p]):null;if(v==null)bad.push(p);else out[p]=v}return {o:out,bad}}
+// the switches, checked: {list, bad: how many were left out}
+const LV_ACT=/^[a-zA-Z][a-zA-Z0-9_]{1,29}$/;
+function lvRule(r){if(!r||typeof r!=='object')return null;const s=v=>typeof v==='string'||typeof v==='number'?String(v).slice(0,60):null;const id=v=>{v=s(v);return v&&/^[a-zA-Z0-9_.:-]{1,60}$/.test(v)?v:null};
+  switch(r.t){case 'proj':case 'rec':{const i=id(r.id);return i?{t:r.t,id:i}:null}
+    case 'mu':{if(!/^(spd|bat|hold|rep|col|lnk)$/.test(String(r.k)))return null;const o={t:'mu',k:String(r.k)};if(r.kind==='refined'||r.kind==='item')o.kind=r.kind;return o}
+    case 'act':{if(!LV_ACT.test(String(r.act)))return null;const o={t:'act',act:String(r.act)};for(const f of ['a','b','c'])if(r[f]!=null&&r[f]!==''){const v=s(r[f]);if(v==null)return null;o[f]=v}return o}}
+  return null}
+function lvOff(list){const out=[];let bad=0;if(!Array.isArray(list))return {list:out,bad};const seen=new Set();
+  for(const x of list.slice(0,300)){if(!x||typeof x!=='object'){bad++;continue}const id=typeof x.id==='string'&&/^[a-zA-Z0-9_.:|-]{1,80}$/.test(x.id)?x.id:null;
+    const r=(Array.isArray(x.r)?x.r:[]).slice(0,16).map(lvRule);if(!id||!r.length||r.some(v=>!v)||seen.has(id)){bad++;continue}seen.add(id);
+    out.push({id,n:typeof x.n==='string'?x.n.slice(0,80):id,r})}
+  return {list:out,bad}}
+// "any button" switches: the code the game's button finder shows ({"act":"mUp","a":"refined","c":"spd"}), as a switch
+function lvBtn(code){let o=code;if(typeof code==='string'){try{o=JSON.parse(code)}catch(e){return {err:'That isn\'t a button code: it looks like {"act":"spin","a":"gem"}'}}}
+  const r=lvRule(Object.assign({},o,{t:'act'}));if(!r)return {err:'"act" must be a button\'s action, like "spin" (and a, b, c up to 60 letters)'};
+  const id=('btn:'+[r.act,r.a,r.b,r.c].map(v=>v==null?'':v).join('|')).replace(/[^a-zA-Z0-9_.:|-]/g,'_').slice(0,80);return {sw:{id,n:'Button '+r.act+(r.a!=null?' · '+r.a:'')+(r.b!=null?' · '+r.b:'')+(r.c!=null?' · '+r.c:''),r:[r]}}}
+
+/* the game's sky brushes, to paint a sky recipe the way the game does */
+const CCXP=(function(){
+function skyHash(x,y,s){let h=(x*374761393+y*668265263+s*1442695041)|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967295}
+function vnoise(x,y,s){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;const u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);const a=skyHash(xi,yi,s),b=skyHash(xi+1,yi,s),c=skyHash(xi,yi+1,s),d=skyHash(xi+1,yi+1,s);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+function fbm(x,y,s,o){o=o||5;let t=0,a=.5,f=1,n=0;for(let i=0;i<o;i++){t+=a*vnoise(x*f,y*f,s+i*17);n+=a;f*=2.03;a*=.5}return t/n}
+function rngSeed(seed){let s=(seed>>>0)||1;return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296}}
+function hashStr(t){let h=2166136261;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function gauss(r){return Math.sqrt(-2*Math.log(r()+1e-9))*Math.cos(6.2832*r())}
+function hexA(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+function pstop(stops,t){if(t<=stops[0][0])return stops[0];for(let i=1;i<stops.length;i++){if(t<=stops[i][0]){const a=stops[i-1],b=stops[i];const k=(t-a[0])/(b[0]-a[0]||1);return [0,a[1]+(b[1]-a[1])*k,a[2]+(b[2]-a[2])*k,a[3]+(b[3]-a[3])*k,a[4]+(b[4]-a[4])*k]}}return stops[stops.length-1]}
+function nebula(g,w,h,o){const R=o.res||4;const sw=Math.max(8,Math.ceil(w/R)),sh=Math.max(8,Math.ceil(h/R));const cv=document.createElement('canvas');cv.width=sw;cv.height=sh;const x=cv.getContext('2d');const id=x.createImageData(sw,sh);const d=id.data;const sc=o.scale||3,seed=o.seed||1,wp=o.warp==null?1.4:o.warp,lo=o.lo==null?.3:o.lo,hi=o.hi==null?.75:o.hi;const m=Math.max(sw,sh);
+  for(let j=0;j<sh;j++)for(let i=0;i<sw;i++){const u=i/m*sc,v=j/m*sc;const q=fbm(u,v,seed,4),r=fbm(u+5.2,v+1.3,seed+3,4);let n=fbm(u+wp*q,v+wp*r,seed+7,5);if(o.mask)n*=o.mask(i/sw,j/sh);n=Math.max(0,Math.min(1,(n-lo)/(hi-lo)));if(o.pow)n=Math.pow(n,o.pow);const c=pstop(o.stops,n);const k=(j*sw+i)*4;d[k]=c[1];d[k+1]=c[2];d[k+2]=c[3];d[k+3]=Math.max(0,Math.min(255,c[4]*255))}
+  x.putImageData(id,0,0);g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';if(o.comp)g.globalCompositeOperation=o.comp;g.globalAlpha=o.alpha==null?1:o.alpha;g.drawImage(cv,0,0,w,h);g.restore()}
+function starTint(r){const t=r();return t<.58?'#ffffff':t<.74?'#cfe1ff':t<.87?'#fff1d6':t<.95?'#ffd2b0':'#b9c8ff'}
+function starField(g,w,h,r,n,o){o=o||{};for(let i=0;i<n;i++){let x,y;if(o.pos){const p=o.pos(r);x=p[0];y=p[1]}else{x=r()*w;y=r()*h}const rad=(o.min||.25)+Math.pow(r(),o.pow||4)*((o.max||1.7)-(o.min||.25));const col=o.color?o.color(r):starTint(r);const a=(o.a||.95)*(.3+.7*r());g.globalAlpha=a;g.fillStyle=col;g.beginPath();g.arc(x,y,rad,0,7);g.fill();
+    if(rad>(o.spike||1.35)){const gl=g.createRadialGradient(x,y,0,x,y,rad*5);gl.addColorStop(0,hexA(col.length===7?col:'#ffffff',.55*a));gl.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gl;g.beginPath();g.arc(x,y,rad*5,0,7);g.fill();g.globalAlpha=a*.55;g.strokeStyle=col;g.lineWidth=.55;g.beginPath();g.moveTo(x-rad*6,y);g.lineTo(x+rad*6,y);g.moveTo(x,y-rad*6);g.lineTo(x,y+rad*6);g.stroke()}}g.globalAlpha=1}
+function glow(g,x,y,r,col,a){const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,hexA(col,a));gr.addColorStop(.35,hexA(col,a*.35));gr.addColorStop(1,hexA(col,0));g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill()}
+function base(g,w,h,top,bot){const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,w,h)}
+function ccxSkyPaint(R,im){return function(g,w,h,r){base(g,w,h,R.base[0],R.base[1]);
+  for(const L of R.layers){g.save();try{if(L.alpha!=null&&L.t!=='neb')g.globalAlpha=L.alpha;if(L.comp&&L.t!=='neb')g.globalCompositeOperation=L.comp;
+    if(L.t==='neb')nebula(g,w,h,{seed:L.seed,scale:L.scale,warp:L.warp,lo:L.lo,hi:L.hi,pow:L.pow,alpha:L.alpha,comp:L.comp,stops:L.stops});
+    else if(L.t==='stars'){const n=L.n!=null?L.n:Math.round(w*h/L.per);const cols=L.colors;const at=L.at;
+      starField(g,w,h,r,n,{min:L.min,max:L.max,a:L.a,color:cols?(rr=>cols[Math.floor(rr()*cols.length)]):undefined,pos:at?(rr=>[w*at[0]+gauss(rr)*w*at[2],h*at[1]+gauss(rr)*w*at[3]]):undefined})}
+    else if(L.t==='glow')glow(g,w*L.x,h*L.y,w*L.r,L.c,L.a);
+    else if(L.t==='grad'){let gr;if(L.dir==='r')gr=g.createRadialGradient(w*L.x,h*L.y,0,w*L.x,h*L.y,Math.max(w,h)*L.r);else if(L.dir==='h')gr=g.createLinearGradient(0,0,w,0);else gr=g.createLinearGradient(0,0,0,h);
+      for(const s of L.stops)gr.addColorStop(s[0],hexA(s[1],s[2]));g.fillStyle=gr;g.fillRect(0,0,w,h)}
+    else if(L.t==='img'&&im&&im.naturalWidth){const iw=im.naturalWidth,ih=im.naturalHeight;let dw=w,dh=h,dx=0,dy=0;
+      if(L.fit!=='stretch'){const s=L.fit==='contain'?Math.min(w/iw,h/ih):Math.max(w/iw,h/ih);dw=iw*s;dh=ih*s;dx=(w-dw)/2;dy=(h-dh)/2}g.imageSmoothingQuality='high';g.drawImage(im,dx,dy,dw,dh)}
+  }catch(e){}g.restore()}}}
+return {skyPaint:ccxSkyPaint,rngSeed,hashStr}})();
+const CX_GUIDE="# Orbital Forge: Shop content codes (a guide for Claude)\n\nYou're making items for the Shop of Orbital Forge, an idle space-mining game for phones (dark space look, neon accents). The developer pastes your code into the game's Command Center, which checks it and sends it to every player, no app update needed.\n\nReply with ONE JSON code block: a single item `{...}` or a list `[{...},{...}]`. Plain JSON: double quotes, no comments, no trailing commas. Say in one or two lines what you made, outside the code block.\n\n## Every item\n- `\"of\": \"content\"` (always)\n- `\"k\"`: the kind: `\"pq\"` plaque, `\"th\"` leaderboard theme, `\"hull\"`, `\"trail\"` (engine trail), `\"probe\"` (probe paint), `\"ptrail\"` (probe trail), `\"star\"`, `\"sky\"` (space background), `\"orbit\"` (orbit lines), `\"ui\"` (interface look)\n- `\"id\"`: plaques and themes: 2 to 12 small letters, a to z only (`\"neonkoi\"`). Everything else: small letters, digits and `_`, up to 32 (`\"sky_lagoon\"`, `\"hull_mint\"`). A NEW item needs an id that's not in the list at the end. Using an id from that list CHANGES that existing item, and only the fields you give change.\n- `\"n\"`: the name, up to 30 characters (needed for a new item)\n- the price, `\"sh\"`: Star Shards, 5 to 5000. Usual prices: plaques and themes Rare 20 to 40, Epic 25 to 60, Legendary 60 to 150, Mythic 150 and up; Hangar looks 30 to 350.\n  Or earned by playing instead of a price: `\"how\"`, an earn code (see \"Earn codes\" below).\n- plaques and themes: `\"tier\"`: `\"r\"` Rare, `\"e\"` Epic, `\"l\"` Legendary, `\"m\"` Mythic (it colours the tile)\n- Hangar looks: `\"rar\"`: `\"common\"`, `\"rare\"`, `\"epic\"` or `\"legendary\"`; `\"d\"`: a description, up to 140 characters\n- `\"off\": true` takes an item out of the Shop (players who have it keep it; nobody new can buy or earn it). `\"off\": false` puts it back.\n- `\"show\": {\"from\":\"2026-12-01\",\"to\":\"2026-12-31\"}`: in the Shop only between those days (either date can be left out); before and after, as if it were off.\n- Changing an item: a code with its id changes only the fields it lists. To take a field away, give it as `null` (`\"lg\": null`).\n\n## Earn codes (`\"how\"`)\nWhat a player must do to earn an item. Any item can be earned instead of bought.\n- One goal: `{\"g\":\"shiny\",\"n\":100}`. The game writes what players read (\"Find 100 shiny planets\"); `\"w\"` gives your own words instead: `{\"g\":\"shiny\",\"n\":100,\"w\":\"Find 100 shiny planets, explorer\"}`.\n- Every one of several (2 to 6): `{\"all\":[{\"g\":\"lv\",\"n\":30},{\"g\":\"shiny\",\"n\":100}]}`. One of several: `{\"any\":[…]}`.\n- Only between two dates (the player's own days, both included): add `\"from\":\"2026-12-01\",\"to\":\"2026-12-31\"`. Before the dates it shows when it starts; after them it's gone for anyone who didn't earn it.\n- `\"during\": true` (with `\"from\"`) counts only what's done between the dates: `{\"g\":\"meteors\",\"n\":50,\"from\":\"2026-12-20\",\"to\":\"2026-12-31\",\"during\":true}`.\n- `{\"g\":\"play\",\"from\":\"2026-12-25\",\"to\":\"2026-12-25\"}`: just open the game that day (a holiday gift). `{\"g\":\"joinedby\",\"d\":\"2026-12-01\"}`: started playing by that day.\n- Players who already have an item keep it when its earn code or price changes.\n- Anything else the game keeps count of, in your own words (`\"w\"`; needed with `path` and `act`):\n  - `{\"stat\":\"<a stat>\",\"n\":N,\"w\":\"…\"}`: a game stat (the stats: {{STATS}}).\n  - `{\"path\":\"<where in the save>\",\"n\":N,\"w\":\"…\"}`: a number in the player's save, like `\"cmd.asc\"`, `\"dly.best\"`, `\"perks.offline\"`, `\"gup.mine\"`, `\"rooms.<room>\"`; a list or set counts its entries, like `\"planets\"`, `\"managers\"`, `\"monGot\"`, `\"proj\"`, `\"book\"`.\n  - `{\"act\":\"<a button's action>\",\"n\":N,\"w\":\"…\"}`: how many times the player tapped a button with that action (since 1.23), like `\"spin\"`, `\"calClaim\"`, `\"buyPlanet\"`.\n  Prefer a named goal when there is one. Only the goal names below are accepted (a misspelt one is refused). Players on an older game see \"Update the game to earn this\" for a goal their game doesn't know.\n- Counts that are new in 1.23 (days played, button taps, and chests, daily rewards and weekly gifts for players who switched off play stats) start from the day the player updates.\n- Numbers can be as big as the game's (`\"n\":1e20` for a galaxy worth $100Q).\nThe goals (`\"g\"`), with what players read:\n{{GOALS}}\n\n## Plaque (`\"k\":\"pq\"`): `\"svg\"`\nA plaque is drawn around the player's level badge, on the leaderboards and on their player card. `\"svg\"` is the INSIDE of an SVG whose viewBox is `0 0 60 60` (don't write the `<svg>` tag). The level badge, a hexagon with the level number, sits in the middle: centre (30,30), reaching about 19 from the centre. Keep the middle clear and decorate around it, between radius 19 and 30: wings, laurels, flames, orbits, a crown on top (y 0 to 11), spikes, rings. It's shown small (40 to 100 px), so bold shapes, strong colours and a little glow read best.\nOptional `\"rc\"`, rank colours, which colour the badge itself: `{\"s\":[\"#fee2e2\",\"#ef4444\",\"#7f1d1d\"], \"f\":[\"#b91c1c\",\"#1a0505\"], \"n\":\"#fff1f2\", \"g\":\"#ef4444\", \"gp\":1, \"sw\":1, \"a\":3}`: `s` 2 to 8 colours round the hexagon's edge, `f` the fill (top, bottom), `n` the number (a colour, or 2 to 4 for a moving gradient), `g` a glow (optional), `gp` the glow pulses, `sw` a light sweeps over it, `a` the edge's width (1 to 10).\n\n## Theme (`\"k\":\"th\"`): `\"svg\"` and `\"c\"`\nA theme is the banner behind a player's row on the leaderboards and behind their player card. `\"svg\"` is the INSIDE of an SVG whose viewBox is `0 0 400 64` (no `<svg>` tag). Fill the whole 400×64 first (a rect or gradient). The row's text sits on top: the name on the left, the score on the right, so keep about x 0 to 140 and x 340 to 400 calm and darkish. Put the main picture around x 200 to 330, centred near x 262: tiles in the Shop show only x 162 to 362.\n`\"c\"`: the accent colour. Optional `\"lg\"`: 2 to 8 colours that make the level number shine with a moving gradient (nice on Legendary and Mythic).\n\n## Drawing rules (plaques and themes)\n- Allowed: g, path, circle, ellipse, rect, line, polyline, polygon, text, tspan, linearGradient, radialGradient, stop, clipPath, mask, pattern, symbol, use, filter with fe* steps (feGaussianBlur, feTurbulence, feDisplacementMap, feColorMatrix, feOffset, feMerge, feComposite, feDropShadow, …), image (only pictures inside it as `data:image/png|jpeg|webp;base64,…`).\n- Movement: SMIL only: animate, animateTransform, animateMotion (with mpath), set; `repeatCount=\"indefinite\"`; calm loops of 2 to 12 seconds.\n- Taken out: script, style elements and CSS animations, foreignObject, title, desc, a, event attributes (onclick…), class, pointer-events, and links to anything outside the drawing (only `url(#id)` and `href=\"#id\"` to its own parts). The drawing is cut off a little outside its box. Heavy filters are capped (blur 25, numOctaves 4).\n- Name ids normally (`id=\"glow\"`, `fill=\"url(#glow)\"`): the game makes them unique.\n- Keep it under about 60 KB (with a picture inside: under 800 KB).\n\n## Sky (`\"k\":\"sky\"`): `\"sky\"` and/or `\"img\"`\nThe space background behind the whole game (a phone held upright; also shown as a small tile). Either a recipe the game paints, or a picture, or both.\n`\"sky\": {\"base\":[\"#top\",\"#bottom\"], \"layers\":[ … up to 14, at most 6 of them nebulas … ], \"fx\":\"sky_ember\"}`. Layers are painted in order:\n- nebula clouds: `{\"t\":\"neb\",\"seed\":11,\"scale\":2.6,\"warp\":1.6,\"lo\":0.38,\"hi\":0.78,\"stops\":[[0, 40,20,90, 0],[0.5, 90,40,160, 0.45],[1, 255,230,250, 0.95]]}`. A stop is [where 0 to 1, red, green, blue 0 to 255, opacity 0 to 1]. `scale` 0.3 to 12 (bigger: smaller clouds), `warp` 0 to 5 (swirl), `lo` and `hi` cut the noise (raise `lo` for fewer, thinner clouds), `pow` 0.2 to 5, `alpha`, `comp`. A last nebula with stops `[[0,0,0,0,0],[1,5,3,12,0.85]]` adds dark dust lanes.\n- stars: `{\"t\":\"stars\",\"per\":650}` (one star per 650 square pixels) or a cluster: `{\"t\":\"stars\",\"n\":200,\"at\":[0.68,0.32,0.06,0.05],\"colors\":[\"#e9dcff\"],\"max\":1.4}` (x, y, spread x, spread y, all 0 to 1); `min`, `max` star size, `a` brightness.\n- a soft glow: `{\"t\":\"glow\",\"x\":0.68,\"y\":0.32,\"r\":0.22,\"c\":\"#c084fc\",\"a\":0.35}` (r is part of the width).\n- a gradient wash: `{\"t\":\"grad\",\"dir\":\"v\",\"stops\":[[0,\"#000000\",0],[1,\"#38e1c6\",0.3]]}` (`dir` v, h, or r with `x`, `y`, `r`).\n- the picture: `{\"t\":\"img\",\"fit\":\"cover\"}` (or contain, stretch).\n- any layer: `\"comp\"` (source-over, lighter, screen, multiply, overlay, soft-light) and `\"alpha\"` 0 to 1.\n- `\"fx\"` (optional) borrows the movement of a built-in sky: {{FX}}\n`\"img\"`: `\"data:image/webp;base64,…\"`: a picture, upright, about 720×1280, under 800 KB.\nAlso `\"dim\"` 0 to 0.9 (darkens it so the game stays easy to read; 0.12 if left out) and `\"twinkle\"` 0 to 1.5 (the game's own twinkling stars on top).\n\n## Star (`\"k\":\"star\"`)\n`\"c\"`: the star's colour. Then either a built-in `\"shape\"`: {{SHAPES}}. Or your own `\"path\"`: SVG path data in a box from -1 to 1, centre 0,0 (a heart: `\"M0 .9 C-.2 .7 -1 .25 -1 -.3 C-1 -.75 -.5 -1 0 -.55 C.5 -1 1 -.75 1 -.3 C1 .25 .2 .7 0 .9Z\"`), drawn glowing in `\"c\"`; `\"path2\"` drawn on top of it in `\"a\"`; `\"spin\"`: degrees per second; `\"pulse\": true` makes it beat.\n\n## The other Hangar looks\n- `\"hull\"` (your ship): `\"c\"` the body (or `\"prism\"`), `\"a\"` the cockpit.\n- `\"trail\"` (the ship's engine): `\"c\"` (or `\"rainbow\"`); optional `\"cyc\"`: 2 to 6 colours it cycles through (or `\"rainbow\"`) and `\"per\"`: milliseconds for one cycle.\n- `\"probe\"` (probe paint): `\"c\"` the body, `\"b\"` while carrying ore; optional `\"cyc\"`, `\"cycB\"`, `\"per\"`.\n- `\"ptrail\"` (probe trails): `\"c\"` (or `\"rainbow\"`), `\"glitter\": true`; optional `\"cyc\"`, `\"per\"`.\n- `\"orbit\"` (orbit lines): `\"c\"` (or `\"none\"`), `\"glow\": true`, `\"dash\": true`.\n- `\"ui\"` (interface): `\"c\"` the main colour and `\"a\"` the second (buttons, highlights). Optional `\"style\"` restyles the whole game: `{\"bg\",\"bg2\",\"panel\",\"panel2\",\"line\",\"line2\",\"muted\",\"hi\",\"hud\"}`, all `#rrggbb` (dark backgrounds, slightly lighter panels and lines, `muted` grey text, `hi` bright text, `hud` the top bar), and `\"pat\"`, a pattern behind it: {{PATS}}; or `\"patSvg\"`: your own small tiling SVG, a whole `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\">…<\/svg>`, faint lines or dots, using `{c1}` and `{c2}` for the two colours.\n\n## Colours\nAlways `\"#rrggbb\"`.\n\n## Ids already in the game (use one only to change that item)\n{{IDS}}\n\n## Examples\n{{EXAMPLES}}\n";
+const CX_SAMPLES=[{"of": "content", "k": "pq", "id": "orbitrings", "n": "Orbit Rings", "tier": "e", "sh": 25, "svg": "<defs><linearGradient id=\"g\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#a5f3fc\"/><stop offset=\"1\" stop-color=\"#6366f1\"/><\/linearGradient><radialGradient id=\"d\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".45\" stop-color=\"#67e8f9\"/><stop offset=\"1\" stop-color=\"#67e8f9\" stop-opacity=\"0\"/><\/radialGradient><\/defs><g fill=\"none\" stroke=\"url(#g)\" stroke-width=\"1.4\" stroke-linecap=\"round\"><ellipse cx=\"30\" cy=\"30\" rx=\"27\" ry=\"9\" transform=\"rotate(-30 30 30)\"/><ellipse cx=\"30\" cy=\"30\" rx=\"27\" ry=\"9\" transform=\"rotate(30 30 30)\" stroke-opacity=\".7\"/><\/g><g transform=\"rotate(-30 30 30)\"><circle r=\"3.4\" fill=\"url(#d)\"><animateMotion dur=\"3.2s\" repeatCount=\"indefinite\" path=\"M3 30 A27 9 0 1 1 57 30 A27 9 0 1 1 3 30\"/><\/circle><\/g><g transform=\"rotate(30 30 30)\"><circle r=\"2.6\" fill=\"url(#d)\"><animateMotion dur=\"4.6s\" repeatCount=\"indefinite\" path=\"M57 30 A27 9 0 1 1 3 30 A27 9 0 1 1 57 30\"/><\/circle><\/g>"}, {"of": "content", "k": "th", "id": "tidalglow", "n": "Tidal Glow", "tier": "e", "sh": 30, "c": "#67e8f9", "lg": ["#a5f3fc", "#22d3ee", "#a78bfa", "#a5f3fc"], "svg": "<defs><linearGradient id=\"bg\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#062a3a\"/><stop offset=\"1\" stop-color=\"#03141f\"/><\/linearGradient><linearGradient id=\"w1\" x1=\"0\" x2=\"1\"><stop offset=\"0\" stop-color=\"#22d3ee\" stop-opacity=\".15\"/><stop offset=\".55\" stop-color=\"#22d3ee\" stop-opacity=\".6\"/><stop offset=\"1\" stop-color=\"#a78bfa\" stop-opacity=\".25\"/><\/linearGradient><linearGradient id=\"w2\" x1=\"0\" x2=\"1\"><stop offset=\"0\" stop-color=\"#818cf8\" stop-opacity=\".1\"/><stop offset=\".6\" stop-color=\"#a78bfa\" stop-opacity=\".45\"/><stop offset=\"1\" stop-color=\"#22d3ee\" stop-opacity=\".2\"/><\/linearGradient><radialGradient id=\"m\"><stop offset=\"0\" stop-color=\"#ecfeff\"/><stop offset=\".35\" stop-color=\"#67e8f9\" stop-opacity=\".55\"/><stop offset=\"1\" stop-color=\"#67e8f9\" stop-opacity=\"0\"/><\/radialGradient><filter id=\"b\" x=\"-20%\" y=\"-60%\" width=\"140%\" height=\"220%\"><feGaussianBlur stdDeviation=\"1.6\"/><\/filter><\/defs><rect width=\"400\" height=\"64\" fill=\"url(#bg)\"/><circle cx=\"262\" cy=\"22\" r=\"22\" fill=\"url(#m)\"><animate attributeName=\"opacity\" values=\".7;1;.7\" dur=\"5s\" repeatCount=\"indefinite\"/><\/circle><circle cx=\"262\" cy=\"22\" r=\"6.5\" fill=\"#ecfeff\"/><g filter=\"url(#b)\"><path d=\"M0 46 Q25 38 50 46 T100 46 T150 46 T200 46 T250 46 T300 46 T350 46 T400 46 T450 46 V64 H0Z\" fill=\"url(#w2)\"><animateTransform attributeName=\"transform\" type=\"translate\" values=\"0 0;-100 0\" dur=\"9s\" repeatCount=\"indefinite\"/><\/path><path d=\"M0 52 Q20 46 40 52 T80 52 T120 52 T160 52 T200 52 T240 52 T280 52 T320 52 T360 52 T400 52 T440 52 V64 H0Z\" fill=\"url(#w1)\"><animateTransform attributeName=\"transform\" type=\"translate\" values=\"-80 0;0 0\" dur=\"6s\" repeatCount=\"indefinite\"/><\/path><\/g><g fill=\"#ecfeff\"><circle cx=\"232\" cy=\"49\" r=\".9\"><animate attributeName=\"opacity\" values=\"0;1;0\" dur=\"2.2s\" repeatCount=\"indefinite\"/><\/circle><circle cx=\"286\" cy=\"53\" r=\".8\"><animate attributeName=\"opacity\" values=\"0;1;0\" dur=\"2.9s\" begin=\"-1s\" repeatCount=\"indefinite\"/><\/circle><circle cx=\"300\" cy=\"47\" r=\".7\"><animate attributeName=\"opacity\" values=\"0;1;0\" dur=\"2.5s\" begin=\"-.6s\" repeatCount=\"indefinite\"/><\/circle><\/g>"}, {"of": "content", "k": "sky", "id": "sky_lagoon", "n": "Lagoon Nebula", "rar": "epic", "sh": 120, "d": "A teal nebula with a bright cluster in its heart.", "dim": 0.12, "twinkle": 0.8, "sky": {"base": ["#04161c", "#02070b"], "layers": [{"t": "neb", "seed": 71, "scale": 2.5, "warp": 1.6, "lo": 0.38, "hi": 0.8, "stops": [[0, 4, 40, 48, 0], [0.35, 10, 110, 120, 0.45], [0.65, 45, 200, 190, 0.7], [0.85, 150, 240, 220, 0.85], [1, 235, 255, 250, 0.95]]}, {"t": "neb", "seed": 83, "scale": 3.6, "warp": 1.3, "lo": 0.5, "hi": 0.82, "alpha": 0.75, "comp": "lighter", "stops": [[0, 60, 10, 60, 0], [0.5, 190, 60, 150, 0.3], [1, 250, 150, 210, 0.5]]}, {"t": "neb", "seed": 97, "scale": 4.4, "warp": 2, "lo": 0.5, "hi": 0.72, "stops": [[0, 0, 0, 0, 0], [1, 2, 8, 10, 0.85]]}, {"t": "stars", "per": 650}, {"t": "stars", "n": 200, "at": [0.3, 0.62, 0.07, 0.05], "colors": ["#ccfbf1", "#ffffff"], "max": 1.3}, {"t": "glow", "x": 0.3, "y": 0.62, "r": 0.25, "c": "#2dd4bf", "a": 0.3}]}}, {"of": "content", "k": "star", "id": "star_heart", "n": "Heart Star", "rar": "rare", "d": "A star in the shape of a heart that beats now and then. Earned by catching meteors.", "c": "#f472b6", "pulse": true, "path": "M0 .9 C-.2 .7 -1 .25 -1 -.3 C-1 -.75 -.5 -1 0 -.55 C.5 -1 1 -.75 1 -.3 C1 .25 .2 .7 0 .9Z", "how": {"g": "meteors", "n": 25}}, {"of": "content", "k": "hull", "id": "hull_mint", "n": "Mint Runner", "rar": "rare", "sh": 45, "d": "A cool mint hull with an ice-white cockpit.", "c": "#6ee7b7", "a": "#ecfeff"}, {"of": "content", "k": "ui", "id": "theme_ocean", "n": "Deep Ocean", "rar": "epic", "sh": 300, "d": "The whole game in deep sea blues, with waves behind.", "c": "#22d3ee", "a": "#818cf8", "style": {"bg": "#03111a", "bg2": "#061a26", "panel": "#0a2230", "panel2": "#0f2c3d", "line": "#164154", "line2": "#1f5670", "muted": "#8fb3c4", "hi": "#ecfeff", "hud": "#04161f", "pat": "waves"}}];
+/* CCX-CORE END */
+</script>
+<script>
 (function(){
 'use strict';
 /* =====================================================================
@@ -2409,7 +2805,7 @@ function moPvFrame(ts){const cv=$('#moPv'),d=S.mon.edit;if(!cv||!d)return;const 
 function verPlayers(min){if(!min)return null;const last={};(S.plays||[]).forEach(p=>{if(!p.iid)return;const o=last[p.iid];if(!o||p.day>o.day)last[p.iid]=p});const wk=addDays(dstr(Date.now()),-7);let n=0,old=0;
   Object.values(last).forEach(p=>{if(p.day<wk)return;n++;if(verLt(p.v||'0.0.0',min))old++});return {n,old}}
 function verLt(a,b){const x=String(a).split('.').map(n=>parseInt(n,10)||0),y=String(b).split('.').map(n=>parseInt(n,10)||0);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)<(y[i]||0)}return false}
-function verCardHTML(){const st=secState('ver');let h='<div class="card" id="verCard"><div class="ph"><div><h2>Required update</h2><div class="sub">Games older than this version can\'t be played until they update: they show “Update to keep playing” with a Google Play button. Games 1.22 and newer have this screen (1.21 players get your update message instead).</div></div></div>';
+function verCardHTML(){const st=secState('ver');let h='<div class="card" id="verCard"><div class="ph"><div><h2>Required update</h2><div class="sub">Games older than this version can\'t be played until they update: they show “Update to keep playing” with a Google Play button. 1.23 and newer show it only once Google Play offers that phone the update (if Play has nothing for them yet, they keep playing). 1.22 shows it as soon as you set this, so raise it only after the rollout reaches everyone. 1.21 players get your update message instead.</div></div></div>';
   if(st)return h+st+'</div>';const v=S.ver;const P=verPlayers(v.min);
   h+='<div class="facts" style="margin-top:6px">'+(v.min?'<span class="chip live st">On: '+esc(v.min)+' or newer required</span>':'<span class="chip soft">Off: any version can play</span>')+(P&&P.n?'<span class="sub">'+P.old+' of '+P.n+' players this week are on an older version</span>':'')+'</div>';
   h+='<div class="frow" style="margin-top:12px"><label class="fld"><span>Oldest version allowed</span><input class="inp mono" id="ver-min" placeholder="1.22.0" value="'+esc(v.min)+'"></label><label class="fld" style="flex:2 1 260px"><span>Extra line on the screen <small>optional</small></span><input class="inp" id="ver-msg" maxlength="200" placeholder="This update fixes saving on some phones." value="'+esc(v.msg)+'"></label></div>';
@@ -2417,7 +2813,7 @@ function verCardHTML(){const st=secState('ver');let h='<div class="card" id="ver
 {const o0=VIEWS.overview;VIEWS.overview=()=>{const h=o0();return h+'<div class="sech"><h2>Game version</h2></div>'+verCardHTML()}}
 Object.assign(ACT,{
   verSave:async()=>{const min=($('#ver-min').value||'').trim(),msg=($('#ver-msg').value||'').trim();if(!/^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(min)){toast('Use a version like 1.22.0','err');return}
-    const P=verPlayers(min);if(!await ask({title:'Require '+min+'?',body:'Every game older than '+min+' stops at “Update to keep playing” until it updates.'+(P&&P.old?' Right now '+P.old+' of this week\'s '+P.n+' players are on an older version.':'')+' Only do this once '+min+' is live on Google Play for everyone (a staged rollout or a review still in progress would leave some players stuck).',ok:'Require '+min}))return;
+    const P=verPlayers(min);if(!await ask({title:'Require '+min+'?',body:'Every game older than '+min+' stops at “Update to keep playing” until it updates.'+(P&&P.old?' Right now '+P.old+' of this week\'s '+P.n+' players are on an older version.':'')+' Games on 1.23 or newer only see it once Google Play offers them the update, so nobody on 1.23+ gets stuck. Games on 1.22 see it straight away, so only do this once '+min+' is live on Google Play for everyone (a staged rollout or a review still in progress would leave 1.22 players stuck).',ok:'Require '+min}))return;
     return DB.set('config/ver',{min,msg,up:DB.serverTime()}).then(()=>{S.ver={min,msg};toast(min+' is now required');render()})},
   verOff:async()=>{if(!await ask({title:'Turn off the required update?',body:'Any version can play again.',ok:'Turn off'}))return;return DB.set('config/ver',{min:'',msg:'',up:DB.serverTime()}).then(()=>{S.ver={min:'',msg:''};toast('Turned off');render()})}});
 
@@ -3348,6 +3744,515 @@ function plcPut(o){try{localStorage.setItem(PLC,JSON.stringify(o))}catch(e){try{
   {const r=await DB.query('plays',{where:[['day','>=',from],['day','<=',dstr(Date.now()+DAY)]]});const o={v:1,up:0,docs:{}};r.forEach(x=>{o.docs[x.id]=x.data;o.up=Math.max(o.up,+x.data.up||0)});
     if(!o.up)o.up=Date.now()-HOUR;plcPut(o);S.plays=Object.values(o.docs);S.plRead=r.length;S.plCached=0}}}
 
+/* CCX-SHOP START: w123/cc/cc_shop.js (copied by w123/tools/cc_sync.py) */
+/* ---------- SHOP ITEMS (game 1.23+): plaques, themes and every Hangar look ----------
+   config/cc {items:{"<kind>:<id>":{...}}} lists what you added or changed; cc_art/<kind>-<id> holds a drawing.
+   The built-in items come from cc_cat.js (made from the game by w123/tools/cc_catalog.py), with a small picture each.
+   Everything is checked by ccx_core.js, the same checker the game uses. */
+const CX_KL=[['all','Everything'],['pq','Plaques'],['th','Themes'],['hull','Hulls'],['trail','Engine trails'],['probe','Probe paint'],['ptrail','Probe trails'],['star','Stars'],['sky','Space'],['orbit','Orbit lines'],['ui','Interface']];
+const CX_ST=[['all','Built in and yours'],['mine','Made by you'],['changed','Built in, changed'],['off','Off the Shop']];
+const CX_TIER={r:['Rare','#60a5fa'],e:['Epic','#c084fc'],l:['Legendary','#fbbf24'],m:['Mythic','#fb7185']};
+const CX_RAR={common:['Common','#9aa6c7'],rare:['Rare','#3aa7ff'],epic:['Epic','#c084fc'],legendary:['Legendary','#ffb02e']};
+const CX_COLS={th:[['c','Accent']],hull:[['c','Body'],['a','Cockpit']],trail:[['c','Flame']],probe:[['c','Body'],['b','Carrying ore']],ptrail:[['c','Trail']],star:[['c','Colour'],['a','Inner shape']],orbit:[['c','Rings']],ui:[['c','Main colour'],['a','Second colour']]};
+const CX_WORD={show:'Shop dates',n:'name',d:'description',sh:'price',how:'goal',tier:'tier',rar:'rarity',off:'in the Shop',c:'colour',a:'colour',b:'colour',svg:'drawing',sky:'sky',img:'picture',rc:'rank colours',lg:'level colours',style:'interface colours',path:'shape',path2:'shape',shape:'shape',spin:'spin',pulse:'pulse',glitter:'glitter',glow:'glow',dash:'dashes',cyc:'colour cycle',cycB:'colour cycle',per:'cycle speed',dim:'darkness',twinkle:'twinkle'};
+S.cx={items:{},art:{},artBusy:{},f:'all',st:'all',q:'',lim:60,add:false,paste:'',chk:null,busy:false,ed:null,pend:false};
+LBL.ccx='shop items';
+let CXB=null;
+function cxCat(){if(CXB)return Promise.resolve();return new Promise(ok=>{const done=()=>{const c=window.CC_CAT;if(c&&Array.isArray(c.items)){CXB={};for(const x of c.items)CXB[x.k+':'+x.id]=x;S.cx.cat=c;S.cx.catErr=false}else S.cx.catErr=true;ok()};
+  if(window.CC_CAT)return done();const s=document.createElement('script');s.src='cc_cat.js?v='+Date.now().toString(36).slice(0,-4);s.onload=done;s.onerror=done;document.head.appendChild(s)})}
+LOAD.ccx=()=>cxSeedMock().then(()=>Promise.all([DB.get('config/cc'),cxCat()])).then(([d])=>{const raw=d&&d.items&&typeof d.items==='object'?d.items:{};const out={};S.cx.bad=[];
+  for(const key in raw){const m=ccxMeta(Object.assign({of:'content'},raw[key]),{isNew:()=>!(CXB&&CXB[key])});if(m.item&&!m.errs.length&&ccxKey(m.item.k,m.item.id)===key)out[key]=m.item;else S.cx.bad.push(key)}S.cx.items=out});
+NEEDS.shopitems=['ccx'];
+{const L=SEC.live.pages;const i=L.findIndex(p=>p[0]==='store');L.splice(i+1,0,['shopitems','Shop items','sparkle']);PAGE.shopitems={sec:'live',n:'Shop items',ic:'sparkle'}}
+// preview data: one plaque of yours and one built-in plaque made cheaper, added once
+function cxSeedMock(){if(DB.mode!=='mock'||DB.dump()['config/cc'])return Promise.resolve();const s=CX_SAMPLES[0];const a=ccxSvg(s.svg,{box:[60,60]});
+  return DB.set('cc_art/pq-'+s.id,{v:1,svg:a.svg,up:Date.now()}).then(()=>DB.set('config/cc',{items:{['pq:'+s.id]:{k:'pq',id:s.id,n:s.n,tier:s.tier,sh:s.sh,v:1,av:1},'pq:katanas':{k:'pq',id:'katanas',sh:20,v:1}},up:Date.now()}))}
+
+/* ---- one item as players see it: built in, with your changes on top ---- */
+function cxSplit(key){const i=key.indexOf(':');return [key.slice(0,i),key.slice(i+1)]}
+function cxEff(key,draft){const b=CXB&&CXB[key]||null,o=S.cx.items[key]||null;const e=Object.assign({},b||{},o||{},draft||{});const [k,id]=cxSplit(key);e.k=k;e.id=id;e.key=key;e.built=!!b;e.ov=!!o;
+  const src=Object.assign({},o||{},draft||{});if(src.sh!=null){delete e.how;e.hw=''}else if(src.how){delete e.sh;e.hw=cxHowTxt(src.how)}
+  e.st=!b?'mine':o?'changed':'built';return e}
+function cxAll(){const out=[],seen=new Set();if(CXB)for(const key in CXB){out.push(cxEff(key));seen.add(key)}for(const key in S.cx.items)if(!seen.has(key))out.push(cxEff(key));return out}
+const CX_OLD={lv:'lv',asc:'asc',sys:'sys',book:'codex',quests:'quests',hours:'hours',chap:'chap',streak:'streak',tops:'tops',top:'tops'};
+const CX_STAT2G={masteryTiers:'mastery',mined:'mined',asteroids:'asteroids',meteors:'meteors',crits:'crits',lucky:'lucky',caches:'caches',smelted:'smelted',crafted:'crafted',recipes:'recipes',asmDone:'asm',forgeTaps:'forge',autoNodes:'auto',shiny:'shiny',colonies:'colonies',rover:'rover',hired:'hired',star3:'star3',rooms:'rooms',contracts:'contracts',creditsEarned:'credits',crates:'crates',spins:'spins',boostersFound:'found',used:'boosts',ads:'videos'};
+function cxWhen(s){try{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString(undefined,{month:'short',day:'numeric'})}catch(e){return s}}
+// one goal as a picker goal {g,n,w}, when it is one
+function cxAsGoal(p){if(!p)return null;if(p.g)return {g:p.g,n:p.n,w:p.w||'',d:p.d||''};if(p.stat&&CX_STAT2G[p.stat])return {g:CX_STAT2G[p.stat],n:p.n,w:p.w||''};for(const k in CX_OLD)if(p[k]!=null)return {g:CX_OLD[k],n:+p[k],w:''};return null}
+function cxPartTxt(p){if(p.w)return p.w;const g=cxAsGoal(p);if(g&&CCX_GOALMAP[g.g])return ccxGoalText(g.g,g.n,g.d);if(p.pod)return p.pod===1?'Finish a week at #1':'Finish a week at #'+p.pod;if(p.pod3)return 'Finish a week in the top 3';return p.stat||'Earned'}
+function cxHowTxt(w){if(!w)return '';if(w.g||w.all||w.any||w.from||w.to){const P=w.all||w.any||[w];let t=w.w||P.map(cxPartTxt).join(w.any?' or ':' and ');
+    if(w.from&&w.to)t+=' ('+cxWhen(w.from)+' to '+cxWhen(w.to)+')';else if(w.from)t+=' (from '+cxWhen(w.from)+')';else if(w.to)t+=' (until '+cxWhen(w.to)+')';return t}
+  if(w.pod||w.pod3)return cxPartTxt(w);
+  return cxHowTxtOld(w)}
+function cxHowTxtOld(w){if(!w)return '';if(w.lv)return 'Reach Level '+w.lv;if(w.asc)return w.asc>1?'Ascend '+w.asc+' times':'Ascend once';if(w.top)return 'A weekly top 10';if(w.tops)return w.tops+' weekly top 10s';
+  if(w.streak)return 'A '+w.streak+'-day daily streak';if(w.stat)return w.w||w.stat;if(w.sys)return 'Reach system '+w.sys;if(w.book)return w.book+' codex entries';if(w.quests)return w.quests+' quests';
+  if(w.hours)return w.hours+' hours played';if(w.chap)return 'Story chapter '+w.chap;return 'Earned'}
+const cxU=svg=>{const u='cxu'+Math.random().toString(36).slice(2,7);return String(svg).replace(/\{u\}/g,u)};
+function cxBadge(){const p=Array.from({length:6},(_,i)=>{const a=Math.PI/180*(60*i-90);return (30+17*Math.cos(a)).toFixed(2)+','+(30+17*Math.sin(a)).toFixed(2)}).join(' ');
+  return '<polygon points="'+p+'" fill="#141c3d" stroke="#6b7bc4" stroke-width="1.6"/><text x="30" y="34.2" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">42</text>'}
+function cxArtOk(e){if(!e.av)return null;const a=S.cx.art[e.key];if(a&&(a.v||0)>=e.av)return a;if(!a||!a.missing)cxLoadArt(e.key);return a&&a.missing?a:null}
+function cxArtNorm(d){if(!d)return d;d=Object.assign({},d);if(typeof d.sky==='string'){try{d.sky=JSON.parse(d.sky)}catch(e){delete d.sky}}
+  if(d.sky){const r=ccxSky(d.sky,!!d.img);if(r.err)delete d.sky;else d.sky=r.sky}if(d.img&&!ccxImg(d.img))delete d.img;
+  if(d.svg!=null){const r=ccxSvg(d.svg,{max:900000});if(r.err)delete d.svg;else d.svg=r.svg}return d}
+function cxLoadArt(key){if(S.cx.artBusy[key])return;const it=S.cx.items[key];if(!it||!it.av)return;S.cx.artBusy[key]=1;const [k,id]=cxSplit(key);
+  DB.get('cc_art/'+ccxDoc(k,id)).then(d=>{S.cx.art[key]=d&&(+d.v||0)>=it.av?cxArtNorm(d):{v:0,missing:1}},e=>{S.cx.art[key]={v:0,missing:1,err:fsErr(e)}}).finally(()=>{delete S.cx.artBusy[key];cxRedraw()})}
+const cxSkyC={},cxStarC={};
+function cxSkyImg(key,art,w,h){w=w||132;h=h||84;const ck=key+'@'+(art.v||'x')+':'+w+':'+(art.img?art.img.length:0)+':'+JSON.stringify(art.sky).length;if(cxSkyC[ck]!==undefined)return cxSkyC[ck];
+  const go=im=>{try{const cv=document.createElement('canvas');cv.width=w;cv.height=h;const g=cv.getContext('2d');CCXP.skyPaint(art.sky,im)(g,w,h,CCXP.rngSeed(CCXP.hashStr(key)));cxSkyC[ck]=cv.toDataURL('image/jpeg',.85)}catch(e){console.error(e);cxSkyC[ck]=''}};
+  if(art.img){cxSkyC[ck]='';const im=new Image();im.onload=()=>{go(im);cxRedraw()};im.src=art.img;return ''}go(null);return cxSkyC[ck]}
+function cxStarImg(e,s){s=s||64;const ck=[e.path,e.path2,e.c,e.a,s].join('|');if(cxStarC[ck])return cxStarC[ck];const cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d');const col=e.c||'#ffd166';
+  try{const gr=g.createRadialGradient(s/2,s/2,2,s/2,s/2,s/2);gr.addColorStop(0,col+'66');gr.addColorStop(1,col+'00');g.fillStyle=gr;g.fillRect(0,0,s,s);g.translate(s/2,s/2);g.scale(s*.3,s*.3);g.shadowColor=col;g.shadowBlur=s*.15;g.fillStyle=col;g.fill(new Path2D(e.path));
+    if(e.path2){g.shadowBlur=0;g.fillStyle=e.a||'#ffffff';g.fill(new Path2D(e.path2))}}catch(x){}cxStarC[ck]=cv.toDataURL('image/png');return cxStarC[ck]}
+function cxSwatch(e){const c=e.c,k=e.k;const col=v=>/^#[0-9a-f]{6}$/i.test(v||'')?v:'#9aa6c7';
+  if(k==='hull')return '<svg viewBox="-16 -10 32 20" width="40" height="26"><path d="M12 0 L-8 7 L-5 0 L-8 -7Z" fill="'+(c==='prism'?'#f472b6':col(c))+'"/><circle cx="3" cy="0" r="2.2" fill="'+col(e.a)+'"/></svg>';
+  if(k==='trail'||k==='ptrail'){const bg=!c?'transparent':c==='rainbow'||e.cyc==='rainbow'?'linear-gradient(90deg,#f87171,#fbbf24,#4ade80,#3aa7ff,#c084fc)':Array.isArray(e.cyc)?'linear-gradient(90deg,'+e.cyc.join(',')+')':'linear-gradient(90deg,transparent,'+col(c)+')';return '<span class="cxSw tr" style="background:'+bg+'"></span>'}
+  if(k==='probe')return '<svg viewBox="-8 -6 16 12" width="30" height="22"><path d="M6 0 L-5 3.5 L-2.5 0 L-5 -3.5Z" fill="'+col(c)+'"/><circle cx="-6.5" cy="0" r="1.2" fill="'+col(e.b)+'"/></svg>';
+  if(k==='star')return '<span class="cxSw st" style="--c:'+(c?col(c):'#ffd166')+'"></span>';
+  if(k==='orbit')return '<span class="cxSw ob'+(e.dash?' dash':'')+'" style="--c:'+(c&&c!=='none'?col(c):'rgba(142,154,200,.35)')+'"></span>';
+  if(k==='ui')return '<span class="cxSw ui" style="background:linear-gradient(135deg,'+col(c)+' 50%,'+col(e.a)+' 50%)"></span>';
+  if(k==='th')return '<span class="cxSw ui" style="background:'+col(c)+'"></span>';return ''}
+// the picture of an item: its drawing (yours), or the built-in picture, or a swatch from its colours
+function cxThumb(e){const k=e.k,art=cxArtOk(e);
+  if(e.av&&!art)return '<span class="cxTh '+k+' wait" title="Loading the drawing">'+ic('clock')+'</span>';
+  if(art&&art.missing)return '<span class="cxTh '+k+' wait bad" title="The drawing isn\'t on the server">'+ic('alert')+'</span>';
+  const img=src=>'<span class="cxTh '+k+'"><img alt="" src="'+src+'"></span>';
+  if(k==='pq'){if(art&&art.svg)return '<span class="cxTh pq"><svg viewBox="0 0 60 60" aria-hidden="true">'+cxU(art.svg)+cxBadge()+'</svg></span>';if(e.img)return img(e.img)}
+  if(k==='th'){if(art&&art.svg)return '<span class="cxTh th"><svg viewBox="162 0 200 64" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+cxU(art.svg)+'</svg></span>';if(e.img)return img(e.img)}
+  if(k==='sky'){if(art&&art.sky){const u=cxSkyImg(e.key,art);return '<span class="cxTh sky">'+(u?'<img alt="" src="'+u+'">':'')+'</span>'}if(e.img)return img(e.img)}
+  if(k==='star'){if(e.path)return img(cxStarImg(e));if(e.img&&!(S.cx.items[e.key]||{}).c)return img(e.img)}
+  if(k==='ui'&&e.img&&!S.cx.items[e.key])return img(e.img);
+  return '<span class="cxTh sw">'+cxSwatch(e)+'</span>'}
+// a drawing straight from a pasted code (before it's on the server)
+function cxThumbCode(r){const e=Object.assign(cxEff(r.key),r.item);delete e.av;if(r.art){const a=Object.assign({v:'code'},r.art);
+    if(r.item.k==='pq')return '<span class="cxTh pq"><svg viewBox="0 0 60 60" aria-hidden="true">'+cxU(a.svg)+cxBadge()+'</svg></span>';
+    if(r.item.k==='th')return '<span class="cxTh th"><svg viewBox="162 0 200 64" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+cxU(a.svg)+'</svg></span>';
+    if(r.item.k==='sky'){const u=cxSkyImg('code:'+r.key,a);return '<span class="cxTh sky">'+(u?'<img alt="" src="'+u+'">':'')+'</span>'}}
+  return cxThumb(e)}
+function cxRedraw(){if(S.tab!=='shopitems')return;const a=document.activeElement;if(a&&a.closest&&a.closest('#view')&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){S.cx.pend=true;return}render()}
+document.addEventListener('focusout',()=>{if(!S.cx.pend)return;setTimeout(()=>{const a=document.activeElement;if(S.cx.pend&&!(a&&a.closest&&a.closest('#view')&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))){S.cx.pend=false;cxRedraw()}},60)},true);
+
+/* ---- the page ---- */
+VIEWS.shopitems=()=>{let h=head('Shop items','Plaques, themes and every Hangar look. Add new ones with a code from Claude, change any item, or take it out of the Shop. Games 1.23 and newer get changes within a minute.',S.cx.ed?'':'<button class="btn" data-act="cxAdd">'+ic('plus')+'Add with a code</button>');
+  const st=secState('ccx');if(st)return h+st;
+  if(S.cx.catErr)h+='<div class="card errc"><b>Couldn\'t load the list of built-in items</b><p class="sub">Reload the page. Publishing waits until it loads, so a new item can\'t replace a built-in one by mistake.</p></div>';
+  if(S.cx.ed)return h+cxEdHTML();
+  if(S.cx.add)h+=cxAddHTML();else h+=cxGuideHTML();
+  const all=cxAll();const cnt={};for(const e of all)cnt[e.k]=(cnt[e.k]||0)+1;
+  const mine=all.filter(e=>e.st!=='built').length;
+  h+='<div class="cxChips" role="group" aria-label="Kind">'+CX_KL.map(([k,n])=>'<button class="cxChip" data-act="cxF" data-v="'+k+'" aria-pressed="'+(S.cx.f===k)+'">'+n+'<small>'+(k==='all'?all.length:(cnt[k]||0))+'</small></button>').join('')+'</div>';
+  h+='<div class="cxRow2"><label class="cxSearch">'+ic('search')+'<input class="inp" data-cx="q" placeholder="Search names and ids" value="'+esc(S.cx.q)+'" aria-label="Search"></label>'
+    +'<select class="inp cxSel" data-cx="st" aria-label="Show">'+CX_ST.map(([k,n])=>'<option value="'+k+'"'+(S.cx.st===k?' selected':'')+'>'+n+(k==='mine'||k==='changed'?' ('+all.filter(e=>e.st===k).length+')':k==='off'?' ('+all.filter(e=>e.off).length+')':'')+'</option>').join('')+'</select></div>';
+  h+='<div id="cxRes">'+cxResHTML()+'</div>';
+  if(mine){const kb=Math.ceil(JSON.stringify(S.cx.items).length/1024);h+='<p class="note">'+mine+' item'+(mine>1?'s':'')+' made or changed by you · the list uses '+kb+' KB of about 1,000 KB'+(kb>700?' (getting full)':'')+'.</p>'}
+  if(S.cx.bad&&S.cx.bad.length)h+='<p class="note" style="color:#ff8ea3">'+S.cx.bad.length+' item'+(S.cx.bad.length>1?'s':'')+' on the server couldn\'t be read and '+(S.cx.bad.length>1?'are':'is')+' left out: '+esc(S.cx.bad.slice(0,5).join(', '))+'</p>';
+  return h};
+function cxList(){const q=S.cx.q.trim().toLowerCase();const ord={mine:0,changed:1,built:2};const ko=CX_KL.map(x=>x[0]);
+  return cxAll().filter(e=>(S.cx.f==='all'||e.k===S.cx.f)&&(S.cx.st==='all'||(S.cx.st==='off'?e.off:e.st===S.cx.st))&&(!q||(e.n||'').toLowerCase().includes(q)||e.id.includes(q)))
+    .sort((a,b)=>(ord[a.st]-ord[b.st])||(ko.indexOf(a.k)-ko.indexOf(b.k))||(a.sh==null)-(b.sh==null)||((a.sh||0)-(b.sh||0)))}
+function cxResHTML(){const L=cxList();if(!L.length)return '<div class="card"><div class="empty">Nothing here.</div></div>';
+  return '<div class="cxList">'+L.slice(0,S.cx.lim).map(cxRow).join('')+'</div>'+(L.length>S.cx.lim?'<button class="btn sec cxMore" data-act="cxMore">Show '+Math.min(60,L.length-S.cx.lim)+' more of '+(L.length-S.cx.lim)+'</button>':'')}
+function cxTierHTML(e){const t=e.k==='pq'||e.k==='th'?CX_TIER[e.tier]:CX_RAR[e.rar];return t?'<i class="cxTier" style="--c:'+t[1]+'">'+t[0]+'</i>':''}
+function cxPriceHTML(e){return e.free?'<span class="cxGoal">Free</span>':e.sh!=null?'<span class="cxPrice">'+ic('sparkle')+e.sh+'</span>':'<span class="cxGoal">'+esc(e.hw||'Earned')+'</span>'}
+function cxRow(e){const chips=(e.st==='mine'?'<span class="chip cxMine">Yours</span>':e.st==='changed'?'<span class="chip cxChg">Changed</span>':'')+(e.off?'<span class="chip cxOff">Off the Shop</span>':'')+(!e.off&&e.show?'<span class="chip cxChg">'+esc((e.show.from?cxWhen(e.show.from):'…')+' to '+(e.show.to?cxWhen(e.show.to):'…'))+'</span>':'')+(e.hol?'<span class="chip soft">'+(e.hol==='hw'?'Halloween':'Holiday')+'</span>':'');
+  return '<button class="cxItem" data-act="cxOpen" data-v="'+esc(e.key)+'">'+cxThumb(e)+'<span class="cxMid"><b>'+esc(e.n||e.id)+'</b><span class="cxSub">'+esc(CCX_KINDS[e.k])+cxTierHTML(e)+'</span>'+(chips?'<span class="cxChs">'+chips+'</span>':'')+'</span><span class="cxR">'+cxPriceHTML(e)+'</span></button>'}
+function cxGuideHTML(){return '<div class="card cxGuide"><div class="cxGIc">'+ic('sparkle')+'</div><div class="grow"><b>New items with Claude</b><ol><li>Copy the guide and paste it into a chat with Claude.</li><li>Ask for what you want: “a dragon plaque that breathes fire, Legendary, 60 shards”.</li><li>Tap <b>Add with a code</b>, paste what Claude gives you, check it and publish.</li></ol></div><button class="btn sm sec" data-act="cxGuide">'+ic('copy')+'Copy the guide</button></div>'}
+
+/* ---- add with a code ---- */
+function cxAddHTML(){const R=S.cx.chk;let h='<section class="card cxAdd" aria-labelledby="cxAddT"><div class="ph"><h2 id="cxAddT">Add or change items with a code</h2><button class="ib" data-act="cxAddClose" aria-label="Close">'+ic('x')+'</button></div>'
+  +'<p class="sub">Paste the code Claude gave you (one item or a list). A code with the id of an item that\'s already in the game changes that item: only what the code lists changes.</p>'
+  +'<textarea class="inp mono cxPaste" data-cx="paste" rows="7" spellcheck="false" placeholder=\'{"of":"content","k":"pq","id":"…","n":"…", …}\' aria-label="Content code">'+esc(S.cx.paste)+'</textarea>'
+  +'<div class="btnrow"><button class="btn" data-act="cxCheck">'+ic('check')+'Check it</button><button class="btn sec" data-act="cxExample">'+ic('book')+'Paste an example</button>'+(S.cx.paste?'<button class="btn sec" data-act="cxClear">Clear</button>':'')+'</div>'
+  +'<div id="cxChk">'+(R?cxChkHTML(R):'')+'</div></section>';return h}
+function cxClash(R){if(!R||!R.list)return;let size=JSON.stringify(S.cx.items).length;
+  for(const r of R.list){if(!r.item)continue;const {k,id}=r.item;size+=JSON.stringify(r.item).length;if(k==='pq'||k==='th')continue;
+    for(const k2 in CCX_SLOT)if(k2!==k&&((CXB&&CXB[ccxKey(k2,id)])||S.cx.items[ccxKey(k2,id)])){r.errs.push('The id "'+id+'" is already used by a '+CCX_KINDS[k2].toLowerCase()+': give it another id');break}}
+  if(size>900000&&R.list.length)R.list[0].errs.push('The list of items would be too big (the most is about 1 MB). Make pattern and shape codes shorter, or delete items you don\'t use.')}
+function cxIsNew(k,id){const key=ccxKey(k,id);return !(CXB&&CXB[key])&&!S.cx.items[key]}
+function cxChkHTML(R){if(R.err)return '<div class="cxErr">'+ic('alert')+'<span>'+esc(R.err)+'</span></div>';const bad=R.list.filter(r=>r.errs.length).length;
+  let h='<div class="cxChkL">'+R.list.map(r=>{const b=CXB&&CXB[r.key],o=S.cx.items[r.key];const ch=Object.keys(r.raw).filter(f=>CX_WORD[f]);
+    const words=[...new Set(ch.map(f=>CX_WORD[f]))].join(', ');
+    const what=!r.item?'':b?'Changes the built-in <b>'+esc(b.n)+'</b>'+(words?': '+esc(words):''):o?'Updates your <b>'+esc(o.n||r.item.id)+'</b>'+(words?': '+esc(words):''):'New '+esc((CCX_KINDS[r.item.k]||'').toLowerCase());
+    const e=r.item?cxEff(r.key,r.item):null;
+    return '<div class="cxChkR'+(r.errs.length?' bad':'')+'">'+(r.item&&!r.errs.length?cxThumbCode(r):'<span class="cxTh sw">'+ic(r.errs.length?'alert':'check')+'</span>')
+      +'<div class="cxMid"><b>'+esc(e&&e.n||(r.raw&&r.raw.n)||(r.raw&&r.raw.id)||'Item')+'</b><span class="cxSub">'+(r.item?esc(CCX_KINDS[r.item.k])+' · '+esc(r.item.id)+(e?cxTierHTML(e):''):'')+'</span><span class="cxWhat">'+what+'</span>'
+      +(r.errs.length?'<ul class="cxErrs">'+r.errs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+(r.warns.length?'<ul class="cxWarns">'+r.warns.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')
+      +'</div>'+(e&&!r.errs.length?'<span class="cxR">'+cxPriceHTML(e)+'</span>':'')+'</div>'}).join('')+'</div>';
+  if(bad)h+='<p class="cxNote bad">'+bad+' of '+R.list.length+' can\'t go in yet. Ask Claude to fix '+(bad>1?'them':'it')+' (paste the red lines back to it), then check again.</p>';
+  else h+='<div class="btnrow"><button class="btn'+(S.cx.busy?' busy':'')+'" data-act="cxPublish"'+(S.cx.catErr?' disabled':'')+'>'+ic('up')+'Publish '+R.list.length+' item'+(R.list.length>1?'s':'')+'</button><span class="sub">Players get '+(R.list.length>1?'them':'it')+' within a minute.</span></div>';
+  return h}
+
+/* ---- writing ---- */
+// changes: {key: entry or null (delete)}; arts: [{doc, data or null}]
+async function cxWrite(changes,arts,msg){S.cx.busy=true;cxRedraw();
+  try{const del=[];for(const a of arts||[]){if(a.data)await DB.set('cc_art/'+a.doc,a.data);else del.push(a.doc)}
+    const ops=await DB.tx(['config/cc'],cur=>{const items=Object.assign({},cur['config/cc']&&cur['config/cc'].items||{});for(const k in changes){if(changes[k])items[k]=changes[k];else delete items[k]}
+      return [{op:'set',path:'config/cc',data:{items,up:Date.now()}}]});
+    S.cx.items=ops[0].data.items;for(const d of del)await DB.del('cc_art/'+d).catch(()=>{});
+    for(const a of arts||[]){const [k,id]=[a.doc.slice(0,a.doc.indexOf('-')),a.doc.slice(a.doc.indexOf('-')+1)];if(a.data)S.cx.art[k+':'+id]=cxArtNorm(a.data);else delete S.cx.art[k+':'+id]}
+    S.cx.busy=false;toast(msg||'Saved: players get it within a minute');return true}
+  catch(e){S.cx.busy=false;toast(fsErr(e),'err');return false}finally{cxRedraw()}}
+async function cxPublish(){const R=S.cx.chk;if(!R||!R.list||R.list.some(r=>r.errs.length)||S.cx.busy)return;if(S.cx.catErr||!CXB){toast('The list of built-in items hasn\'t loaded: reload the page','err');return}
+  const ch={},arts=[];
+  for(const r of R.list){const key=r.key,prev=S.cx.items[key]||null;const ent=Object.assign({},prev||{},r.item);ent.v=(prev&&prev.v||0)+1;
+    if(r.item.how)delete ent.sh;else if(r.item.sh!=null)delete ent.how;
+    for(const f in r.raw)if(r.raw[f]===null&&!['of','k','id','v','av','svg','sky','img'].includes(f))delete ent[f];
+    if(r.art){ent.av=Math.max((prev&&prev.av||0)+1,Math.floor(Date.now()/1000));const a=Object.assign({},r.art);delete a.dropped;if(a.sky)a.sky=JSON.stringify(a.sky);a.v=ent.av;a.up=Date.now();arts.push({doc:ccxDoc(r.item.k,r.item.id),data:a})}
+    else if(prev&&prev.av)ent.av=prev.av;else delete ent.av;
+    const m=ccxMeta(Object.assign({of:'content'},ent),{isNew:()=>!(CXB&&CXB[key])});if(m.errs.length){toast((ent.n||key)+': '+m.errs[0],'err');return}
+    ch[key]=m.item}
+  const n=R.list.length;if(await cxWrite(ch,arts,'Published '+n+' item'+(n>1?'s':'')+': players get '+(n>1?'them':'it')+' within a minute')){S.cx.add=false;S.cx.chk=null;S.cx.paste='';S.cx.st='all';render()}}
+
+/* ---- one item: change it ---- */
+function cxOpen(key){const e=cxEff(key);if(!e.k)return;const f={n:e.n||''};
+  if(!e.free){const earn=e.sh==null&&!!(e.how||e.hw);f.mode=earn?'earn':'buy';f.sh=e.sh!=null?e.sh:'';const w=earn&&e.how||null;
+    const one=w&&!w.all&&!w.any?cxAsGoal(w):null;f.g=one?one.g:'';f.gn=one?one.n:'';f.gd=one&&one.d||'';f.gw=w&&w.w||(one&&one.w)||'';f.from=w&&w.from||'';f.to=w&&w.to||'';f.during=!!(w&&w.during);
+    f.adv=!!(w&&!one);f.code=w?JSON.stringify(w):'';f.howDirty=false;f.howWas=earn&&!w?(e.hw||''):''}
+  if(e.k==='pq'||e.k==='th')f.tier=e.tier||'';else{f.rar=e.rar||'';f.d=e.d||''}
+  for(const [c] of CX_COLS[e.k]||[])if(/^#[0-9a-f]{6}$/i.test(e[c]||''))f[c]=e[c];
+  f.off=!!e.off;f.sFrom=e.show&&e.show.from||'';f.sTo=e.show&&e.show.to||'';S.cx.ed={key,f};render();window.scrollTo(0,0)}
+function cxEdEff(){const d=S.cx.ed;const f=Object.assign({},d.f);const x={};for(const k of ['n','tier','rar','d','c','a','b','off'])if(k in f)x[k]=f[k];
+  if(f.mode==='buy'&&f.sh!==''&&f.sh!=null)x.sh=+f.sh;else if(f.mode==='earn'){const r=cxEdHow(f);if(r&&r.how)x.how=r.how}return cxEff(d.key,x)}
+// the earn code the form makes: from the picker, or the code box
+function cxEdHow(f){if(f.adv){let v;try{v=JSON.parse(f.code||'')}catch(e){return {err:'The earn code isn\'t JSON yet'}}return ccxHow(v)}
+  if(!f.g)return f.howWas?null:{err:'Pick a goal'};const o={g:f.g,n:CCX_YES[f.g]?1:Math.round(+f.gn)};if(f.g==='joinedby')o.d=f.gd||'';if(String(f.gw||'').trim())o.w=String(f.gw).trim();if(f.from)o.from=f.from;if(f.to)o.to=f.to;if(f.during&&f.from)o.during=true;return ccxHow(o)}
+function cxEdHowHTML(f){const r=cxEdHow(f);return r&&r.how?'<b>Players read:</b> '+esc(cxHowTxt(r.how)):r&&r.err?'<span class="cxBad">'+esc(r.err)+'</span>':(f.howWas?'<b>Built-in goal:</b> '+esc(f.howWas)+'. Pick a goal to replace it.':'')}
+function cxGoalOpts(sel){const cats=[];for(const g of CCX_GOALS)if(!cats.includes(g[1]))cats.push(g[1]);
+  return '<option value="">Pick a goal…</option>'+cats.map(c=>'<optgroup label="'+esc(c)+'">'+CCX_GOALS.filter(g=>g[1]===c).map(g=>'<option value="'+g[0]+'"'+(g[0]===sel?' selected':'')+'>'+esc(g[2].replace('{n}','…').replace('{s}','s').replace('{ies}','ies').replace('{es}','es'))+'</option>').join('')+'</optgroup>').join('')}
+function cxGetHTML(f,e){if(e.free)return '<div class="fld"><span class="lbl">How players get it</span><div class="cxRo">Free: everyone has it</div></div>';
+  let h='<div class="fld"><span class="lbl">How players get it</span><div class="seg cxMode" role="group" aria-label="How players get it"><button data-act="cxMode" data-v="buy" aria-pressed="'+(f.mode==='buy')+'">'+ic('sparkle')+'Buy with shards</button><button data-act="cxMode" data-v="earn" aria-pressed="'+(f.mode==='earn')+'">'+ic('trophy')+'Earn by playing</button></div></div>';
+  if(f.mode==='buy')return h+'<label class="fld"><span class="lbl">Price in Star Shards <small>5 to 5,000</small></span><input class="inp" type="number" min="5" max="5000" step="5" data-cx="e.sh" value="'+esc(f.sh)+'"></label>';
+  h+='<div class="cxEarn">';
+  if(!f.adv)h+='<div class="cxGoalRow"><label class="fld cxG"><span class="lbl">Goal</span><select class="inp" data-cx="e.g">'+cxGoalOpts(f.g)+'</select></label>'+(f.g==='joinedby'?'<label class="fld cxN"><span class="lbl">Date</span><input class="inp" type="date" data-cx="e.gd" value="'+esc(f.gd)+'"></label>':CCX_YES[f.g]?'':'<label class="fld cxN"><span class="lbl">How many</span><input class="inp" type="number" min="1" step="1" data-cx="e.gn" value="'+esc(f.gn)+'"></label>')+'</div>'
+    +'<label class="fld"><span class="lbl">Own words <small>optional: what players read instead</small></span><input class="inp" data-cx="e.gw" maxlength="60" value="'+esc(f.gw)+'"></label>'
+    +'<div class="cxDates"><label class="fld"><span class="lbl">From <small>optional</small></span><input class="inp" type="date" data-cx="e.from" value="'+esc(f.from)+'"></label><label class="fld"><span class="lbl">To <small>optional</small></span><input class="inp" type="date" data-cx="e.to" value="'+esc(f.to)+'"></label></div>'
+    +'<label class="tgl"><span class="sw2"><input type="checkbox" data-cx="e.during"'+(f.during?' checked':'')+'><i></i></span><span>Only count what they do between the dates<small>Off: everything they ever did counts, but they can only earn it between the dates.</small></span></label>';
+  else h+='<label class="fld"><span class="lbl">Earn code <small>from Claude, for several goals or dates</small></span><textarea class="inp mono cxCode" data-cx="e.code" rows="4" spellcheck="false">'+esc(f.code)+'</textarea></label>';
+  h+='<div class="cxHowTxt" id="cxHowTxt">'+cxEdHowHTML(f)+'</div>';
+  h+='<button class="btn sm sec cxAdvB" data-act="cxAdv">'+(f.adv?ic('list')+'Pick one goal instead':ic('edit')+'Use an earn code (several goals)')+'</button></div>';
+  return h}
+function cxEdHTML(){const d=S.cx.ed,e=cxEdEff(),f=d.f;const card=e.k==='pq'||e.k==='th';
+  let h='<div class="card form cxEd"><div class="ph"><div><h2>'+esc(e.n||e.id)+'</h2><div class="sub">'+esc(CCX_KINDS[e.k])+' · <span class="mono">'+esc(e.id)+'</span> · '+(e.st==='mine'?'made by you':e.st==='changed'?'built in, changed by you':'built in')+'</div></div><div class="facts" style="margin-top:0"><button class="btn sm sec" data-act="cxCancel">Cancel</button><button class="btn sm'+(S.cx.busy?' busy':'')+'" data-act="cxSave">Save</button></div></div>';
+  h+='<div class="cxEdPv" id="cxPv">'+cxBig(e)+'</div>';
+  h+='<label class="fld"><span class="lbl">Name</span><input class="inp" data-cx="e.n" maxlength="30" value="'+esc(f.n)+'"></label>';
+  h+=cxGetHTML(f,e);
+  if(card)h+='<div class="fld"><span class="lbl">Tier</span><div class="seg" role="group" aria-label="Tier">'+Object.entries(CX_TIER).map(([k,t])=>'<button data-act="cxSeg" data-f="tier" data-v="'+k+'" aria-pressed="'+(f.tier===k)+'" style="--c:'+t[1]+'">'+t[0]+'</button>').join('')+'</div></div>';
+  else h+='<div class="fld"><span class="lbl">Rarity</span><div class="seg" role="group" aria-label="Rarity">'+Object.entries(CX_RAR).map(([k,t])=>'<button data-act="cxSeg" data-f="rar" data-v="'+k+'" aria-pressed="'+(f.rar===k)+'" style="--c:'+t[1]+'">'+t[0]+'</button>').join('')+'</div></div>'
+    +'<label class="fld"><span class="lbl">Description <small>shown in the Hangar</small></span><textarea class="inp cxDesc" data-cx="e.d" maxlength="140" rows="2">'+esc(f.d)+'</textarea></label>';
+  const cols=(CX_COLS[e.k]||[]).filter(([c])=>c in f);
+  if(cols.length)h+='<div class="fld"><span class="lbl">Colours</span><div class="cxCols">'+cols.map(([c,n])=>'<label class="cxCol"><input type="color" data-cx="e.'+c+'" value="'+esc(f[c])+'"><span>'+esc(n)+'</span></label>').join('')+'</div></div>';
+  h+='<label class="tgl"><span class="sw2"><input type="checkbox" data-cx="e.off"'+(f.off?'':' checked')+'><i></i></span><span>In the Shop<small>Off: hidden. Nobody new can buy or earn it; players who have it keep it and can still wear it. Turn it back on any time.</small></span></label>';
+  if(!f.off)h+='<div class="cxDates"><label class="fld"><span class="lbl">In the Shop from <small>optional</small></span><input class="inp" type="date" data-cx="e.sFrom" value="'+esc(f.sFrom)+'"></label><label class="fld"><span class="lbl">Until <small>optional</small></span><input class="inp" type="date" data-cx="e.sTo" value="'+esc(f.sTo)+'"></label></div><p class="note" style="margin-top:-6px">With dates it shows up by itself on the first day and goes after the last (each player\'s own days).</p>';
+  h+='<div class="cxEdFoot"><button class="btn sm sec" data-act="cxCode">'+ic('copy')+'Copy its code</button>';
+  if(e.st==='changed')h+='<button class="btn sm sec" data-act="cxReset">'+ic('refresh')+'Put back as built in</button>';
+  if(e.st==='mine')h+='<button class="btn sm danger" data-act="cxDel">'+ic('trash')+'Delete from the game</button>';
+  h+='</div><p class="note">'+(e.st==='mine'?'To change the drawing, give its code to Claude, then paste what comes back with Add with a code.':'To change the drawing or anything else, copy its code and give it to Claude.')+'</p></div>';return h}
+function cxBig(e){const art=cxArtOk(e);
+  if(e.k==='pq'){if(art&&art.svg)return '<svg class="cxBigPq" viewBox="0 0 60 60">'+cxU(art.svg)+cxBadge()+'</svg>'}
+  else if(e.k==='th'){if(art&&art.svg)return '<svg class="cxBigTh" viewBox="0 0 400 64" preserveAspectRatio="xMidYMid slice">'+cxU(art.svg)+'</svg>'}
+  else if(e.k==='sky'){if(art&&art.sky){const u=cxSkyImg(e.key,art,264,168);return u?'<img class="cxBigSky" alt="" src="'+u+'">':''}}
+  else if(e.k==='star'&&e.path)return '<img class="cxBigSt" alt="" src="'+cxStarImg(e,128)+'">';
+  return '<span class="cxBigW">'+cxThumb(e)+'</span>'}
+function cxEdSave(){const d=S.cx.ed;if(!d||S.cx.busy)return;const key=d.key,[k,id]=cxSplit(key),b=CXB&&CXB[key]||null,prev=S.cx.items[key]||null,f=d.f;
+  const ov=Object.assign({},prev||{k,id});const set=(n,v,bv)=>{if(v==null||v===''||(b&&JSON.stringify(v)===JSON.stringify(bv)))delete ov[n];else ov[n]=v};
+  set('n',String(f.n||'').trim(),b&&b.n);
+  if(f.mode==='buy'){if(f.sh===''||f.sh==null||!(+f.sh>=5)){toast('Give it a price (5 to 5,000)','err');return}set('sh',Math.round(+f.sh),b&&b.sh);delete ov.how;if(b&&b.sh==null&&ov.sh==null)ov.sh=Math.round(+f.sh)}
+  else if(f.mode==='earn'){delete ov.sh;const keep=!f.howDirty&&((b&&b.sh==null)||(prev&&prev.how));   // untouched: the goal it has stays
+    if(!keep){const r=cxEdHow(f);if(!r||r.err){toast(r?r.err:'Pick a goal','err');return}set('how',r.how,b&&b.how);if(b&&b.sh!=null&&!ov.how)ov.how=r.how}}
+  if('tier' in f)set('tier',f.tier,b&&b.tier);if('rar' in f)set('rar',f.rar,b&&b.rar);if('d' in f)set('d',String(f.d||'').trim(),b&&b.d);
+  for(const [c] of CX_COLS[k]||[])if(c in f)set(c,f[c],b&&b[c]);if(f.off)ov.off=true;else delete ov.off;
+  if(!f.off&&(f.sFrom||f.sTo)){if(f.sFrom&&f.sTo&&f.sTo<f.sFrom){toast('"Until" is before "from"','err');return}ov.show={};if(f.sFrom)ov.show.from=f.sFrom;if(f.sTo)ov.show.to=f.sTo}else delete ov.show;
+  const has=Object.keys(ov).some(x=>!['k','id','v','av'].includes(x))||ov.av;
+  if(b&&!has)return cxWrite({[key]:null},[],'Saved: it\'s back as built in').then(ok=>{if(ok){S.cx.ed=null;render()}});
+  ov.v=(prev&&prev.v||0)+1;const m=ccxMeta(Object.assign({of:'content'},ov),{isNew:()=>!b});if(m.errs.length){toast(m.errs[0],'err');return}
+  return cxWrite({[key]:m.item},[]).then(ok=>{if(ok){S.cx.ed=null;render()}})}
+// the item as a code (with its drawing when it's yours), to give to Claude
+async function cxCodeOf(key){const [k,id]=cxSplit(key),b=CXB&&CXB[key]||null,o=S.cx.items[key]||null;const code={of:'content',k,id};
+  if(b){code.note='Built into the game: '+b.n+'. Only what is listed here is changed; add fields to change more.';Object.assign(code,o||{})}
+  else Object.assign(code,o||{});delete code.v;delete code.av;
+  if(o&&o.av){let a=S.cx.art[key];if(!a||(a.v||0)<o.av){try{a=cxArtNorm(await DB.get('cc_art/'+ccxDoc(k,id)))}catch(e){a=null}}
+    if(a){if(a.svg)code.svg=a.svg;if(a.sky)code.sky=a.sky;if(a.img)code.img=a.img}}
+  return JSON.stringify(code,null,1)}
+
+/* ---- the guide for Claude ---- */
+function cxGuideText(){const c=S.cx.cat||{};const by={};for(const x of (c.items||[]))(by[x.k]=by[x.k]||[]).push(x.id);for(const key in S.cx.items){const [k,id]=cxSplit(key);(by[k]=by[k]||[]);if(!by[k].includes(id))by[k].push(id)}
+  return CX_GUIDE.replace('{{IDS}}',Object.keys(CCX_KINDS).map(k=>'- '+k+': '+(by[k]||[]).join(', ')).join('\n'))
+    .replace('{{SHAPES}}',(c.shapes||[]).join(', ')).replace('{{PATS}}',(c.pats||[]).join(', ')).replace('{{FX}}',(c.fx||[]).map(x=>x[0]+' ('+x[1]+')').join(', '))
+    .replace('{{STATS}}',((S.cx.cat&&S.cx.cat.stats)||[]).join(', ')).replace('{{GOALS}}',CCX_GOALS.map(g=>'- "'+g[0]+'": '+g[2].replace('{n}','N').replace('{s}','s').replace('{ies}','ies').replace('{es}','es')+' ('+g[1]+')').join('\n')).replace('{{EXAMPLES}}',JSON.stringify(CX_SAMPLES,null,1))}
+
+Object.assign(ACT,{
+  cxAdd:()=>{S.cx.add=true;S.cx.ed=null;render();window.scrollTo(0,0);setTimeout(()=>{const t=$('.cxPaste');if(t)t.focus()},50)},
+  cxAddClose:()=>{S.cx.add=false;S.cx.chk=null;render()},
+  cxClear:()=>{S.cx.paste='';S.cx.chk=null;render()},
+  cxExample:()=>{S.cx.paste=JSON.stringify(CX_SAMPLES.slice(0,2),null,1);S.cx.chk=null;render()},
+  cxCheck:()=>{const t=$('.cxPaste');if(t)S.cx.paste=t.value;S.cx.chk=ccxCheck(S.cx.paste,{isNew:cxIsNew});cxClash(S.cx.chk);const r=$('#cxChk');if(r)r.innerHTML=cxChkHTML(S.cx.chk);else render()},
+  cxPublish:()=>cxPublish(),
+  cxF:el=>{S.cx.f=el.dataset.v;S.cx.lim=60;render()},
+  cxMore:()=>{S.cx.lim+=60;const r=$('#cxRes');if(r)r.innerHTML=cxResHTML()},
+  cxOpen:el=>cxOpen(el.dataset.v),
+  cxCancel:()=>{S.cx.ed=null;render()},
+  cxSave:()=>cxEdSave(),
+  cxMode:el=>{const d=S.cx.ed;if(!d)return;d.f.mode=el.dataset.v;if(d.f.mode==='earn'&&!d.f.g&&!d.f.adv&&!d.f.howWas)d.f.gn=d.f.gn||10;render()},
+  cxAdv:()=>{const d=S.cx.ed;if(!d)return;const f=d.f;if(!f.adv){const r=cxEdHow(f);f.code=r&&r.how?JSON.stringify(r.how):(f.code||'{"all":[{"g":"lv","n":30},{"g":"shiny","n":100}]}')}
+    else{try{const g=cxAsGoal(JSON.parse(f.code||'{}'));if(g){f.g=g.g;f.gn=g.n;f.gw=g.w}}catch(e){}}f.adv=!f.adv;f.howDirty=true;render()},
+  cxSeg:el=>{if(!S.cx.ed)return;S.cx.ed.f[el.dataset.f]=el.dataset.v;el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===el)))},
+  cxCode:async()=>{if(!S.cx.ed)return;const t=await cxCodeOf(S.cx.ed.key);copyText(t).then(()=>toast('Code copied: give it to Claude to change it'),()=>toast('Couldn\'t copy: your browser blocked it','err'))},
+  cxGuide:()=>copyText(cxGuideText()).then(()=>toast('Guide copied: paste it into a chat with Claude'),()=>toast('Couldn\'t copy: your browser blocked it','err')),
+  cxReset:async()=>{const d=S.cx.ed;if(!d)return;const b=CXB&&CXB[d.key];if(!await ask({title:'Put '+(b?b.n:'it')+' back?',body:'Your changes to it go, for every player. It\'s exactly as built into the game again.',ok:'Put it back'}))return;
+    const [k,id]=cxSplit(d.key);const o=S.cx.items[d.key];if(await cxWrite({[d.key]:null},o&&o.av?[{doc:ccxDoc(k,id),data:null}]:[],'Back as built in')){S.cx.ed=null;render()}},
+  cxDel:async()=>{const d=S.cx.ed;if(!d)return;const o=S.cx.items[d.key]||{};if(!await ask({title:'Delete '+(o.n||'this item')+'?',body:'It disappears from the game for everyone, including players who bought it (their shards aren\'t given back). To keep it for them, turn off In the Shop instead.',ok:'Delete',danger:true}))return;
+    const [k,id]=cxSplit(d.key);if(await cxWrite({[d.key]:null},[{doc:ccxDoc(k,id),data:null}],'Deleted')){S.cx.ed=null;render()}}});
+document.addEventListener('input',e=>{const el=e.target;const f=el&&el.dataset&&el.dataset.cx;if(!f)return;
+  if(f==='q'){S.cx.q=el.value;S.cx.lim=60;const r=$('#cxRes');if(r)r.innerHTML=cxResHTML();return}
+  if(f==='paste'){S.cx.paste=el.value;if(S.cx.chk){S.cx.chk=null;const r=$('#cxChk');if(r)r.innerHTML=''}return}
+  if(f.startsWith('e.')&&S.cx.ed){const k=f.slice(2);S.cx.ed.f[k]=el.type==='checkbox'?(k==='off'?!el.checked:el.checked):el.value;
+    if(['g','gn','gd','gw','from','to','during','code'].includes(k)){S.cx.ed.f.howDirty=true;
+      // a goal that needs a date, or no number, changes the fields
+      if(k==='g'){const want=el.value==='joinedby'?'gd':CCX_YES[el.value]?'':'gn';const have=$('[data-cx="e.gd"]')?'gd':$('[data-cx="e.gn"]')?'gn':'';if(want!==have){if(want==='gn'&&!S.cx.ed.f.gn)S.cx.ed.f.gn=10;render();return}}
+      const t=$('#cxHowTxt');if(t)t.innerHTML=cxEdHowHTML(S.cx.ed.f)}
+    if(['c','a','b','sh'].includes(k)){const p=$('#cxPv');if(p)p.innerHTML=cxBig(cxEdEff())}}});
+document.addEventListener('change',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.cx==='st'){S.cx.st=el.value;S.cx.lim=60;const r=$('#cxRes');if(r)r.innerHTML=cxResHTML()}});
+(function(){const st=document.createElement('style');st.textContent=`
+.cxGuide{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}.cxGuide .grow{flex:1;min-width:200px}.cxGuide b{font-size:14.5px}
+.cxGuide ol{margin:6px 0 0 18px;font-size:13px;color:var(--mu);display:grid;gap:3px}.cxGIc{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(56,225,198,.1);color:var(--ac);flex:none}
+.cxChips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;margin:0 -2px;scrollbar-width:none}.cxChips::-webkit-scrollbar{display:none}
+.cxChip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;font-weight:700;font-size:13px;color:var(--mu);background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--line)}
+.cxChip small{font-size:11px;font-weight:800;color:var(--mu2)}.cxChip[aria-pressed=true]{background:var(--card3);color:var(--tx);box-shadow:inset 0 0 0 1px var(--line2)}
+.cxRow2{display:flex;gap:8px;margin:4px 0 12px;flex-wrap:wrap}.cxSearch{flex:1;min-width:180px;position:relative;display:block}.cxSearch .i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--mu2);width:16px;height:16px}
+.cxSearch .inp{padding-left:34px;width:100%}.cxSel{flex:0 1 auto;min-width:0;max-width:100%}
+.cxList{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.cxItem{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:13px;background:var(--card);border:1px solid var(--line);min-width:0;width:100%}
+.cxItem:hover{border-color:var(--line2);background:#141d3e}
+.cxTh{flex:none;display:grid;place-items:center;overflow:hidden;border-radius:10px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line);width:52px;height:52px;color:var(--mu2)}
+.cxTh img,.cxTh svg{width:100%;height:100%;display:block;object-fit:cover}.cxTh.th{width:92px;height:44px}.cxTh.sky{width:78px;height:50px}.cxTh.wait .i{width:18px;height:18px;opacity:.7}.cxTh.bad{color:#ff8ea3}
+.cxSw{display:block}.cxSw.tr{width:34px;height:8px;border-radius:99px}.cxSw.st{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,var(--c) 30%,transparent 72%);box-shadow:0 0 14px var(--c)}
+.cxSw.ob{width:32px;height:32px;border-radius:50%;border:2px solid var(--c)}.cxSw.ob.dash{border-style:dashed}.cxSw.ui{width:30px;height:30px;border-radius:8px}
+.cxMid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left}.cxMid b{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cxSub{font-size:12px;color:var(--mu2);display:flex;gap:6px;align-items:center;flex-wrap:wrap}.cxTier{font-style:normal;font-weight:800;color:var(--c)}.cxTier::before{content:'·';color:var(--mu2);margin-right:6px;font-weight:400}
+.cxChs{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}.cxMine{background:rgba(56,225,198,.12);color:var(--ac)}.cxChg{background:rgba(90,169,255,.12);color:var(--bl)}.cxOff{background:rgba(255,92,122,.1);color:#ff8ea3}
+.cxR{flex:none;text-align:right}.cxPrice{display:inline-flex;align-items:center;gap:4px;font-weight:800;color:var(--yl);font-variant-numeric:tabular-nums}.cxPrice .i{width:14px;height:14px}
+.cxGoal{display:inline-block;max-width:120px;font-size:11.5px;font-weight:700;color:var(--mu);line-height:1.3}
+.cxMore{width:100%;margin-top:10px}
+.cxAdd .cxPaste{width:100%;margin-top:10px;font-size:12.5px;min-height:130px;resize:vertical}
+.cxErr{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(255,92,122,.08);color:#ff8ea3;font-size:13.5px}
+.cxChkL{display:grid;gap:8px;margin-top:12px}.cxChkR{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line)}
+.cxChkR.bad{border-color:rgba(255,92,122,.4);background:rgba(255,92,122,.05)}.cxWhat{font-size:12.5px;color:var(--mu)}.cxWhat b{color:var(--tx)}
+.cxErrs,.cxWarns{margin:6px 0 0 16px;font-size:12.5px;display:grid;gap:2px}.cxErrs{color:#ff8ea3}.cxWarns{color:var(--yl)}
+.cxNote{font-size:13px;margin-top:10px}.cxNote.bad{color:#ff8ea3}
+.cxEd .lbl small{font-weight:500;color:var(--mu2)}.cxEdPv{display:grid;place-items:center;padding:14px;margin:12px 0 16px;border-radius:13px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line);min-height:110px}
+.cxBigPq{width:128px;height:128px}.cxBigTh{width:100%;max-width:520px;aspect-ratio:400/64;height:auto;border-radius:10px}.cxBigSky{width:264px;max-width:100%;border-radius:10px}.cxBigSt{width:110px;height:110px}
+.cxBigW .cxTh{transform:scale(1.6);margin:18px}
+.cxRo{padding:9px 12px;border-radius:10px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line);font-weight:700;font-size:13.5px}
+.cxEd .seg button[aria-pressed=true]{color:var(--c)}.cxEd .inp{width:100%}.cxDesc{min-height:0!important}
+.cxCols{display:flex;gap:14px;flex-wrap:wrap}.cxCol{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--mu)}.cxCol input{width:44px;height:34px;border:0;padding:0;background:none;border-radius:8px;cursor:pointer}
+.cxMode button{display:inline-flex;align-items:center;gap:6px}.cxMode .i{width:15px;height:15px}
+.cxEarn{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:12px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line);margin:-4px 0 12px}
+.cxGoalRow,.cxDates{display:flex;gap:10px;flex-wrap:wrap}.cxGoalRow .cxG{flex:1 1 200px;min-width:0}.cxGoalRow .cxN{flex:0 0 110px}.cxDates .fld{flex:1 1 140px;min-width:0}
+.cxHowTxt{font-size:13px;color:var(--mu);margin:6px 0 8px}.cxHowTxt b{color:var(--tx)}.cxBad{color:#ff8ea3}.cxAdvB{align-self:flex-start}.cxCode{min-height:90px!important;font-size:12.5px}
+.cxEdFoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+@media (max-width:520px){.cxList{grid-template-columns:minmax(0,1fr)}.cxGoal{max-width:96px}}
+`;document.head.appendChild(st)})();
+
+/* ---------- looks as gifts: monuments, messages and support replies can give plaques, themes and Hangar looks ---------- */
+const GL_RE=/^(pq|th|hull|trail|probe|ptrail|star|sky|orbit|ui):[a-z][a-z0-9_]{1,31}$/;
+for(const p of ['monuments','messages','support'])NEEDS[p]=[...new Set((NEEDS[p]||[]).concat(['ccx']))];
+{const c0=giftClean;giftClean=function(g){const o=c0.apply(this,arguments);try{const L=[...new Set((g&&Array.isArray(g.looks)?g.looks:[]).filter(k=>GL_RE.test(k)))].slice(0,8);if(L.length)o.looks=L}catch(e){}return o}}
+function glName(key){const e=cxEff(key);return (e.n||key.split(':')[1])+' ('+(CCX_KINDS[e.k]||e.k).toLowerCase()+')'}
+{const p0=giftParts;giftParts=function(g){const p=p0.apply(this,arguments);try{for(const k of (g&&Array.isArray(g.looks)?g.looks:[]))if(GL_RE.test(k))p.push(['✨',glName(k)])}catch(e){}return p}}
+function glGift(ctx){return ctx==='mon'?S.mon.edit&&S.mon.edit.gift:ctx==='msg'?S.draft&&S.draft.giftOn&&S.draft.gift:ctx==='sup'?S.sup.giftOn&&S.sup.gift:null}
+function glRedraw(ctx){if(ctx==='msg'&&$('#s-gift')){paint('gift');return}render()}
+function glHTML(ctx,g){if(!g)return '';const L=Array.isArray(g.looks)?g.looks:[];
+  let h='<div class="glBox"><span class="lbl">Looks to give <small>plaques, themes and Hangar looks: theirs to keep</small></span>';
+  if(!CXB){cxCat().then(()=>glRedraw(ctx));return h+'<p class="note">Loading the list of looks…</p></div>'}
+  const all=cxAll().filter(e=>!e.free);const by={};for(const e of all)(by[e.k]=by[e.k]||[]).push(e);
+  h+='<div class="frow"><label class="fld" style="flex:1 1 220px"><select class="inp" data-gl="'+ctx+'" aria-label="Look">'+Object.keys(CCX_KINDS).filter(k=>by[k]).map(k=>'<optgroup label="'+esc(CCX_KINDS[k])+'">'+by[k].sort((a,b)=>String(a.n).localeCompare(String(b.n))).map(e=>'<option value="'+esc(e.key)+'">'+esc(e.n||e.id)+'</option>').join('')+'</optgroup>').join('')+'</select></label>'
+    +'<button class="btn sm sec" data-act="glAdd" data-v="'+ctx+'" style="align-self:flex-end;margin-bottom:12px"'+(L.length>=8?' disabled':'')+'>'+ic('plus')+'Add look</button></div>';
+  if(L.length)h+='<div class="facts" style="margin-top:0">'+L.map(k=>'<span class="chip gold">✨ '+esc(glName(k))+' <button class="ib xs" data-act="glRm" data-v="'+ctx+'" data-k="'+esc(k)+'" aria-label="Remove">'+ic('x')+'</button></span>').join('')+'</div>';
+  return h+'</div>'}
+Object.assign(ACT,{
+  glAdd:el=>{const ctx=el.dataset.v,g=glGift(ctx),sel=$('[data-gl="'+ctx+'"]');if(!g||!sel||!GL_RE.test(sel.value))return;g.looks=[...new Set([...(g.looks||[]),sel.value])].slice(0,8);glRedraw(ctx)},
+  glRm:el=>{const ctx=el.dataset.v,g=glGift(ctx);if(!g)return;g.looks=(g.looks||[]).filter(k=>k!==el.dataset.k);glRedraw(ctx)}});
+// a message's gift
+{const g0=CSECS.gift;CSECS.gift=d=>{const h=g0(d);try{if(d.giftOn)return h.replace(/<\/section>\s*$/,glHTML('msg',d.gift)+'</section>')}catch(e){}return h}}
+// a support reply's gift
+{const t0=supThreadHTML;supThreadHTML=function(){let h=t0.apply(this,arguments);try{if(S.sup.giftOn){const i=h.indexOf('<div class="facts"><button class="btn'+(S.sup.busy?' busy':'')+'" data-act="supSend">');if(i>0)h=h.slice(0,i)+glHTML('sup',S.sup.gift)+h.slice(i)}}catch(e){}return h}}
+// a monument's gift, and its days
+{const m0=monEditHTML;monEditHTML=function(){let h=m0.apply(this,arguments);try{const d=S.mon.edit;
+    const days='<div class="frow"><label class="fld"><span>Only from <small>optional: the first day it\'s there</small></span><input class="inp" type="date" data-mod="from" value="'+esc(d.from||'')+'"></label><label class="fld"><span>Until <small>optional: the last day</small></span><input class="inp" type="date" data-mod="to" value="'+esc(d.to||'')+'"></label></div>'
+      +'<p class="note" style="margin:-6px 0 12px">For a holiday gift, put the same day in both: it\'s in every galaxy on that day only (each player\'s own day).</p>';
+    const k=h.indexOf('<div class="fld"><span>Look</span>');if(k>0)h=h.slice(0,k)+days+h.slice(k);
+    if(d.gift){const gl=glHTML('mon',d.gift);const t=h.indexOf('<div class="moTL">The trade</div>');const pv=h.indexOf('</div><div class="moPv">');const at=t>0?t:pv;if(at>0)h=h.slice(0,at)+gl+h.slice(at)}}catch(e){console.error(e)}return h}}
+document.addEventListener('input',e=>{const el=e.target;const f=el&&el.dataset&&el.dataset.mod;if(!f||!S.mon.edit)return;if(f==='from'||f==='to')S.mon.edit[f]=el.value||''});
+{const c0=monCleanForSave;monCleanForSave=function(m){const o=c0.apply(this,arguments);try{const day=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))?String(v):'';let f=day(m.from),t=day(m.to);if(f&&t&&t<f){const x=f;f=t;t=x}if(f)o.from=f;if(t)o.to=t}catch(e){}return o}}
+{const s0=monSum;monSum=function(m){const L=s0.apply(this,arguments);try{if(m.from||m.to)L.unshift(m.from&&m.from===m.to?'On '+cxWhen(m.from)+' only':(m.from?cxWhen(m.from):'…')+' to '+(m.to?cxWhen(m.to):'…'))}catch(e){}return L}}
+(function(){const st=document.createElement('style');st.textContent='.glBox{margin:4px 0 12px;padding:10px 12px;border-radius:12px;background:rgba(255,209,102,.05);box-shadow:inset 0 0 0 1px rgba(255,209,102,.2)}.glBox .lbl{display:block;margin-bottom:6px}.glBox .lbl small{font-weight:500;color:var(--mu2);margin-left:4px}.glBox .facts{justify-content:flex-start}';document.head.appendChild(st)})();
+
+/* ---------- SWITCHES AND ECONOMY (game 1.23+) ----------
+   config/off {list:[{id, n, r:[rule]}], up}: what's switched off. config/econ {o:{"<where>":number}, up}: only the economy
+   numbers changed from the built-in ones. lv_core.js (the same file the game uses) checks both; lv_cat.js (made from the
+   game by w123/tools/lv_catalog.py) lists everything there is, with the built-in numbers. */
+S.off={list:[],grp:'research',q:'',lim:40,code:'',busy:false,bad:0};
+S.ec={o:{},draft:{},grp:'bars',q:'',lim:20,busy:false,bad:[]};
+LBL.off='switches';LBL.econ='the economy';
+let LVC=null,LVF=null;
+function lvCat(){if(LVC)return Promise.resolve();return new Promise(ok=>{const done=()=>{const c=window.LV_CAT;if(c&&Array.isArray(c.econ)&&Array.isArray(c.off)){LVC=c;LVF={};for(const g of c.econ)for(const it of g.items)for(const f of it.f)LVF[f.p]=Object.assign({g:g.g,gn:g.n,it:it.n,iid:it.id,t:it.t||''},f)}ok()};
+  if(window.LV_CAT)return done();const s=document.createElement('script');s.src='lv_cat.js?v='+Date.now().toString(36).slice(0,-4);s.onload=done;s.onerror=done;document.head.appendChild(s)})}
+LOAD.off=()=>Promise.all([DB.get('config/off'),lvCat()]).then(([d])=>{const c=lvOff(d&&d.list);S.off.list=c.list;S.off.bad=c.bad});
+LOAD.econ=()=>Promise.all([DB.get('config/econ'),lvCat()]).then(([d])=>{const c=lvEcon(d&&d.o);S.ec.o=c.o;S.ec.bad=c.bad});
+NEEDS.switches=['off'];NEEDS.economy=['econ'];
+{const L=SEC.live.pages;const i=L.findIndex(p=>p[0]==='shopitems');L.splice(i+1,0,['switches','Switches','shield'],['economy','Economy','coins']);
+  PAGE.switches={sec:'live',n:'Switches',ic:'shield'};PAGE.economy={sec:'live',n:'Economy',ic:'coins'}}
+function lvNoCat(){return LVC?'':'<div class="card errc"><b>Couldn\'t load the list of everything in the game</b><p class="sub">Reload the page (lv_cat.js didn\'t load).</p></div>'}
+// a number as people read it
+function lvFmt(v){v=+v;if(!isFinite(v))return String(v);if(Math.abs(v)<1e5)return (Math.round(v*1000)/1000).toLocaleString('en-US');return ccxBig(v)}
+
+/* ---- Switches ---- */
+VIEWS.switches=()=>{const L=S.off.list;let h=head('Switches','Switch off any one thing for every player: a research project, making one item, one machine upgrade, a whole feature or any button. Players see it locked, and a tap says “Not available now”. Games 1.23 and newer, within a minute.',L.length?'<button class="btn sec" data-act="offAllOn">'+ic('play')+'Turn everything back on</button>':'');
+  const st=secState('off');if(st)return h+st;h+=lvNoCat();
+  h+='<section class="card"><div class="ph"><h2>'+ic('shield')+' Switched off now'+(L.length?' <small class="lvCnt">'+L.length+'</small>':'')+'</h2></div>';
+  if(!L.length)h+='<p class="sub">Nothing is switched off: every player has the whole game.</p>';
+  else h+='<div class="lvOffL">'+L.map(sw=>'<div class="lvOffR"><span class="lvLk">'+ic('shield')+'</span><div class="grow"><b>'+esc(sw.n)+'</b><span class="sub">'+esc(offWhat(sw))+'</span></div><button class="btn sm" data-act="offOn" data-v="'+esc(sw.id)+'"'+(S.off.busy?' disabled':'')+'>Turn back on</button></div>').join('')+'</div>';
+  if(S.off.bad)h+='<p class="note" style="color:#ff8ea3">'+S.off.bad+' switch'+(S.off.bad>1?'es':'')+' on the server couldn\'t be read and '+(S.off.bad>1?'are':'is')+' left out.</p>';
+  h+='</section>';
+  if(!LVC)return h;
+  const G=LVC.off;const grp=S.off.grp;
+  h+='<section class="card"><div class="ph"><h2>'+ic('plus')+' Switch something off</h2></div>';
+  h+='<div class="lvChips" role="group" aria-label="What">'+G.map(g=>'<button class="cxChip" data-act="offGrp" data-v="'+g.g+'" aria-pressed="'+(grp===g.g)+'">'+esc(g.n)+'</button>').join('')+'<button class="cxChip" data-act="offGrp" data-v="btn" aria-pressed="'+(grp==='btn')+'">Any button</button></div>';
+  if(grp==='btn')h+=offBtnHTML();
+  else{const g=G.find(x=>x.g===grp)||G[0];h+='<p class="sub lvD">'+esc(g.d)+'</p>';
+    h+='<label class="cxSearch lvSearch">'+ic('search')+'<input class="inp" data-lv="oq" placeholder="Search '+esc(g.n.toLowerCase())+'" value="'+esc(S.off.q)+'" aria-label="Search"></label>';
+    h+='<div id="offRes">'+offResHTML(g)+'</div>'}
+  return h+'</section>'};
+function offWhat(sw){if(sw.id.startsWith('btn:'))return 'Any button';if(LVC)for(const g of LVC.off)if(g.items.some(x=>x.id===sw.id))return g.n;return 'Switched off'}
+function offResHTML(g){const q=S.off.q.trim().toLowerCase();const on=new Set(S.off.list.map(x=>x.id));
+  const L=g.items.filter(x=>!q||x.n.toLowerCase().includes(q)||x.id.toLowerCase().includes(q)||(x.sub||'').toLowerCase().includes(q));
+  if(!L.length)return '<div class="empty">Nothing here.</div>';
+  return '<div class="lvPick">'+L.slice(0,S.off.lim).map(x=>{const off=on.has(x.id);return '<div class="lvPickR'+(off?' off':'')+'"><div class="grow"><b>'+esc(x.n)+'</b>'+(x.sub?'<span class="sub">'+esc(x.sub)+'</span>':'')+'</div>'
+    +(off?'<span class="chip lvOffC">Off</span><button class="btn sm sec" data-act="offOn" data-v="'+esc(x.id)+'">Turn on</button>':'<button class="btn sm" data-act="offSet" data-v="'+esc(x.id)+'"'+(S.off.busy?' disabled':'')+'>Switch off</button>')+'</div>'}).join('')+'</div>'
+    +(L.length>S.off.lim?'<button class="btn sec cxMore" data-act="offMore">Show '+Math.min(40,L.length-S.off.lim)+' more of '+(L.length-S.off.lim)+'</button>':'')}
+function offBtnHTML(){const r=S.off.code.trim()?lvBtn(S.off.code.trim()):null;
+  return '<p class="sub lvD">Any button in the game, by its code. To get a code: in the game, signed in as the developer, open the Test panel → <b>Button finder</b>, then tap the button: its code is copied. Paste it here. Leave out "a", "b" or "c" to switch off the button wherever it is.</p>'
+    +'<textarea class="inp mono lvCode" data-lv="code" rows="3" spellcheck="false" placeholder=\'{"act":"spin","a":"gem"}\' aria-label="Button code">'+esc(S.off.code)+'</textarea>'
+    +'<div id="offBtnChk">'+offBtnChk(r)+'</div>'
+    +'<p class="note">Careful with buttons that move between screens (tabs, Close, Back): players could get stuck. Turning it back on fixes it at once.</p>'}
+function offBtnChk(r){if(!r)return '';if(r.err)return '<div class="cxErr">'+ic('alert')+'<span>'+esc(r.err)+'</span></div>';
+  return '<div class="btnrow"><button class="btn" data-act="offBtn"'+(S.off.busy?' disabled':'')+'>'+ic('shield')+'Switch off: '+esc(r.sw.n)+'</button></div>'}
+// writing: the whole list, changed in one go (a transaction, so two Command Centers can't undo each other)
+async function offWrite(fn,msg){if(S.off.busy)return false;S.off.busy=true;render();
+  try{const ops=await DB.tx(['config/off'],cur=>{const c=lvOff(cur['config/off']&&cur['config/off'].list);const list=fn(c.list.slice());return [{op:'set',path:'config/off',data:{list,up:Date.now()}}]});
+    S.off.list=lvOff(ops[0].data.list).list;S.off.busy=false;toast(msg);return true}
+  catch(e){S.off.busy=false;toast(fsErr(e),'err');return false}finally{render()}}
+function offFind(id){if(LVC)for(const g of LVC.off){const x=g.items.find(i=>i.id===id);if(x)return x}return null}
+Object.assign(ACT,{
+  offGrp:el=>{S.off.grp=el.dataset.v;S.off.q='';S.off.lim=40;render()},
+  offMore:()=>{S.off.lim+=40;const g=LVC.off.find(x=>x.g===S.off.grp);const r=$('#offRes');if(r&&g)r.innerHTML=offResHTML(g)},
+  offSet:async el=>{const x=offFind(el.dataset.v);if(!x)return;
+    if(!await ask({title:'Switch off '+x.n+'?',body:'Every player on 1.23 or newer sees it locked within a minute, and a tap says “Not available now”. Nothing they already have is taken away. Turn it back on here any time.',ok:'Switch it off'}))return;
+    await offWrite(L=>L.filter(s=>s.id!==x.id).concat([{id:x.id,n:x.n,r:x.r}]),x.n+' is switched off: players see it within a minute')},
+  offBtn:async()=>{const r=lvBtn(S.off.code.trim());if(!r||r.err)return;
+    if(!await ask({title:'Switch off this button?',body:esc(r.sw.n)+'. Every player on 1.23 or newer sees it locked within a minute.',ok:'Switch it off'}))return;
+    if(await offWrite(L=>L.filter(s=>s.id!==r.sw.id).concat([r.sw]),'Switched off: players see it within a minute')){S.off.code='';render()}},
+  offOn:async el=>{const id=el.dataset.v;const sw=S.off.list.find(s=>s.id===id);await offWrite(L=>L.filter(s=>s.id!==id),(sw?sw.n:'It')+' is back on: players get it within a minute')},
+  offAllOn:async()=>{if(!await ask({title:'Turn everything back on?',body:S.off.list.length+' switched off. Players get it all back within a minute.',ok:'Turn it all on'}))return;
+    await offWrite(()=>[],'Everything is back on')}});
+
+/* ---- Economy ---- */
+// a field: what it is now on the server, what's typed (the draft), and whether it can be published
+function ecNow(p){return S.ec.o[p]!=null?S.ec.o[p]:LVF&&LVF[p]?LVF[p].v:null}
+// what's typed, as a number: "1,500" is fifteen hundred, "1.5" one and a half, "1e20" works; "1,5" is refused (use a dot)
+function ecParse(raw){raw=String(raw).trim();if(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(raw))raw=raw.replace(/,/g,'');if(raw===''||/[^0-9.eE+-]/.test(raw))return null;const v=+raw;return isFinite(v)?v:null}
+function ecDraft(p){const d=S.ec.draft;if(!(p in d))return {has:false};const raw=d[p];if(raw===null)return {has:true,back:true,ok:true};
+  const f=LVF&&LVF[p];const n=ecParse(raw);const v=f&&n!=null?lvNum(f.k,n):null;return {has:true,raw,v,ok:v!=null&&!ecRoomErr(p),comma:/,/.test(String(raw))&&n==null}}
+// a room's three numbers are checked together (the game checks the same: lvRoomOk)
+function ecVal(p){const d=ecDraft0(p);if(d.back)return LVF[p]?LVF[p].v:null;if(d.has){const f=LVF[p];const n=ecParse(d.raw);return f&&n!=null?lvNum(f.k,n):null}return ecNow(p)}
+function ecDraft0(p){const d=S.ec.draft;if(!(p in d))return {has:false};return d[p]===null?{has:true,back:true}:{has:true,raw:d[p]}}
+function ecRoomErr(p){const f=LVF&&LVF[p];if(!f||f.g!=='rooms'||!f.t||f.iid==='buy')return '';const b='room.'+f.iid+'.';
+  if(![b+'base',b+'per',b+'max'].some(x=>x in S.ec.draft))return '';const v=[ecVal(b+'base'),ecVal(b+'per'),ecVal(b+'max')];if(v.some(x=>x==null))return '';
+  return lvRoomOk(f.t,v[0],v[1],v[2])?'':(f.t==='m'?'Level 1 can\'t be below 0.05.':'At its top level this room would take prices or times down to 5% or less: lower “Each level takes off” or the max level.')}
+function ecPending(){const out=[];for(const p in S.ec.draft){const d=ecDraft(p);const f=LVF&&LVF[p];if(!f)continue;
+  if(d.back){if(S.ec.o[p]!=null)out.push({p,f,back:true,ok:true});continue}
+  if(!d.ok){out.push({p,f,ok:false});continue}if(d.v===ecNow(p)&&(S.ec.o[p]!=null||f.v23==null))continue;out.push({p,f,v:d.v,ok:true})}return out}
+VIEWS.economy=()=>{let h=head('Economy','Change any number of the game: what things sell for, what a recipe uses and how long it takes, what upgrades and research cost, how high they go. Only what you change is sent, and players get it within a minute (games 1.23 and newer). Everything else stays as built in.');
+  const st=secState('econ');if(st)return h+st;h+=lvNoCat();if(!LVC)return h;
+  h+='<div id="ecBar">'+ecBarHTML()+'</div>';
+  const ch=Object.keys(S.ec.o).filter(p=>LVF[p]);
+  h+='<section class="card"><div class="ph"><h2>'+ic('coins')+' Changed now'+(ch.length?' <small class="lvCnt">'+ch.length+'</small>':'')+'</h2>'+(ch.length?'<button class="btn sm sec" data-act="ecAllBack">Put all back</button>':'')+'</div>';
+  if(!ch.length)h+='<p class="sub">Nothing: the economy is as built in.</p>';
+  else h+='<div class="lvOffL">'+ch.map(p=>{const f=LVF[p];const d=ecDraft(p);return '<div class="lvOffR"><div class="grow"><b>'+esc(f.it)+' · '+esc(f.l)+'</b><span class="sub">'+esc(f.gn)+' · <b class="lvNew">'+lvFmt(S.ec.o[p])+'</b> (built in '+lvFmt(f.v)+(f.v23!=null?', '+lvFmt(f.v23)+' in galaxies started in 1.23':'')+')'+(d.back?' · <b class="lvWarn">put back when you publish</b>':'')+'</span></div>'
+    +(d.back?'<button class="btn sm sec" data-act="ecUndo" data-v="'+esc(p)+'">Keep it</button>':'<button class="btn sm sec" data-act="ecBack" data-v="'+esc(p)+'">Put back</button>')+'</div>'}).join('')+'</div>';
+  const bad=S.ec.bad.length+Object.keys(S.ec.o).filter(p=>!LVF[p]).length;if(bad)h+='<p class="note" style="color:#ff8ea3">'+bad+' number'+(bad>1?'s':'')+' on the server this page doesn\'t know (from a newer game, or no longer in it).</p>';
+  h+='</section>';
+  const G=LVC.econ;const g=G.find(x=>x.g===S.ec.grp)||G[0];
+  h+='<section class="card"><div class="ph"><h2>'+ic('edit')+' Change a number</h2></div>';
+  h+='<div class="lvChips" role="group" aria-label="Part of the economy">'+G.map(x=>'<button class="cxChip" data-act="ecGrp" data-v="'+x.g+'" aria-pressed="'+(g.g===x.g&&!S.ec.q.trim())+'">'+esc(x.n)+'</button>').join('')+'</div>';
+  h+='<label class="cxSearch lvSearch">'+ic('search')+'<input class="inp" data-lv="eq" placeholder="Search everything (an item, a project, a planet…)" value="'+esc(S.ec.q)+'" aria-label="Search"></label>';
+  h+='<div id="ecRes">'+ecResHTML()+'</div>';
+  return h+'</section>'};
+function ecList(){const q=S.ec.q.trim().toLowerCase();const out=[];
+  for(const g of LVC.econ){if(!q&&g.g!==S.ec.grp)continue;for(const it of g.items){if(q&&!(it.n.toLowerCase().includes(q)||it.id.toLowerCase().includes(q)||it.f.some(f=>f.l.toLowerCase().includes(q))))continue;out.push({g,it})}}return out}
+function ecResHTML(){const L=ecList();const q=S.ec.q.trim();const g=LVC.econ.find(x=>x.g===S.ec.grp);
+  let h=!q&&g?'<p class="sub lvD">'+esc(g.d)+'</p>':'';if(!L.length)return h+'<div class="empty">Nothing here.</div>';
+  h+='<div class="ecList">'+L.slice(0,S.ec.lim).map(({g,it})=>'<div class="ecIt"><div class="ecH"><b>'+esc(it.n)+'</b><span class="sub">'+esc(q?g.n+(it.sub?' · '+it.sub:''):it.sub||'')+'</span></div>'+it.f.map(ecFieldHTML).join('')+'</div>').join('')+'</div>';
+  if(L.length>S.ec.lim)h+='<button class="btn sec cxMore" data-act="ecMore">Show '+Math.min(20,L.length-S.ec.lim)+' more of '+(L.length-S.ec.lim)+'</button>';return h}
+function ecFieldHTML(f){const d=ecDraft(f.p);const now=ecNow(f.p);const chg=S.ec.o[f.p]!=null;const val=d.has?(d.back?f.v:d.raw):now;const K=LV_KIND[f.k];
+  const cls=d.has&&!d.ok?' bad':d.has&&(d.back||d.v!==now)?' dirty':chg?' chg':'';
+  return '<label class="ecF'+cls+'" data-p="'+esc(f.p)+'"><span class="ecL">'+esc(f.l)+'<small>Built in '+lvFmt(f.v)+(f.v23!=null?' · '+lvFmt(f.v23)+' in 1.23 galaxies':'')+'</small></span>'
+    +'<input class="inp ecIn" type="text" inputmode="decimal" data-lv="f" data-p="'+esc(f.p)+'" value="'+esc(String(val))+'" aria-label="'+esc(f.l)+'" autocomplete="off">'
+    +((chg||d.has)?'<button class="ib ecR" data-act="ecReset" data-v="'+esc(f.p)+'" aria-label="Put back as built in" title="Put back as built in">'+ic('refresh')+'</button>':'<span class="ecR"></span>')
+    +(d.has&&!d.ok?'<span class="ecE">'+esc(ecErrTxt(f.p))+'</span>':'')+'</label>'}
+function ecErrTxt(p){const f=LVF[p],d=ecDraft(p);if(d.comma)return 'Use a dot for decimals (1.5)';if(d.v==null)return ecRange(LV_KIND[f.k]);return ecRoomErr(p)}
+function ecRange(K){return 'A '+(K.int?'whole ':'')+'number from '+lvFmt(K.lo)+' to '+(K.hi>=1e100?'any size':lvFmt(K.hi))}
+function ecBarHTML(){const P=ecPending();if(!P.length)return '';const bad=P.filter(x=>!x.ok).length;
+  return '<div class="ecBar"><span class="grow"><b>'+P.length+' change'+(P.length>1?'s':'')+' not published</b>'+(bad?'<span class="lvWarn"> · '+bad+' to fix</span>':'')+'</span><button class="btn sm sec" data-act="ecDiscard">Discard</button><button class="btn sm" data-act="ecPublish"'+(bad||S.ec.busy?' disabled':'')+'>'+ic('up')+'Publish</button></div>'}
+function ecPaintBar(){const b=$('#ecBar');if(b)b.innerHTML=ecBarHTML()}
+function ecPaintField(p){const el=document.querySelector('.ecF[data-p="'+CSS.escape(p)+'"]');const f=LVF[p];if(!el||!f)return;const d=ecDraft(p);const now=ecNow(p);const chg=S.ec.o[p]!=null;
+  el.classList.toggle('bad',d.has&&!d.ok);el.classList.toggle('dirty',d.has&&d.ok&&(d.back||d.v!==now));el.classList.toggle('chg',!d.has&&chg);
+  let e=el.querySelector('.ecE');if(d.has&&!d.ok){if(!e){e=document.createElement('span');e.className='ecE';el.appendChild(e)}e.textContent=ecErrTxt(p)}else if(e)e.remove()}
+async function ecWrite(fn,msg){if(S.ec.busy)return false;S.ec.busy=true;ecPaintBar();
+  try{const ops=await DB.tx(['config/econ'],cur=>{const c=lvEcon(cur['config/econ']&&cur['config/econ'].o);const o=fn(Object.assign({},c.o));return [{op:'set',path:'config/econ',data:{o,up:Date.now()}}]});
+    S.ec.o=lvEcon(ops[0].data.o).o;S.ec.busy=false;toast(msg);return true}
+  catch(e){S.ec.busy=false;toast(fsErr(e),'err');return false}finally{render()}}
+Object.assign(ACT,{
+  ecGrp:el=>{S.ec.grp=el.dataset.v;S.ec.q='';S.ec.lim=20;render()},
+  ecMore:()=>{S.ec.lim+=20;const r=$('#ecRes');if(r)r.innerHTML=ecResHTML()},
+  ecReset:el=>{const p=el.dataset.v;if(S.ec.o[p]!=null)S.ec.draft[p]=null;else delete S.ec.draft[p];render()},
+  ecBack:el=>{S.ec.draft[el.dataset.v]=null;render()},
+  ecUndo:el=>{delete S.ec.draft[el.dataset.v];render()},
+  ecAllBack:()=>{for(const p in S.ec.o)S.ec.draft[p]=null;render()},
+  ecDiscard:()=>{S.ec.draft={};render()},
+  ecPublish:async()=>{const P=ecPending();if(!P.length||P.some(x=>!x.ok))return;
+    const lines=P.slice(0,8).map(x=>x.f.it+' · '+x.f.l+': '+(x.back?'built in ('+lvFmt(x.f.v)+')':lvFmt(x.v))).join('\n')+(P.length>8?'\n… and '+(P.length-8)+' more':'');
+    if(!await ask({title:'Publish '+P.length+' change'+(P.length>1?'s':'')+'?',body:esc(lines).replace(/\n/g,'<br>')+'<br><br>Every player on 1.23 or newer gets '+(P.length>1?'them':'it')+' within a minute.',ok:'Publish'}))return;
+    const ok=await ecWrite(o=>{for(const x of P){if(x.back||(x.v===x.f.v&&x.f.v23==null))delete o[x.p];else o[x.p]=x.v}return o},'Published: players get it within a minute');if(ok){S.ec.draft={};render()}}});
+document.addEventListener('input',e=>{const el=e.target;const k=el&&el.dataset&&el.dataset.lv;if(!k)return;
+  if(k==='oq'){S.off.q=el.value;S.off.lim=40;const g=LVC&&LVC.off.find(x=>x.g===S.off.grp);const r=$('#offRes');if(r&&g)r.innerHTML=offResHTML(g)}
+  else if(k==='code'){S.off.code=el.value;const c=$('#offBtnChk');if(c)c.innerHTML=offBtnChk(el.value.trim()?lvBtn(el.value.trim()):null)}
+  else if(k==='eq'){S.ec.q=el.value;S.ec.lim=20;const r=$('#ecRes');if(r)r.innerHTML=ecResHTML()}
+  else if(k==='f'){const p=el.dataset.p;const f=LVF&&LVF[p];if(!f)return;const raw=el.value.trim();const n=ecParse(raw);
+    if(raw===''||(n!=null&&lvNum(f.k,n)===ecNow(p)&&S.ec.o[p]==null&&f.v23==null))delete S.ec.draft[p];else S.ec.draft[p]=raw;
+    ecPaintField(p);if(f.g==='rooms'&&f.t)for(const x of ['base','per','max'])ecPaintField('room.'+f.iid+'.'+x);ecPaintBar()}});
+(function(){const st=document.createElement('style');st.textContent=`
+.lvChips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px}
+.lvD{margin:0 0 10px}.lvSearch{display:block;margin:0 0 12px}.lvCnt{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:var(--card3);font-size:12px;color:var(--tx);vertical-align:middle}
+.lvOffL,.lvPick{display:grid;gap:8px}.lvOffR,.lvPickR{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line);min-width:0}
+.lvOffR .grow,.lvPickR .grow{flex:1 1 auto;min-width:0;display:grid;gap:2px}.lvOffR .btn,.lvPickR .btn,.lvPickR .chip{flex:none}.lvOffR b,.lvPickR b{overflow-wrap:anywhere}.lvOffR .sub,.lvPickR .sub{font-size:12.5px}
+.lvLk{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(255,92,122,.12);color:#ff8ea3;flex:none}.lvLk .i{width:16px;height:16px}
+.lvPickR.off{border-color:rgba(255,92,122,.35)}.lvOffC{background:rgba(255,92,122,.14);color:#ff8ea3}
+.lvCode{width:100%;font-size:13px;min-height:70px;margin:2px 0 8px}.lvNew{color:var(--ac)}.lvWarn{color:var(--yl)}
+.ecList{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.ecIt{padding:10px 12px;border-radius:13px;background:var(--card2);border:1px solid var(--line);display:grid;gap:8px;min-width:0}
+.ecH{display:grid;gap:1px}.ecH .sub{font-size:12px}
+.ecF{display:grid;grid-template-columns:minmax(0,1fr) 120px 30px;align-items:center;gap:8px;padding:6px 8px;margin:0 -8px;border-radius:9px}
+.ecL{display:grid;gap:1px;font-size:13px;font-weight:700;min-width:0;overflow-wrap:anywhere}.ecL small{font-size:11.5px;font-weight:500;color:var(--mu2)}
+.ecIn{width:100%;text-align:right;font-variant-numeric:tabular-nums;padding:7px 9px}
+.ecR{width:30px;height:30px}.ecF.chg{background:rgba(56,225,198,.07)}.ecF.chg .ecIn{box-shadow:inset 0 0 0 1px rgba(56,225,198,.5)}
+.ecF.dirty{background:rgba(255,209,102,.08)}.ecF.dirty .ecIn{box-shadow:inset 0 0 0 1px rgba(255,209,102,.7)}
+.ecF.bad .ecIn{box-shadow:inset 0 0 0 1px #ff5c7a}.ecE{grid-column:1/-1;font-size:12px;color:#ff8ea3}
+.ecBar{position:sticky;top:8px;z-index:20;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;margin:0 0 12px;border-radius:13px;background:var(--card3);border:1px solid rgba(255,209,102,.55);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.ecBar .grow{flex:1 1 160px;min-width:0}
+@media (max-width:520px){.ecList{grid-template-columns:minmax(0,1fr)}.ecF{grid-template-columns:minmax(0,1fr) 104px 30px}.ecBar .grow{flex-basis:100%}.ecBar .btn{flex:1 1 0}}
+`;document.head.appendChild(st)})();
+
+/* CCX-SHOP END */
 /* ---------- boot ---------- */
 S.tab=pageFor(location.hash.slice(1)||'home');
 render();
