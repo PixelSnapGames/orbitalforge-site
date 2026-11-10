@@ -2354,7 +2354,7 @@ async function mailDelete(id){const M=S.mail;if(!M||!M.rows)return;const x=M.row
    ===================================================================== */
 const WDL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 function loadLibrary(retry){S.lib={st:'loading'};try{delete window.CC_LIBRARY}catch(e){window.CC_LIBRARY=undefined}
-  return loadScript('library/library.js'+(retry?'?r='+Date.now():''),15000).then(()=>{S.lib=libParse(window.CC_LIBRARY)},e=>{S.lib={st:'missing',msg:e&&e.message||String(e)}}).then(()=>{if(S.tab==='library')soonRender()})}
+  return loadScript('library/library.js?v='+Math.floor(Date.now()/60000),15000)/* always the newest Library (browsers keep the file up to 10 minutes otherwise) */.then(()=>{S.lib=libParse(window.CC_LIBRARY)},e=>{S.lib={st:'missing',msg:e&&e.message||String(e)}}).then(()=>{if(S.tab==='library')soonRender()})}
 function libParse(L){if(!L||typeof L!=='object'||!Array.isArray(L.items))return {st:'bad',msg:'library.js loaded, but it has no window.CC_LIBRARY.items list.'};
   const cats=(Array.isArray(L.cats)?L.cats:[]).filter(c=>c&&typeof c.id==='string'&&typeof c.n==='string'),seen={},items=[];let skipped=0;
   L.items.forEach(it=>{if(!it||typeof it!=='object'||typeof it.id!=='string'||!/^[a-z0-9-]{3,40}$/.test(it.id)||seen[it.id]||!it.msg||typeof it.msg!=='object'||typeof it.msg.t!=='string'){skipped++;return}seen[it.id]=1;items.push(it)});
