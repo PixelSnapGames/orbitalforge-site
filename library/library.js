@@ -19,6 +19,9 @@
 
   var items=[
     /* ===================== WELCOME & TESTERS ===================== */
+    {id:'update-123',cat:'welcome',name:'1.23 is here (update now)',tip:'Publish once 1.23 shows "Available on Google Play". Put the day you will require 1.23 in the text (Game updates, Required update). The button opens the game on Google Play.',img:'library/update-123.jpg',fit:'cover',
+      msg:{t:'1.23 is here!',b:'Hey Commanders! 1.23 is finally out, and I can\'t wait for you to play it. Every look in one place, new rewards to earn, and podium prizes for the weekly top 3. Update on Google Play by Wed, Nov 11 to keep playing. Your galaxy comes with you. See you on the leaderboards! - Joe',k:'New update',tag:'update',c:'#ffd166',cta:{l:'Update on Google Play',go:'url:https://play.google.com/store/apps/details?id=com.pixelsnapgames.orbitalforge'},gift:null,prio:10,pop:true,aud:aud()},
+      when:{rule:'now',hours:72},event:null,sale:null},
     {id:'welcome-113',cat:'welcome',name:'Welcome to 1.13 (gift)',tip:'Run it for the first two weeks after the update. Everyone who opens the game gets the gift once.',img:'library/welcome-113.jpg',fit:'cover',
       msg:{t:'Welcome to Orbital Forge 1.13',b:'Three lanes on the Path, big builds before every warp gate, and meteor showers that move from system to system. Here is a little something to get you started.',k:'New update',tag:'update',c:'#38e1c6',cta:{l:'Open the Path',go:'path'},gift:gift({dm:100,uk:2,items:{mine_rare:1}}),prio:10,pop:true,aud:aud()},
       when:{rule:'now',hours:336},event:null,sale:null},
