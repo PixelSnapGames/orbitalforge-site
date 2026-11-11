@@ -2195,7 +2195,7 @@ function profFlags(g){const F=[];if(!g)return F;const pf=g.pf||{};
   const buys=(g.stats&&g.stats.purchases||0)+(g.bought&&g.bought.lic?1:0);if((+g.dm||0)>=20000&&!buys)F.push(fmtBig(g.dm)+' Dark Matter and no purchases');
   return F}
 function plSummary(row){const doc=row.data||{};const g=parseSave(doc)||{};const pf=g.pf||{};
-  return {uid:row.id,at:+doc.updatedAt||0,v:g.appVer||doc.version||'',lv:lvOf(g.cmd&&g.cmd.xp),cash:+g.cash||0,dm:+g.dm||0,play:+(g.stats&&g.stats.playSec)||0,flags:profFlags(g).length,lic:!!(g.bought&&g.bought.lic),cs:g.lb?csName(g.lb.c1,g.lb.c2,g.lb.n):'',sess:pf.sess&&pf.sess.n||0}}
+  return {uid:row.id,at:+doc.updatedAt||0,v:g.appVer||doc.version||'',lv:lvOf(g.cmd&&g.cmd.xp),cash:+g.cash||0,dm:+g.dm||0,play:+(g.stats&&g.stats.playSec)||0,flags:profFlags(g).length,lic:!!(g.bought&&g.bought.lic),cs:g.lb?csName(g.lb.c1,g.lb.c2,g.lb.n):'',sess:pf.sess&&pf.sess.n||0,iid:pf.iid||''}}
 function plCardHTML(){const st=secState('pl');let h='<div class="card" id="plCard"><div class="ph"><div><h2>Player profiles</h2><div class="sub">Everyone with a cloud save, most recently active first. Open one for their wallet, boosters, play time, Shop and video history, gifts, and to change their account.</div></div></div>';
   h+='<div class="srch">'+ic('search')+'<input class="inp" id="plQ" data-f="plQ" value="'+esc(S.plQ||'')+'" placeholder="Name or uid" aria-label="Find a player" autocomplete="off"></div>';
   if(S.errs.pl&&/permission|insufficient/i.test(String(S.errs.pl.code||S.errs.pl.message||S.errs.pl)))return h+'<div class="warn" style="display:block">Firestore did not let the Command Center read saves. Publish the new rules: copy <b>firebase/firestore.rules</b> from the game kit into Firebase → Firestore → Rules → Publish.</div></div>';
@@ -3347,8 +3347,8 @@ VIEWS.names=()=>head('Names','Display names players picked, and names you took a
 VIEWS.reports=()=>head('Reports','Names players reported from the leaderboards. Reset a name, or dismiss the report.')+repCardHTML();
 // Profiles: filter and sort the loaded players
 {const p0=plCardHTML;plCardHTML=function(){let h=p0.apply(this,arguments);if(secState('pl')||!S.pl)return h;
-  const L=S.pl||[],F=S.ov2.plF,cnt={all:L.length,old:L.filter(plOld).length,lic:L.filter(x=>x.lic).length,flag:L.filter(x=>x.flags).length,today:L.filter(x=>x.at>Date.now()-DAY).length};
-  const bar='<div class="fbar" id="plFbar" role="group" aria-label="Show">'+[['all','All'],['today','Active today'],['old','Old version'],['lic','License'],['flag','Flagged']].map(x=>'<button class="'+(F===x[0]?'on':'')+'" data-act="plF" data-v="'+x[0]+'">'+x[1]+'<span class="n">'+cnt[x[0]]+'</span></button>').join('')+'</div>';
+  const L=S.pl||[],F=S.ov2.plF,R=plRetSets(),cnt={all:L.length,old:L.filter(plOld).length,lic:L.filter(x=>x.lic).length,flag:L.filter(x=>x.flags).length,today:L.filter(x=>x.at>Date.now()-DAY).length,back:S.loaded.plays?R.back.size:'…',first:S.loaded.plays?R.first.size:'…'};
+  const bar='<div class="fbar" id="plFbar" role="group" aria-label="Show">'+[['all','All'],['today','Active today'],['back','Back from yesterday'],['first','First return'],['old','Old version'],['lic','License'],['flag','Flagged']].map(x=>'<button class="'+(F===x[0]?'on':'')+'" data-act="plF" data-v="'+x[0]+'">'+x[1]+'<span class="n">'+cnt[x[0]]+'</span></button>').join('')+'</div>';
   const sort='<select class="inp" id="plSort" aria-label="Sort players">'+[['recent','Recently active'],['lv','Highest level'],['play','Most time played'],['dm','Most Dark Matter']].map(o=>'<option value="'+o[0]+'"'+(S.ov2.plSort===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>';
   return h.replace(/<div class="srch">([\s\S]*?)<\/div>/,'<div class="tools"><div class="srch">$1</div>'+sort+'</div>'+bar)}}
 function plOld(x){return !!(x.v&&verLt(x.v,GAME_VER))}
@@ -3724,7 +3724,7 @@ function histSeedMock(){if(DB.mode!=='mock')return Promise.resolve();const all=D
 const CORE=['plays','motd','stat','live','rep','sup','ver','fbN'];
 const NEEDS={home:[],stats:['plays'],retention:['plays'],funnel:['plays'],goals:['plays'],sessions:['plays'],activity:[],shop:[],perf:['motd','stat'],
   messages:['motd','stat'],library:['motd'],events:['live'],store:['live'],monuments:['mon'],updates:['motd','ver','mon','tags','plays'],
-  profiles:['pl','tags'],boards:['lb','lbw','hid','dn'],names:['dn','blk'],tags:['tags'],support:['sup'],feedback:['feedback'],reports:['rep']};
+  profiles:['pl','tags','plays'],boards:['lb','lbw','hid','dn'],names:['dn','blk'],tags:['tags'],support:['sup'],feedback:['feedback'],reports:['rep']};
 Object.assign(LBL,{fbN:'new feedback'});S.busyK={};S.fbN=[];
 // feedback from the last day, for the Inbox badge and Home (the full list loads when you open Feedback)
 LOAD.fbN=()=>DB.query('feedback',{where:[['at','>',new Date(Date.now()-DAY)]],limit:100}).then(r=>{S.fbN=r.map(x=>x.data)});
@@ -3743,6 +3743,35 @@ function plcPut(o){try{localStorage.setItem(PLC,JSON.stringify(o))}catch(e){try{
     catch(e){console.warn('[cc] check-ins since last visit failed, reading them all',e);c=null;try{localStorage.removeItem(PLC)}catch(x){}}}
   {const r=await DB.query('plays',{where:[['day','>=',from],['day','<=',dstr(Date.now()+DAY)]]});const o={v:1,up:0,docs:{}};r.forEach(x=>{o.docs[x.id]=x.data;o.up=Math.max(o.up,+x.data.up||0)});
     if(!o.up)o.up=Date.now()-HOUR;plcPut(o);S.plays=Object.values(o.docs);S.plRead=r.length;S.plCached=0}}}
+
+/* Profiles: who came back today. Back from yesterday: played yesterday and today. First return: their first day
+   was yesterday and they came back today. UTC days, like the Players page. The list normally holds only the 40 most
+   recent players, so these filters read everyone who saved since today began and match them to the check-ins. */
+function plRetSets(){const today=dstr(Date.now()),yd=addDays(today,-1);const days={},d0={};
+  for(const p of S.plays||[]){if(!p||!p.iid||!p.day)continue;(days[p.iid]||(days[p.iid]={}))[p.day]=1;const f=p.d0||p.day;if(!d0[p.iid]||f<d0[p.iid])d0[p.iid]=f}
+  const back=new Set(),first=new Set();for(const id in days)if(days[id][today]&&days[id][yd]){back.add(id);if(d0[id]===yd)first.add(id)}
+  return {back,first,today,yd}}
+S.plRet=null;S.plRetBusy=false;
+async function plRetLoad(){if(S.plRetBusy)return;S.plRetBusy=true;const day=dstr(Date.now());
+  try{const t0=Date.parse(day+'T00:00:00Z');const r=await DB.query('users',{where:[['updatedAt','>=',t0]],order:['updatedAt','desc'],limit:600});const L=r.map(plSummary);
+    const known={};(S.pl||[]).forEach(x=>{known[x.uid]=x.name||''});
+    const names=await Promise.all(L.map(x=>x.uid in known?Promise.resolve(known[x.uid]):DB.get('dn/'+x.uid).then(d=>d&&d.name||'',()=>'')));L.forEach((x,i)=>{x.name=names[i]});
+    S.plRet={at:Date.now(),day,L}}
+  catch(e){console.warn('[cc] saves since today began failed',e);S.plRet={at:Date.now(),day,L:[],err:fsErr(e)}}
+  finally{S.plRetBusy=false;const el=$('#plList');if(el)el.innerHTML=plListHTML()}}
+{const l1=plListHTML;plListHTML=function(){const F=S.ov2.plF;if(F!=='back'&&F!=='first')return l1.apply(this,arguments);
+  if(!S.loaded.plays)return '<div class="load">Loading the check-ins…</div>';
+  const R=plRetSets(),set=R[F];
+  if(!S.plRet||S.plRet.day!==R.today||Date.now()-S.plRet.at>5*60e3){plRetLoad();if(!S.plRet||S.plRet.day!==R.today)return '<div class="load">Finding who came back…</div>'}
+  const by={};for(const x of (S.plRet.L||[]).concat(S.pl||[]))if(!by[x.uid])by[x.uid]=x;
+  const L=Object.values(by).filter(x=>x.iid&&set.has(x.iid));const missing=Math.max(0,set.size-new Set(L.map(x=>x.iid)).size);
+  // the usual rows, search and sort, over just these players
+  const keep=S.pl,kf=S.ov2.plF,km=S.plMore;S.pl=L;S.ov2.plF='all';S.plMore=false;let h;try{h=l1.apply(this,arguments)}finally{S.pl=keep;S.ov2.plF=kf;S.plMore=km}
+  const at=new Date(Date.parse(R.today+'T00:00:00Z')).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  const what=F==='back'?'Played yesterday and came back today':'First played yesterday and came back today';
+  return '<div class="note" style="margin:0 0 8px">'+what+': '+set.size+' player'+(set.size===1?'':'s')+'. Days are UTC days, like the Players page (a new day starts at '+esc(at)+' your time).'
+    +(missing?' '+missing+' of them '+(missing===1?'has':'have')+' no cloud save from today to open yet.':'')+(S.plRet.err?' Could not read every save: '+esc(S.plRet.err):'')+'</div>'+h}}
+{const a0=loadAll;loadAll=function(){S.plRet=null;return a0.apply(this,arguments)}}
 
 /* CCX-SHOP START: w123/cc/cc_shop.js (copied by w123/tools/cc_sync.py) */
 /* ---------- SHOP ITEMS (game 1.23+): plaques, themes and every Hangar look ----------
