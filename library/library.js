@@ -19,6 +19,9 @@
 
   var items=[
     /* ===================== WELCOME & TESTERS ===================== */
+    {id:'update-124',cat:'welcome',name:'1.24 is here (update now)',tip:'Publish once 1.24 shows "Available on Google Play". The button opens the game on Google Play. Relics in gifts need 1.24, so send relic gifts after this.',img:'library/update-124.jpg',fit:'cover',
+      msg:{t:'1.24 is here!',b:'Hey Commanders! 1.24 is out. Every menu is a brand new arcade screen, and relics are here: find one in a long upgrade streak or buy one in the Shop, then give it to a planet for +5% forever. Update on Google Play. Your galaxy comes with you. See you on the leaderboards! - Joe',k:'New update',tag:'update',c:'#c77dff',cta:{l:'Update on Google Play',go:'url:https://play.google.com/store/apps/details?id=com.pixelsnapgames.orbitalforge'},gift:null,prio:10,pop:true,aud:aud()},
+      when:{rule:'now',hours:72},event:null,sale:null},
     {id:'update-123',cat:'welcome',name:'1.23 is here (update now)',tip:'Publish once 1.23 shows "Available on Google Play". Put the day you will require 1.23 in the text (Game updates, Required update). The button opens the game on Google Play.',img:'library/update-123.jpg',fit:'cover',
       msg:{t:'1.23 is here!',b:'Hey Commanders! 1.23 is finally out, and I can\'t wait for you to play it. Every look in one place, new rewards to earn, and podium prizes for the weekly top 3. Update on Google Play by Wed, Nov 11 to keep playing. Your galaxy comes with you. See you on the leaderboards! - Joe',k:'New update',tag:'update',c:'#ffd166',cta:{l:'Update on Google Play',go:'url:https://play.google.com/store/apps/details?id=com.pixelsnapgames.orbitalforge'},gift:null,prio:10,pop:true,aud:aud()},
       when:{rule:'now',hours:72},event:null,sale:null},
