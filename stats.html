@@ -844,6 +844,7 @@ function ccxImg(v){return typeof v==='string'&&v.length<=900000&&/^data:image\/(
    "w": what players read instead of the goal's own words. "from" / "to": dates (the player's own days) it can be earned
    between; "during": true counts only what's done between them. The older forms ({"lv":30}, {"stat":"shiny","n":100,"w":…})
    still work. The goals the game knows (the game counts them; the Command Center lists them): */
+// [kind, group, text, retired]: a retired goal (1: Gem Upgrades, not sold since 1.24) still counts in an old event but isn't offered
 const CCX_GOALS=[
   ['lv','Progress','Reach Commander Level {n}'],['asc','Progress','Ascend {n} time{s}'],['sys','Progress','Reach star system {n}'],
   ['hours','Progress','Play for {n} hour{s}'],['days','Progress','Play on {n} different day{s}'],['sessions','Progress','Start the game {n} time{s}'],
@@ -862,7 +863,7 @@ const CCX_GOALS=[
   ['crates','Rewards','Open {n} crate{s}'],['spins','Rewards','Spin the Prize Wheel {n} time{s}'],['found','Rewards','Get {n} booster{s}'],
   ['boosts','Rewards','Use {n} booster{s}'],['videos','Rewards','Watch {n} video{s}'],['chests','Rewards','Open {n} Path chest{s}'],
   ['dailies','Rewards','Claim {n} daily reward{s}'],['wkgifts','Rewards','Claim {n} weekly gift{s}'],['candy','Rewards','Collect {n} candy'],
-  ['perks','Shop','Buy {n} perk level{s}'],['gemups','Shop','Buy {n} Gem Upgrade level{s}'],
+  ['perks','Shop','Buy {n} perk level{s}'],['gemups','Shop','Buy {n} Gem Upgrade level{s}',1],
   ['streak','Daily','Reach a {n}-day daily streak'],['laps','Daily','Finish {n} lap{s} of the daily calendar'],
   ['tops','Leaderboards','Finish {n} week{s} in the weekly top 10'],['top3','Leaderboards','Finish {n} week{s} in the weekly top 3'],['top1','Leaderboards','Finish {n} week{s} at #1'],
   ['looks','Collecting','Own {n} Hangar look{s}'],['cards','Collecting','Own {n} plaques and themes']];
@@ -3951,8 +3952,8 @@ function cxEdEff(){const d=S.cx.ed;const f=Object.assign({},d.f);const x={};for(
 function cxEdHow(f){if(f.adv){let v;try{v=JSON.parse(f.code||'')}catch(e){return {err:'The earn code isn\'t JSON yet'}}return ccxHow(v)}
   if(!f.g)return f.howWas?null:{err:'Pick a goal'};const o={g:f.g,n:CCX_YES[f.g]?1:Math.round(+f.gn)};if(f.g==='joinedby')o.d=f.gd||'';if(String(f.gw||'').trim())o.w=String(f.gw).trim();if(f.from)o.from=f.from;if(f.to)o.to=f.to;if(f.during&&f.from)o.during=true;return ccxHow(o)}
 function cxEdHowHTML(f){const r=cxEdHow(f);return r&&r.how?'<b>Players read:</b> '+esc(cxHowTxt(r.how)):r&&r.err?'<span class="cxBad">'+esc(r.err)+'</span>':(f.howWas?'<b>Built-in goal:</b> '+esc(f.howWas)+'. Pick a goal to replace it.':'')}
-function cxGoalOpts(sel){const cats=[];for(const g of CCX_GOALS)if(!cats.includes(g[1]))cats.push(g[1]);
-  return '<option value="">Pick a goal…</option>'+cats.map(c=>'<optgroup label="'+esc(c)+'">'+CCX_GOALS.filter(g=>g[1]===c).map(g=>'<option value="'+g[0]+'"'+(g[0]===sel?' selected':'')+'>'+esc(g[2].replace('{n}','…').replace('{s}','s').replace('{ies}','ies').replace('{es}','es'))+'</option>').join('')+'</optgroup>').join('')}
+function cxGoalOpts(sel){const GL=CCX_GOALS.filter(g=>!g[3]||g[0]===sel);const cats=[];for(const g of GL)if(!cats.includes(g[1]))cats.push(g[1]);
+  return '<option value="">Pick a goal…</option>'+cats.map(c=>'<optgroup label="'+esc(c)+'">'+GL.filter(g=>g[1]===c).map(g=>'<option value="'+g[0]+'"'+(g[0]===sel?' selected':'')+'>'+esc(g[2].replace('{n}','…').replace('{s}','s').replace('{ies}','ies').replace('{es}','es'))+'</option>').join('')+'</optgroup>').join('')}
 function cxGetHTML(f,e){if(e.free)return '<div class="fld"><span class="lbl">How players get it</span><div class="cxRo">Free: everyone has it</div></div>';
   let h='<div class="fld"><span class="lbl">How players get it</span><div class="seg cxMode" role="group" aria-label="How players get it"><button data-act="cxMode" data-v="buy" aria-pressed="'+(f.mode==='buy')+'">'+ic('sparkle')+'Buy with shards</button><button data-act="cxMode" data-v="earn" aria-pressed="'+(f.mode==='earn')+'">'+ic('trophy')+'Earn by playing</button></div></div>';
   if(f.mode==='buy')return h+'<label class="fld"><span class="lbl">Price in Star Shards <small>5 to 5,000</small></span><input class="inp" type="number" min="5" max="5000" step="5" data-cx="e.sh" value="'+esc(f.sh)+'"></label>';
@@ -4012,7 +4013,7 @@ async function cxCodeOf(key){const [k,id]=cxSplit(key),b=CXB&&CXB[key]||null,o=S
 function cxGuideText(){const c=S.cx.cat||{};const by={};for(const x of (c.items||[]))(by[x.k]=by[x.k]||[]).push(x.id);for(const key in S.cx.items){const [k,id]=cxSplit(key);(by[k]=by[k]||[]);if(!by[k].includes(id))by[k].push(id)}
   return CX_GUIDE.replace('{{IDS}}',Object.keys(CCX_KINDS).map(k=>'- '+k+': '+(by[k]||[]).join(', ')).join('\n'))
     .replace('{{SHAPES}}',(c.shapes||[]).join(', ')).replace('{{PATS}}',(c.pats||[]).join(', ')).replace('{{FX}}',(c.fx||[]).map(x=>x[0]+' ('+x[1]+')').join(', '))
-    .replace('{{STATS}}',((S.cx.cat&&S.cx.cat.stats)||[]).join(', ')).replace('{{GOALS}}',CCX_GOALS.map(g=>'- "'+g[0]+'": '+g[2].replace('{n}','N').replace('{s}','s').replace('{ies}','ies').replace('{es}','es')+' ('+g[1]+')').join('\n')).replace('{{EXAMPLES}}',JSON.stringify(CX_SAMPLES,null,1))}
+    .replace('{{STATS}}',((S.cx.cat&&S.cx.cat.stats)||[]).join(', ')).replace('{{GOALS}}',CCX_GOALS.filter(g=>!g[3]).map(g=>'- "'+g[0]+'": '+g[2].replace('{n}','N').replace('{s}','s').replace('{ies}','ies').replace('{es}','es')+' ('+g[1]+')').join('\n')).replace('{{EXAMPLES}}',JSON.stringify(CX_SAMPLES,null,1))}
 
 Object.assign(ACT,{
   cxAdd:()=>{S.cx.add=true;S.cx.ed=null;render();window.scrollTo(0,0);setTimeout(()=>{const t=$('.cxPaste');if(t)t.focus()},50)},
