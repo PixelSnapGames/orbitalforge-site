@@ -1127,7 +1127,7 @@ const LV_KIND={
   effb:{lo:.05,hi:100,n:'effect'},
   effp:{lo:0,hi:10,n:'effect'},
   pct:{lo:0,hi:100,n:'percent'},
-  streak:{lo:1,hi:100000,int:true,n:'upgrades in a row'}};
+  streak:{lo:1,hi:100000,int:true,n:'upgrades'}};
 const LV_ID='[a-z0-9_]{1,40}';
 const LV_PATHS=[
   [new RegExp('^res\\.'+LV_ID+'\\.price$'),'price'],[new RegExp('^res\\.'+LV_ID+'\\.time$'),'time'],[new RegExp('^res\\.'+LV_ID+'\\.unlock$'),'cost'],
@@ -1680,7 +1680,7 @@ function imgShared(imgId,exceptId){return S.motd.some(x=>x.id!==exceptId&&x.img=
    waits for every player who started before that version as a Command Center change, adm/{uid}/ops/{campaign id}, which
    only game 1.21+ applies (once, with the thank-you note), so updating is the way to get it. A player who started on the
    new version gets nothing: it is a thank-you for updating. The message doc carries camp:{v,item,n,note,sent,at}. */
-const UR_DEF={t:'Update now: 1.24 is here',b:'Version 1.24 is out! Update from Google Play to keep playing with everyone.\n\nWhat\'s new:\n• A brand new look: every menu is an arcade screen\n• Relics in the Shop, and rare relics from long upgrade streaks\n• Your total balance up top\n• A smoother game: no more blank flashes',note:'Thanks for updating! Here\'s a free 4-hour Time Warp. It\'s in your Boosters.'};
+const UR_DEF={t:'Update now: 1.24 is here',b:'Version 1.24 is out! Update from Google Play to keep playing with everyone.\n\nWhat\'s new:\n• A brand new look: every menu is an arcade screen\n• Relics in the Shop, and rare relics found as you upgrade\n• Your total balance up top\n• A smoother game: no more blank flashes',note:'Thanks for updating! Here\'s a free 4-hour Time Warp. It\'s in your Boosters.'};
 const UR_VER=/^\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 function urId(v){return 'upd_'+String(v).trim().replace(/\./g,'_')}
 function urF(){return S.ur||(S.ur={open:false,v:GAME_VER,item:'',n:'1',t:UR_DEF.t,b:UR_DEF.b,note:UR_DEF.note,busy:false,prog:'',cnt:null})}
