@@ -4435,8 +4435,13 @@ function p3StripHTML(){if(!S.loaded.plays||S.errs.plays)return '';let c;try{c=co
   const t=(k,v,d)=>'<div class="p3S"><div class="k">'+esc(k)+'</div><div class="v">'+v+'</div><div class="d">'+esc(d)+'</div></div>';
   let h='<div class="p3Strip">'+t('Playing today',nf(c.todayP),'unique players, UTC day')+t('New players',nf(c.newp),'in the last '+S.range+' days')
     +t('Came back next day',pct(c.r1,c.c1),c.r1+' of '+c.c1)+t('Still playing after a week',pct(c.r7,c.c7),c.r7+' of '+c.c7)+t('Minutes a day',c.avg,'per player')
-    +'<button class="p3S p3SBtn" data-act="p3Chart" aria-expanded="'+S.p3.chart+'">'+ic('chart')+'<span>'+(S.p3.chart?'Hide the chart':'Players per day')+'</span></button></div>';
-  if(S.p3.chart){S.cw=chartWidth();h+='<div class="card p3Chart"><div class="ph"><div><h2>Players per day</h2><div class="sub">Tap a column for details. Days are UTC days: a new one starts at '+esc(resetTime())+' your time.</div></div>'+rangeHTML()+'</div><div class="chart" id="chart">'+columns(c)+'<div class="tip" id="tip" hidden></div></div></div>'}
+    +'<button class="p3S p3SBtn" data-act="p3Chart" aria-expanded="'+S.p3.chart+'">'+ic(S.table?'list':'chart')+'<span>'+(S.p3.chart?'Hide players per day':'Players per day')+'</span></button></div>';
+  if(S.p3.chart){S.cw=chartWidth();h+='<div class="card p3Chart"><div class="ph"><div><h2>Players per day</h2><div class="sub">'+(S.table?'New and returning players, minutes per player and the top version, each day.':'Tap a column for details.')+' Days are UTC days: a new one starts at '+esc(resetTime())+' your time.</div></div><div class="p3ChT">'+rangeHTML()+'<button class="btn sm sec" data-act="tbl">'+ic(S.table?'chart':'list')+(S.table?'Chart':'Table')+'</button></div></div>';
+    if(S.table){const D=anaDays(c),yd=addDays(c.today,-1);h+='<div class="tw"><table class="tbl day"><thead><tr><th>Day</th><th>Players</th><th>New</th><th>Returning</th><th>Min / player</th><th>New came back</th><th>Top version</th></tr></thead><tbody>'
+      +c.days.slice().reverse().map(d=>{const b=c.byDay[d],o=D[d];const back=o.e?(d===yd?'<span class="sub">'+o.r+' of '+o.e+' so far</span>':pct(o.r,o.e)+' <small>'+o.r+'/'+o.e+'</small>'):'<span class="sub">—</span>';
+        return '<tr><td>'+short(d)+(d===c.today?' <span class="chip st live">today</span>':'')+'</td><td>'+b.players+'</td><td>'+b.newp+'</td><td>'+o.ret+'</td><td>'+o.mpp+'</td><td>'+back+'</td><td>'+topVer(o.vers)+'</td></tr>'}).join('')+'</tbody></table></div>'}
+    else h+='<div class="chart" id="chart">'+columns(c)+'<div class="tip" id="tip" hidden></div></div>';
+    h+='</div>'}
   return h}
 {const r0=render;render=function(){const r=r0.apply(this,arguments);try{if(S.tab==='profiles'&&S.p3.chart&&$('#chart'))bindChart()}catch(e){}return r}}
 
@@ -4476,7 +4481,7 @@ function p3ProfHTML(){const P=S.prof;if(!P)return '';
   if(P.ban)h+='<div class="p3Alert bad">'+ic('userx')+'<div><b>Banned '+esc(rel(+P.ban.at||0))+'</b>'+(P.ban.why?' · “'+esc(P.ban.why)+'”':'')+(P.ban.by?' · by '+esc(P.ban.by==='phone'?'their banned phone':P.ban.by):'')+'<div class="sub">Their game shows the ban screen; the server refuses their saves, purchases and scores.</div></div></div>';
   if(P.hid)h+='<div class="p3Alert">'+ic('trophy')+'<div>'+(P.hid.why==='ver'?'Off the leaderboards until they update ('+(P.hid.v?'was on '+esc(P.hid.v)+', ':'')+'since '+esc(rel(P.hid.at||0))+')':'Kept off the leaderboards since '+esc(rel(P.hid.at||0)))+'</div></div>';
   if(old)h+='<div class="p3Alert">'+ic('alert')+'<div>They\'re on '+esc(v)+'. Shop, video and gift history start with 1.21, and changes you send apply once they update.</div></div>';
-  if(flags.length)h+='<div class="p3Alert bad">'+ic('flag')+'<div><b>Checks</b><ul class="flags">'+flags.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul></div></div>';
+  if(flags.length){const all=S.p3.allChecks===P.uid,F=all?flags:flags.slice(0,4);h+='<div class="p3Alert bad">'+ic('flag')+'<div><b>Checks</b> <span class="sub">'+flags.length+' found</span><ul class="flags">'+F.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul>'+(flags.length>4?'<button class="p3Lnk" data-act="p3Checks">'+(all?'Show fewer':'Show all '+flags.length)+'</button>':'')+'</div></div>'}
   // the wallet: every balance with its own Change
   const inv=g.inv||{};const W=[['cash','Cash','$'+fmtBig(g.cash||0)],['dm','Dark Matter',nf(g.dm||0)],['sh','Star Shards',nf(g.shards||0)],['cr','Credits',nf(g.credits||0)],['key','Crate keys',nf(inv.crate_key||0)]];
   if(g.relic)W.push(['rl','Relics',nf(g.relic.n||0),nf(g.relic.got||0)+' ever']);W.push(['lic','Commander License',lic?'Owned':'No',lic?'':'not bought']);
@@ -4583,7 +4588,7 @@ if(!ICP.down)ICP.down='<path d="m6 9 6 6 6-6"/>';if(!ICP.back)ICP.back='<path d=
 .p3SBtn{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ac);font-weight:800;cursor:pointer;font-family:inherit;font-size:13.5px}
 .p3SBtn:hover{border-color:var(--ac)}
 .p3SBtn svg{width:18px;height:18px}
-.p3Chart{margin-bottom:14px}
+.p3Chart{margin-bottom:14px}.p3ChT{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.p3Chart .ph{flex-wrap:wrap;gap:10px}
 .p3Wrap{display:grid;grid-template-columns:minmax(290px,350px) minmax(0,1fr);gap:16px;align-items:start}
 .p3L{position:sticky;top:calc(var(--hh) + 14px);min-width:0}
 .p3L #plCard{margin:0;display:flex;flex-direction:column;max-height:calc(100vh - var(--hh) - 30px);padding:12px}
@@ -4656,7 +4661,105 @@ if(!ICP.down)ICP.down='<path d="m6 9 6 6 6-6"/>';if(!ICP.back)ICP.back='<path d=
 .p3Hot{color:var(--yl);font-weight:800}
 .p3H4{margin:14px 0 6px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.07em}
 @media (max-width:1099px){.p3Page.has .p3Strip,.p3Page.has .p3Chart{display:none}.p3Wrap{grid-template-columns:minmax(0,1fr)}.p3Wrap.has .p3L{display:none}.p3L{position:static}.p3L #plCard{max-height:none}.p3Wrap:not(.has) .p3R{display:none}.p3Back{display:inline-flex}}
-@media (max-width:560px){.p3Top{padding:14px}.p3Av{width:44px;height:44px;font-size:19px;border-radius:13px}.p3Nm{font-size:20px}.p3Wal{grid-template-columns:repeat(2,minmax(0,1fr))}.p3Strip{display:flex;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}.p3Strip::-webkit-scrollbar{display:none}.p3Strip>*{flex:0 0 136px}.p3Fd{max-width:46%}.p3F>summary b{white-space:normal}}
+@media (max-width:560px){.p3Top{padding:14px}.p3Av{width:44px;height:44px;font-size:19px;border-radius:13px}.p3Nm{font-size:20px}.p3Wal{grid-template-columns:repeat(2,minmax(0,1fr))}.p3Strip{display:flex;overflow-x:auto;scrollbar-width:none}.p3Strip::-webkit-scrollbar{display:none}.p3Strip>*{flex:0 0 136px}.p3Fd{max-width:46%}.p3F>summary b{white-space:normal}}
+`;document.head.appendChild(st)}
+
+/* =====================================================================
+   PLAYERS 3b (Nov 17, 2026): RESET ACCOUNT, MARK FOR DELETION
+   Joe: "I want to make a thing where I can reset their account on the command center, and it resets everything with
+   one button rather than just having to set everything directly to zero. Also ... mark for deletion, and it removes the
+   player from my command center, and it marks them for deletion in 30 days ... if they log back in before that 30 days,
+   it still deletes their account, but it shows their name on my command center again. Only if they log back in ...
+   if he decides to never come back, then I don't want to see his name ever again."
+   - Reset account (a profile's More menu): one change, {k:'wipe'}, and their game starts over like a new player's the
+     next time it's open (game 1.24.5+). Their galaxy as it was goes to Players › Deleted for 30 days first, so it can be
+     given back if it was a mistake.
+   - Mark for deletion (More menu): ccdel/{uid} = {uid, at, until, by, name}. From then on they're nowhere in the
+     Command Center: not in Players, Support, Banned, Names, Reports, Deleted or the leaderboards' lists. In 30 days
+     (the first time the Command Center is open after that) their data is deleted for good: their save and purchase
+     records, name, scores, mail, support chat, switches and changes. A ban stays (so a banned player stays banned).
+     If they open the game before then, they show up again, marked, with the day it happens: still deleted then,
+     unless you take the mark off (their profile → More → Don't delete). Players → Marked lists them all.
+   - Needs the rules from the game kit (ccdel, and the developer deleting a save) published.
+   ===================================================================== */
+const DEL_KEEP=30*DAY;S.ccdel={};S.p3.purged=[];LBL.ccdel='players marked for deletion';
+LOAD.ccdel=async()=>{const r=await DB.query('ccdel',{limit:500});const M={};for(const x of r)M[x.id]=Object.assign({},x.data||{});
+  // have they been back since? (their save moved after the mark)
+  await Promise.all(Object.keys(M).map(u=>DB.get('users/'+u).then(d=>{M[u].seen=+(d&&d.updatedAt)||0;M[u].gone=!d},()=>{})));
+  S.ccdel=M;
+  // the ones whose 30 days are up: deleted now
+  const due=Object.keys(M).filter(u=>Date.now()>=(+M[u].until||0));for(const u of due){try{await delPurge(u)}catch(e){console.warn('[cc] delete',u,e);M[u].err=fsErr(e)}}};
+CORE.push('ccdel');
+// (the preview's test hooks)
+setTimeout(()=>{try{if(window.__cc&&DB.mode==='mock'){window.__cc.LOAD=LOAD;window.__cc.load=load}}catch(e){}},2500);
+function delMark(uid){const m=S.ccdel&&S.ccdel[uid];return m||null}
+function delBack(m){if(!m)return false;const x=(S.pl||[]).find(p=>p.uid===m.uid);const seen=Math.max(+m.seen||0,x?+x.at||0:0);return seen>(+m.at||0)+120e3}
+// hidden: marked and not back since
+function delHid(uid){const m=delMark(uid);return !!m&&!delBack(m)}
+function delDate(m){return new Date(+m.until||0).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
+// everything they left behind, deleted for good (their ban stays)
+async function delPurge(uid){const ops=[];const del=p=>ops.push({op:'delete',path:p});
+  const [pur,mail,supm,adm,dn]=await Promise.all([DB.query('users/'+uid+'/purchases',{limit:400}).catch(()=>[]),DB.query('mail/'+uid+'/m',{limit:400}).catch(()=>[]),DB.query('sup/'+uid+'/m',{limit:400}).catch(()=>[]),DB.query('adm/'+uid+'/ops',{limit:400}).catch(()=>[]),DB.get('dn/'+uid).catch(()=>null)]);
+  pur.forEach(x=>del('users/'+uid+'/purchases/'+x.id));mail.forEach(x=>del('mail/'+uid+'/m/'+x.id));supm.forEach(x=>del('sup/'+uid+'/m/'+x.id));adm.forEach(x=>del('adm/'+uid+'/ops/'+x.id));
+  if(dn&&dn.key){const c=await DB.get('names/'+dn.key).catch(()=>null);if(c&&c.uid===uid)del('names/'+dn.key)}
+  ['users/'+uid,'dn/'+uid,'lb/'+uid,'lbw_'+weekId()+'/'+uid,'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid,'sup/'+uid,'supmute/'+uid,'offu/'+uid,'devs/'+uid,'lbhide/'+uid].forEach(del);
+  for(let i=0;i<ops.length;i+=400)await DB.batch(ops.slice(i,i+400));
+  const m=S.ccdel[uid]||{};await DB.del('ccdel/'+uid);delete S.ccdel[uid];S.p3.purged.push(m.name||shortUid(uid));
+  if(S.pl)S.pl=S.pl.filter(x=>x.uid!==uid);if(S.prof&&S.prof.uid===uid)S.prof=null}
+// the Command Center shows none of them while hidden: the lists are filtered while a page is drawn
+{const r0=render;render=function(){const keep={pl:S.pl,sup:S.sup&&S.sup.rows,bans:S.bans,dn:S.dn,rep:S.rep,trash:S.trash,hid:S.hid};
+  try{if(S.ccdel&&Object.keys(S.ccdel).length){const f=(L,k)=>Array.isArray(L)?L.filter(x=>!delHid(k(x))):L;
+      if(S.ov2.plF!=='del')S.pl=f(S.pl,x=>x.uid);if(S.sup)S.sup.rows=f(S.sup.rows,x=>x.id);S.bans=f(S.bans,x=>x.id);S.dn=f(S.dn,x=>x.id);
+      S.rep=f(S.rep,x=>x.data&&x.data.uid);S.trash=f(S.trash,x=>x.data&&x.data.uid);S.hid=f(S.hid,x=>x.id)}
+    return r0.apply(this,arguments)}
+  finally{S.pl=keep.pl;if(S.sup)S.sup.rows=keep.sup;S.bans=keep.bans;S.dn=keep.dn;S.rep=keep.rep;S.trash=keep.trash;S.hid=keep.hid}}}
+// (a list redrawn on its own, e.g. after typing in the search: the same)
+{const l0=plListHTML;plListHTML=function(){if(S.ov2.plF==='del')return delRows();const keep=S.pl;try{if(S.pl)S.pl=S.pl.filter(x=>!delHid(x.uid));return l0.apply(this,arguments)}finally{S.pl=keep}}}
+{const p0=plCardHTML;plCardHTML=function(){let h=p0.apply(this,arguments);try{const n=Object.keys(S.ccdel||{}).length;if(!n&&S.ov2.plF!=='del')return h;
+    h=h.replace(/(<div class="fbar" id="plFbar"[^>]*>[\s\S]*?)(<\/div>)/,'$1<button class="'+(S.ov2.plF==='del'?'on':'')+'" data-act="plF" data-v="del">Marked for deletion<span class="n">'+n+'</span></button>$2')}catch(e){}return h}}
+function delRows(){const M=S.ccdel||{},U=Object.keys(M).sort((a,b)=>(+M[a].until||0)-(+M[b].until||0));if(!U.length)return '<div class="empty sm">Nobody is marked for deletion.</div>';const cur=S.prof&&S.prof.uid;
+  return '<div class="note" style="margin:0 0 8px">Hidden everywhere else. Their data is deleted for good on the day shown; open one to take the mark off.</div>'+U.map(u=>{const m=M[u],b=delBack(m);
+    return '<button class="plrow p3Row'+(u===cur?' on':'')+'" data-act="profOpen" data-v="'+esc(u)+'">'+p3Av(u,m.name||'?')+'<span class="p3Rt"><span class="pln"><b>'+(m.name?esc(m.name):'<span class="cs">(no name)</span>')+'</b> <span class="chip p3Del">Deleted '+esc(delDate(m))+'</span>'+(b?' <span class="chip p3Ban">Came back</span>':'')+'</span><span class="plm">Marked '+esc(rel(+m.at||0))+(m.err?' · couldn\'t delete yet: '+esc(m.err):'')+'</span></span></button>'}).join('')}
+// the profile: the mark, and the two new things in More
+{const h0=p3ProfHTML;p3ProfHTML=function(){let h=h0.apply(this,arguments);const P=S.prof;if(!P||P.loading)return h;try{const m=delMark(P.uid);
+    if(m){const b=delBack(m);const bar='<div class="p3Alert bad">'+ic('trash')+'<div><b>Marked for deletion</b> '+esc(rel(+m.at||0))+' · their data is deleted for good on <b>'+esc(delDate(m))+'</b>'
+        +'<div class="sub">'+(b?'They came back after you marked them, so they show in the Command Center again. ':'Hidden everywhere else in the Command Center. ')+'Their ban, if any, stays.</div></div><button class="btn sm sec" data-act="delUnmark" data-v="'+esc(P.uid)+'">Don\'t delete</button></div>';
+      h=h.replace('<div class="p3Wal">',bar+'<div class="p3Wal">');h=h.replace(/(<div class="p3Chips">)/,'$1<span class="chip p3Del">Marked for deletion</span>')}
+    // (one button for the whole account, under the balances)
+    if(P.g)h=h.replace('<div class="p3Gl">','<div class="p3Wipe"><button class="p3WB p3WBd" data-act="p3Wipe" data-v="'+esc(P.uid)+'">'+ic('refresh')+'Reset the whole account…</button><span class="sub">'+(verLt(P.g.appVer||(P.doc&&P.doc.version)||'0','1.24.5')?'Sets everything they hold to 0 (a full start-over needs game 1.24.5).':'Starts them over like a new player. Their galaxy is kept 30 days in Deleted.')+'</span></div><div class="p3Gl">');
+    const items=(P.g?'<button data-act="p3Wipe" data-v="'+esc(P.uid)+'">'+ic('refresh')+'Reset account…</button>':'')
+      +(m?'<button data-act="delUnmark" data-v="'+esc(P.uid)+'">'+ic('check')+'Don\'t delete</button>':'<button data-act="delMarkAsk" data-v="'+esc(P.uid)+'">'+ic('trash')+'Mark for deletion…</button>');
+    h=h.replace('<div class="p3Menu">','<div class="p3Menu">'+items)}catch(e){console.error(e)}return h}}
+// the Changes you sent table, and the list of changes, know the reset
+{const o0=opTxt;opTxt=function(d){if(d&&d.k==='wipe')return 'Reset the whole account'+(d.msg?' · “'+d.msg+'”':'');return o0.apply(this,arguments)}}
+{const t0=p3OpsHTML;p3OpsHTML=function(P){return t0.apply(this,arguments).replace(/(Reset the whole account(?:(?!<\/tr>)[\s\S])*?<\/td><td>)<span class="chip st live">Done<\/span> (\d+) → (\d+)/g,'$1<span class="chip st live">Done</span> Lv $2 → Lv $3')}}
+document.addEventListener('input',e=>{const t=e.target;if(!t)return;if(t.id==='p3WipeMsg')S.p3.wipeMsg=t.value;else if(t.id==='p3WipeWhy')S.p3.wipeWhy=t.value});
+async function p3Wipe(uid){const P=S.prof;if(!P||P.uid!==uid||!P.g)return;const v=P.g.appVer||(P.doc&&P.doc.version)||'0';const nm=p3Name(P).t;
+  // game 1.24.5+: a full start-over; older games: everything they hold set to 0 (the changes every 1.21+ game knows)
+  const full=!verLt(v,'1.24.5');S.p3.wipeMsg='';S.p3.wipeWhy='';
+  const inputs='<br><br><input class="inp" id="p3WipeMsg" maxlength="80" placeholder="Note they see (optional), e.g. Your account was reset" style="width:100%" autocomplete="off"><br><br><input class="inp" id="p3WipeWhy" maxlength="200" placeholder="Why (for you only)" style="width:100%" autocomplete="off">';
+  const ok=await ask(full?{title:'Reset '+esc(nm)+'\'s account?',body:'Their game starts over like a new player\'s the next time it\'s open: no planets, no money, no Dark Matter, Star Shards, boosters, relics or License. Their account, name and purchase records stay.<br><br>Their galaxy as it is now goes to <b>Players › Deleted</b> for 30 days, so you can give it back if this was a mistake.'+inputs,ok:'Reset account',danger:true}
+    :{title:'Zero out '+esc(nm)+'\'s account?',body:'The next time their game is open: Cash, Dark Matter, Star Shards, Credits and Crate keys go to 0'+(verLt(v,'1.24.0')?'':', relics in hand go to 0')+', every booster is removed and the Commander License is taken away.<br><br>Their planets, levels and progress stay: a full start-over needs game 1.24.5, and they\'re on '+esc(v)+'.'+inputs,ok:'Zero everything',danger:true});
+  if(!ok)return;const msg=String(S.p3.wipeMsg||'').trim().slice(0,80),note=String(S.p3.wipeWhy||'').trim().slice(0,200);const by=S.user&&S.user.email||'';const t=Date.now();
+  const K=full?[{k:'wipe',mode:'set',n:0}]:[{k:'cash',mode:'set',n:0},{k:'dm',mode:'set',n:0},{k:'sh',mode:'set',n:0},{k:'cr',mode:'set',n:0},{k:'key',mode:'set',n:0}].concat(verLt(v,'1.24.0')?[]:[{k:'rl',mode:'set',n:0}]).concat([{k:'items0',mode:'set',n:0},{k:'lic',mode:'set',n:0}]);
+  const ops=K.map((o,i)=>{const d=Object.assign(o,{at:t+i,by,done:false});if(msg&&i===K.length-1)d.msg=msg;if(note)d.note=note;return {op:'set',path:'adm/'+uid+'/ops/op'+(t+i).toString(36)+Math.random().toString(36).slice(2,6),data:d}});
+  try{await DB.batch(ops);toast(full?'Sent: their game resets the next time it\'s open':'Sent: everything they hold goes to 0 the next time their game is open');S.p3.open.ops=true;await profFetch(uid)}catch(e){toast(fsErr(e),'err')}}
+async function delMarkAsk(uid){const P=S.prof;const nm=P&&P.uid===uid?p3Name(P).t:shortUid(uid);
+  const until=Date.now()+DEL_KEEP;const ok=await ask({title:'Mark '+esc(nm)+' for deletion?',body:'They disappear from the Command Center now (Players, Support, Banned, Names, Reports). On <b>'+esc(new Date(until).toLocaleDateString(undefined,{month:'long',day:'numeric'}))+'</b> their data is deleted for good: their save and purchase records, name, scores, mail, support chat and changes. A ban stays.<br><br>If they open the game before then, they show up here again, still marked. You can take the mark off any time from Players › Marked for deletion.',ok:'Mark for deletion',danger:true});
+  if(!ok)return;const m={uid,at:Date.now(),until,by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)};
+  try{await DB.set('ccdel/'+uid,m);S.ccdel[uid]=Object.assign({},m,{seen:P&&P.doc&&+P.doc.updatedAt||0});S.prof=null;S.mail=null;toast((nm?'“'+nm+'”':'They')+' won\'t show here again unless they come back');render()}catch(e){toast(fsErr(e),'err')}}
+async function delUnmark(uid){const m=delMark(uid);if(!m)return;try{await DB.del('ccdel/'+uid);delete S.ccdel[uid];toast((m.name?'“'+m.name+'”':'They')+' won\'t be deleted');render()}catch(e){toast(fsErr(e),'err')}}
+Object.assign(ACT,{p3Checks:()=>{const P=S.prof;if(!P)return;S.p3.allChecks=S.p3.allChecks===P.uid?null:P.uid;render()},
+  p3Wipe:el=>p3Wipe(el.dataset.v),delMarkAsk:el=>delMarkAsk(el.dataset.v),delUnmark:el=>delUnmark(el.dataset.v)});
+// what was deleted while you were away
+{const l0=load;load=function(keys){return l0.apply(this,arguments).then(r=>{try{if(S.p3.purged.length){const n=S.p3.purged.splice(0);toast('Deleted for good (marked 30 days ago): '+n.join(', '))}}catch(e){}return r})}}
+if(!ICP.trash)ICP.trash='<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>';
+{const st=document.createElement('style');st.textContent=`
+.chip.p3Del{background:rgba(255,92,122,.12);color:#ffb3c1;border:1px dashed rgba(255,92,122,.55)}
+.p3Lnk{margin-top:6px;padding:0;border:0;background:none;color:var(--ac);font:700 13px/1.3 inherit;cursor:pointer}
+.p3Alert>.btn{margin-left:auto;align-self:center;flex:none}
+.p3Wipe{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:-2px}.p3Wipe .p3WB{margin-top:0}.p3Wipe .sub{font-size:12px}
+.p3WBd{color:#ffb3c1;border-color:rgba(255,92,122,.5)}.p3WBd:hover{color:#fff;border-color:var(--rd);background:rgba(255,92,122,.15)}
 `;document.head.appendChild(st)}
 
 /* ---------- boot ---------- */
