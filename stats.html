@@ -4289,6 +4289,114 @@ document.addEventListener('input',e=>{const el=e.target;const k=el&&el.dataset&&
 `;document.head.appendChild(st)})();
 
 /* CCX-SHOP END */
+/* =====================================================================
+   DELETED ACCOUNTS (game 1.24.4) — Players → Deleted
+   trash/{uid}_{ms}: a galaxy a player reset (Settings → Reset game), the account they deleted, or the galaxy they swapped
+   out when they got another one back. Each is kept 30 days so it can come back, then deleted for good: opening this page
+   deletes anything older (and a Firestore TTL policy on expireAt does it automatically, see LIVE_OPS.md).
+   - Players don't see their own copies (Joe, Nov 16: restore on request, e.g. for paying customers who ask Support).
+   - Give back: offers it to any uid (to). Use the same player for a reset, or a deleted player's new account (their uid
+     is on their Support conversation or their profile). It shows up in their Settings as Restore a galaxy.
+   ===================================================================== */
+const TR_KEEP=30*DAY;
+S.trash=[];S.trF='all';S.trTo='';S.trPurged=0;
+LBL.trash='deleted accounts';
+function trSeedMock(){if(DB.mode!=='mock')return Promise.resolve();if(Object.keys(DB.dump()).some(k=>/^trash\//.test(k)))return Promise.resolve();
+  return DB.query('users',{limit:3}).then(r=>{const t=Date.now(),u=r.map(x=>x.id);const sv=JSON.stringify({appVer:'1.24.4',planets:[{}]});
+    const mk=(uid,o)=>DB.set('trash/'+uid+'_'+o.at,Object.assign({uid,ver:'1.24.4',name:'',email:'',anon:false,save:sv,expireAt:new Date(o.at+TR_KEEP)},o));
+    return Promise.all([mk(u[0]||'demoA1',{why:'reset',at:t-3*DAY,lv:21,name:'Nova Falcon'}),mk('delDemoB2c3',{why:'delete',at:t-12*DAY,lv:34,name:'Stardust',email:'player@example.com'}),
+      mk(u[1]||'demoC3',{why:'reset',at:t-26*DAY,lv:9,anon:true}),mk(u[2]||'demoD4',{why:'swap',at:t-5*DAY,lv:15,done:true,doneAt:t-4*DAY,doneBy:u[2]||'demoD4',save:''})])})}
+LOAD.trash=async()=>{await trSeedMock();const r=await DB.query('trash',{order:['at','desc'],limit:500});const t=Date.now();
+  const old=r.filter(x=>t-(+x.data.at||0)>=TR_KEEP);let n=0;for(const x of old){try{await DB.del('trash/'+x.id);n++}catch(e){console.warn('[cc] trash purge',e)}}
+  S.trPurged=n;S.trash=r.filter(x=>old.indexOf(x)<0)};
+NEEDS.trash=['trash'];
+SEC.players.pages.push(['trash','Deleted','trash']);PAGE.trash={sec:'players',n:'Deleted',ic:'trash'};
+function trLeft(at){return Math.max(0,Math.ceil((at+TR_KEEP-Date.now())/DAY))}
+function trWhy(w){return w==='delete'?'Deleted account':w==='swap'?'Swapped out':'Reset'}
+function trRow(x){const d=x.data,left=trLeft(+d.at||0),kb=Math.round(String(d.save||'').length/1024);
+  const st=d.done?'<span class="chip st ended">Got back '+esc(rel(+d.doneAt||0))+'</span>':d.to?'<span class="chip st live">Offered to '+esc(d.to===d.uid?'the same player':d.to)+'</span>':'';
+  return '<div class="prow trRow"><div class="pmain"><div class="pn"><b>'+(d.name?esc(d.name):'<span class="noname">(no name)</span>')+'</b> · Lv '+esc(d.lv||'?')+' <span class="chip st '+(d.why==='delete'?'paused':'sched')+'">'+trWhy(d.why)+'</span> '+st+'</div>'
+    +'<div class="sub">'+esc(rel(+d.at||0))+' · <b>'+left+' day'+(left===1?'':'s')+' left</b> · '+(d.email?esc(d.email):d.anon?'guest':'no email')+' · v'+esc(d.ver||'?')+' · '+kb+' KB</div>'
+    +'<div class="sub" style="font-size:11px;opacity:.75">uid '+esc(d.uid||'')+'</div></div>'
+    +'<div class="facts">'+(d.done?'':'<button class="btn sm" data-act="trGive" data-v="'+esc(x.id)+'">'+ic('gift')+'Give back</button>')
+    +(d.why!=='delete'?'<button class="btn sm sec" data-act="profOpen" data-v="'+esc(d.uid||'')+'">'+ic('user')+'Profile</button>':'')
+    +'<button class="btn sm sec" data-act="trDel" data-v="'+esc(x.id)+'">'+ic('trash')+'Delete now</button></div></div>'}
+VIEWS.trash=()=>{let h=head('Deleted','Galaxies players reset and accounts they deleted, kept 30 days and then deleted for good. Players don\'t see these: the game tells them there\'s no undo. Give back sends one to a player (the same one, or their new account\'s uid from Support); it shows up in their Settings as Restore a galaxy.');
+  const st=secState('trash');if(st)return h+st;
+  const L=S.trash,F=S.trF,cnt={all:L.length,reset:L.filter(x=>x.data.why!=='delete'&&!x.data.done).length,delete:L.filter(x=>x.data.why==='delete'&&!x.data.done).length,done:L.filter(x=>x.data.done).length};
+  const show=L.filter(x=>F==='all'||(F==='done'?x.data.done:(!x.data.done&&(F==='delete'?x.data.why==='delete':x.data.why!=='delete'))));
+  h+='<div class="card"><div class="fbar" role="group" aria-label="Show">'+[['all','All'],['reset','Reset'],['delete','Deleted accounts'],['done','Got back']].map(o=>'<button class="'+(F===o[0]?'on':'')+'" data-act="trF" data-v="'+o[0]+'">'+o[1]+'<span class="n">'+cnt[o[0]]+'</span></button>').join('')+'</div>'
+    +(show.length?show.map(trRow).join(''):'<div class="sub" style="padding:14px 4px">Nothing here. When a player resets or deletes their account, it shows up here for 30 days.</div>')
+    +(S.trPurged?'<div class="sub" style="margin-top:10px">'+S.trPurged+' older than 30 days were deleted for good just now.</div>':'')
+    +'<div class="sub" style="margin-top:10px">Tip: a Firestore TTL policy on <b>trash</b> / <b>expireAt</b> deletes them automatically on day 30, even when this page isn\'t opened.</div></div>';
+  return h};
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='trTo')S.trTo=e.target.value.trim()});
+async function trGive(id){const x=S.trash.find(y=>y.id===id);if(!x)return;const d=x.data;S.trTo=d.why==='delete'?'':d.uid;
+  const ok=await ask({title:'Give back '+(d.name?'“'+d.name+'”':'this galaxy')+' (Lv '+(d.lv||'?')+')?',body:'It shows up in that player\'s game under Settings → Restore a galaxy, where they tap Get it back (the galaxy they\'re playing is kept here too, so nothing is lost). '+(d.why==='delete'?'This account was deleted: paste the uid of their new account (from their Support conversation or their profile).':'Same player by default.')+'<br><br><input class="inp" id="trTo" placeholder="Player uid" value="'+esc(S.trTo)+'" style="width:100%" autocomplete="off">',ok:'Give back'});
+  if(!ok)return;const to=S.trTo;if(!/^[A-Za-z0-9_-]{6,128}$/.test(to)){toast('That is not a uid','err');return}
+  try{await DB.update('trash/'+id,{to,toAt:Date.now(),toBy:S.user&&S.user.email||''});toast('Sent: it\'s in their Settings → Restore a galaxy');await load(['trash']);render()}catch(e){toast(fsErr(e),'err')}}
+async function trDel(id){const x=S.trash.find(y=>y.id===id);if(!x)return;const d=x.data;
+  if(!await ask({title:'Delete it for good?',body:(d.name?'“'+esc(d.name)+'”, ':'')+'Lv '+esc(d.lv||'?')+', '+esc(trWhy(d.why).toLowerCase())+' '+esc(rel(+d.at||0))+'. It can\'t come back after this.',ok:'Delete for good',danger:true}))return;
+  try{await DB.del('trash/'+id);toast('Deleted for good');await load(['trash']);render()}catch(e){toast(fsErr(e),'err')}}
+Object.assign(ACT,{trGive:el=>trGive(el.dataset.v),trDel:el=>trDel(el.dataset.v),trF:el=>{S.trF=el.dataset.v;render()}});
+/* =====================================================================
+   BANS (game 1.24.4). bans/{uid} = {uid, why, at, by, name}. A banned player's game shows a red "You have been banned"
+   screen on start (and at once if they're playing) and can't be played; Firestore refuses their saves, purchases,
+   scores and name. Their galaxy is left as it is, so Unban brings everything back. Publish the bans rules first
+   (firestore.rules in the kit; LIVE_OPS.md).
+   ===================================================================== */
+S.bans=[];S.banWhy='';
+LBL.bans='bans';
+LOAD.bans=async()=>{S.bans=await DB.query('bans',{order:['at','desc'],limit:500})};
+NEEDS.bans=['bans'];
+SEC.players.pages.push(['bans','Banned','userx']);PAGE.bans={sec:'players',n:'Banned',ic:'userx'};
+VIEWS.bans=()=>{let h=head('Banned','Players who can\'t play. Their game shows a red “You have been banned” screen with the reason and their Player ID, and the server refuses their saves, purchases and scores. Nothing of theirs is deleted: Unban and their game comes back at once. Ban someone from their profile.');
+  const st=secState('bans');if(st)return h+st;
+  h+='<div class="card">'+(S.bans.length?S.bans.map(x=>{const d=x.data;return '<div class="prow"><div class="pmain"><div class="pn"><b>'+(d.name?esc(d.name):'<span class="noname">(no name)</span>')+'</b> <span class="chip st paused">Banned</span></div>'
+      +'<div class="sub">'+esc(rel(+d.at||0))+(d.by==='phone'?' · <b>played on a banned phone</b>':d.by?' · by '+esc(d.by):'')+(d.why?' · “'+esc(d.why)+'”':'')+'</div><div class="sub" style="font-size:11px;opacity:.75">uid '+esc(x.id)+'</div></div>'
+      +'<div class="facts"><button class="btn sm sec" data-act="profOpen" data-v="'+esc(x.id)+'">'+ic('user')+'Profile</button><button class="btn sm" data-act="banLift" data-v="'+esc(x.id)+'">'+ic('check')+'Unban</button></div></div>'}).join('')
+    :'<div class="sub" style="padding:14px 4px">Nobody is banned.</div>')+'</div>';
+  h+='<div class="card"><h3>Ban by Player ID</h3><div class="sub">The Player ID is on their ban screen and in their profile (uid).</div><div class="facts" style="margin-top:8px"><input class="inp" id="banUid" placeholder="Player uid" autocomplete="off" style="flex:1;min-width:200px"><button class="btn sm dangerP" data-act="banById">'+ic('userx')+'Ban</button></div></div>';
+  return h};
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='banWhy')S.banWhy=e.target.value});
+async function banGive(uid){uid=String(uid||'').trim();if(!/^[A-Za-z0-9_-]{6,128}$/.test(uid)){toast('That is not a uid','err');return}
+  let nm='';try{nm=hidName(uid)}catch(e){nm=''}S.banWhy='';
+  const ok=await ask({title:'Ban '+(nm?'“'+nm+'”':'this player')+'?',body:'Their game shows a red “You have been banned” screen with the reason below and can\'t be played, now and every time it starts. Their phones are banned too (game 1.24.4 and newer): a new account or a reinstall on them is banned as well. The server refuses their saves, purchases and scores, and they come off the leaderboards. Nothing of theirs is deleted: Unban brings it all back.<br><br><input class="inp" id="banWhy" maxlength="200" placeholder="Reason they see (optional), e.g. Purchases that weren\'t paid for" style="width:100%" autocomplete="off">',ok:'Ban',danger:true});
+  if(!ok)return;const why=String(S.banWhy||'').trim().slice(0,200);
+  // their phones (the codes their game noted on the account: devs/{uid})
+  let ds=[];try{const d=await DB.get('devs/'+uid);ds=(d&&Array.isArray(d.ds)?d.ds:[]).filter(x=>typeof x==='string'&&/^[0-9a-f]{8,64}$/.test(x)).slice(0,5)}catch(e){}
+  const ops=[{op:'set',path:'bans/'+uid,data:{uid,why,at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},
+    ...ds.map(d=>({op:'set',path:'bandev/'+d,data:{uid,why,at:Date.now(),by:S.user&&S.user.email||''}})),
+    {op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid}];
+  try{await DB.batch(ops);toast((nm?'“'+nm+'”':'They')+' can\'t play now');await load(['bans','lb','lbw','hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid);render()}catch(e){toast(fsErr(e),'err')}}
+async function banLift(uid){let nm='';try{nm=hidName(uid)}catch(e){}
+  if(!await ask({title:'Unban '+(nm?'“'+nm+'”':'this player')+'?',body:'Their game comes back at once (it reloads by itself if it\'s open), with everything as it was. They stay off the leaderboards until you put them back from their profile.',ok:'Unban'}))return;
+  try{const cur=await DB.get('bans/'+uid).catch(()=>null);await DB.del('bans/'+uid);
+    // their phones, and any account that was banned for playing on one of them (an account banned only for the phone it
+    // played on frees that phone too: a phone bought second-hand from a banned player, say)
+    try{const ph=await DB.query('bandev',{where:[['uid','==',uid]],limit:50});if(cur&&cur.by==='phone'&&typeof cur.dev==='string'&&!ph.some(x=>x.id===cur.dev))ph.push({id:cur.dev,data:{}});
+      const codes=new Set(ph.map(x=>x.id));
+      const ops=ph.map(x=>({op:'delete',path:'bandev/'+x.id}));
+      if(codes.size){const dep=await DB.query('bans',{where:[['by','==','phone']],limit:500});dep.forEach(x=>{if(x.id!==uid&&codes.has(x.data.dev))ops.push({op:'delete',path:'bans/'+x.id})})}
+      if(ops.length)await DB.batch(ops)}catch(e){console.warn('[cc] unban phones',e)}
+    toast((nm?'“'+nm+'”':'They')+' can play again');await load(['bans']);if(S.prof&&S.prof.uid===uid)profFetch(uid);render()}catch(e){toast(fsErr(e),'err')}}
+Object.assign(ACT,{banGive:el=>banGive(el.dataset.v),banLift:el=>banLift(el.dataset.v),banById:()=>{const i=document.getElementById('banUid');banGive(i&&i.value)}});
+// the profile: whether they're banned, and the button
+{const f0=profFetch;profFetch=async function(uid){const r=await f0.apply(this,arguments);try{const b=await DB.get('bans/'+uid).catch(()=>null);if(S.prof&&S.prof.uid===uid){S.prof.ban=b||null;render()}}catch(e){}return r}}
+{const h0=profHTML;profHTML=function(){let h=h0.apply(this,arguments);try{const P=S.prof;if(!P||P.loading||!P.uid)return h;
+    const btn=P.ban?'<button class="btn sm" data-act="banLift" data-v="'+esc(P.uid)+'">'+ic('check')+'Unban</button>':'<button class="btn sm dangerP" data-act="banGive" data-v="'+esc(P.uid)+'">'+ic('userx')+'Ban</button>';
+    const note=P.ban?'<div class="sub" style="margin-top:6px;color:#fca5a5"><b>Banned</b> '+esc(rel(+P.ban.at||0))+(P.ban.why?' · “'+esc(P.ban.why)+'”':'')+(P.ban.by?' · by '+esc(P.ban.by):'')+'</div>':'';
+    const k=h.indexOf('data-act="lbHide"')>=0?h.indexOf('data-act="lbHide"'):h.indexOf('data-act="lbShow"');
+    if(k>=0){const e=h.indexOf('</button>',k)+9;h=h.slice(0,e)+btn+h.slice(e);const f=h.indexOf('</div>',e);if(note&&f>=0)h=h.slice(0,f+6)+note+h.slice(f+6)}}catch(e){}return h}}
+// Support: a banned player can still write (the ban screen has Message support). Their conversation says so, with Unban.
+NEEDS.support=[...new Set((NEEDS.support||[]).concat(['bans']))];
+function banOf(uid){try{const x=(S.bans||[]).find(b=>b.id===uid);return x?x.data||{}:null}catch(e){return null}}
+{const n0=supName;supName=function(uid){const h=n0.apply(this,arguments);return banOf(uid)?h+' <span class="chip st paused">Banned</span>':h}}
+{const t0=supThreadHTML;supThreadHTML=function(){let h=t0.apply(this,arguments);try{const u=S.sup.open,b=u&&banOf(u);if(!b)return h;
+    const bar='<div class="suBan"><div class="grow"><b>'+ic('userx')+'Banned</b> '+esc(rel(+b.at||0))+(b.why?' · “'+esc(b.why)+'”':'')+(b.by?' · by '+esc(b.by):'')
+      +'<div class="sub">They\'re writing from the ban screen. Their game can\'t be played until you unban them.</div></div><button class="btn sm" data-act="banLift" data-v="'+esc(u)+'">'+ic('check')+'Unban</button></div>';
+    const k=h.indexOf('data-act="supRefresh"');const e=k>=0?h.indexOf('</div></div>',k):-1;if(e>=0)h=h.slice(0,e+12)+bar+h.slice(e+12)}catch(e){}return h}}
+{const st=document.createElement('style');st.textContent='.suBan{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(220,38,38,.12);border:1px solid rgba(248,113,113,.45);color:#fecaca}.suBan b{display:inline-flex;align-items:center;gap:6px;color:#fca5a5}.suBan b svg{width:16px;height:16px}.suBan .sub{margin-top:2px}.suBan .grow{min-width:0;flex:1 1 220px}';document.head.appendChild(st)}
 /* ---------- boot ---------- */
 S.tab=pageFor(location.hash.slice(1)||'home');
 render();
