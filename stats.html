@@ -4142,7 +4142,7 @@ function lvNoCat(){return LVC?'':'<div class="card errc"><b>Couldn\'t load the l
 function lvFmt(v){v=+v;if(!isFinite(v))return String(v);if(Math.abs(v)<1e5)return (Math.round(v*1000)/1000).toLocaleString('en-US');return ccxBig(v)}
 
 /* ---- Switches ---- */
-VIEWS.switches=()=>{const L=S.off.list;let h=head('Switches','Switch off any one thing for every player: a research project, making one item, one machine upgrade, a whole feature or any button. Players see it locked, and a tap says “Not available now”. Games 1.23 and newer, within a minute.',L.length?'<button class="btn sec" data-act="offAllOn">'+ic('play')+'Turn everything back on</button>':'');
+VIEWS.switches=()=>{const L=S.off.list;let h=head('Switches','Switch off any one thing for every player: a research project, making one item, one machine upgrade, a whole feature or any button. Players see it locked, and a tap says “Not available now”. Games 1.23 and newer, within a minute. For one player only: open them in Players → Switches for this player.',L.length?'<button class="btn sec" data-act="offAllOn">'+ic('play')+'Turn everything back on</button>':'');
   const st=secState('off');if(st)return h+st;h+=lvNoCat();
   h+='<section class="card"><div class="ph"><h2>'+ic('shield')+' Switched off now'+(L.length?' <small class="lvCnt">'+L.length+'</small>':'')+'</h2></div>';
   if(!L.length)h+='<p class="sub">Nothing is switched off: every player has the whole game.</p>';
@@ -4397,6 +4397,268 @@ function banOf(uid){try{const x=(S.bans||[]).find(b=>b.id===uid);return x?x.data
       +'<div class="sub">They\'re writing from the ban screen. Their game can\'t be played until you unban them.</div></div><button class="btn sm" data-act="banLift" data-v="'+esc(u)+'">'+ic('check')+'Unban</button></div>';
     const k=h.indexOf('data-act="supRefresh"');const e=k>=0?h.indexOf('</div></div>',k):-1;if(e>=0)h=h.slice(0,e+12)+bar+h.slice(e+12)}catch(e){}return h}}
 {const st=document.createElement('style');st.textContent='.suBan{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(220,38,38,.12);border:1px solid rgba(248,113,113,.45);color:#fecaca}.suBan b{display:inline-flex;align-items:center;gap:6px;color:#fca5a5}.suBan b svg{width:16px;height:16px}.suBan .sub{margin-top:2px}.suBan .grow{min-width:0;flex:1 1 220px}';document.head.appendChild(st)}
+/* =====================================================================
+   PLAYERS 3 (Nov 17, 2026): ONE PLAYERS PAGE
+   Joe: "right now we have a players tab, a profile tab ... it should all be one, and that's what I intended from the
+   start ... I want to be able to look at the player's Dark Matter account and then click set change ... the logs ...
+   like a drop down, like you can open it up to view the logs, but I don't want it to take up the whole page ... in the
+   player's profile, switch on or off features ... and only apply to this player."
+   - Stats › Players (who plays, day by day) and Players › Profiles are one page, Players: the day's numbers in a strip
+     on top (the chart folds out of it), the players on the left, the one you open on the right. On a phone the player
+     you open fills the screen, with a way back to the list.
+   - A profile: who they are and anything wrong first (status, checks), then their wallet, each balance with its own
+     Change (give, take or set, right there), then everything else folded shut, each fold saying in one line what's in
+     it: switches for this player, changes you've sent, history, Shop and purchases, videos, rewards, where their Dark
+     Matter comes from, boosters, days played, tags.
+   - Switches for one player: the same switches as Live ops › Switches (research, making an item, upgrades, features,
+     any button), for this player only. offu/{uid} = {list, up, by}; their game (1.24.4+) applies it within moments.
+   ===================================================================== */
+S.p3={open:{},chg:null,chart:false,sw:{grp:'features',q:'',lim:30,code:''},busy:false};
+// the nav: one Players page (the old Stats › Players address opens it, with the chart out)
+{const st=SEC.stats.pages,i=st.findIndex(p=>p[0]==='stats');if(i>=0)st.splice(i,1);delete PAGE.stats;
+  const pl=SEC.players.pages,j=pl.findIndex(p=>p[0]==='profiles');if(j>=0)pl[j]=['profiles','Players','users'];PAGE.profiles={sec:'players',n:'Players',ic:'users'}}
+{const p0=pageFor;pageFor=function(t){if(t==='stats'){S.p3.chart=true;try{if(location.hash==='#stats')history.replaceState(null,'','#profiles')}catch(e){}return 'profiles'}return p0.apply(this,arguments)}}
+NEEDS.profiles=[...new Set((NEEDS.profiles||[]).concat(['plays','bans']))];
+function p3Col(uid,name){try{const c=tagNameColor(uid);if(c)return c}catch(e){}const P=['#38e1c6','#5aa9ff','#b46bff','#ff6fb5','#ffd166','#4ade80','#fb923c'];let h=0;for(const ch of String(uid||name||'?'))h=(h*31+ch.charCodeAt(0))>>>0;return P[h%P.length]}
+function p3Av(uid,name,big){const n=String(name||'?').replace(/[^A-Za-z0-9]/g,'')||'?';return '<span class="p3Av'+(big?'':' sm')+'" style="--c:'+p3Col(uid,name)+'" aria-hidden="true">'+esc(n[0].toUpperCase())+'</span>'}
+function p3Name(P){const g=P.g||{};const n=P.dn&&P.dn.name;if(n)return {t:n,cs:false};return {t:g.lb?csName(g.lb.c1,g.lb.c2,g.lb.n)||'Commander':'Commander',cs:true}}
+
+/* ---------- the page ---------- */
+VIEWS.profiles=()=>{let h=head('Players','Everyone with a cloud save. Open a player to see their account, change it, switch things off for them alone, or read what they did.');
+  const has=!!(S.prof||S.mail);h+='<div class="p3Page'+(has?' has':'')+'">'+p3StripHTML();
+  let list=plCardHTML().replace(/<div class="ph"><div><h2>Player profiles<\/h2><div class="sub">[\s\S]*?<\/div><\/div><\/div>/,'');
+  h+='<div class="p3Wrap'+(has?' has':'')+'"><aside class="p3L" aria-label="Players">'+list+'</aside><div class="p3R">'
+    +(S.mail?mailPanelHTML():'')+(S.prof?p3ProfHTML():S.mail?'':'<div class="card p3Empty">'+ic('users')+'<b>Pick a player</b><span class="sub">Their account, switches and history open here.</span></div>')+'</div></div></div>';
+  return h};
+// the day's numbers (what Stats › Players showed), with the chart folded out on request
+function p3StripHTML(){if(!S.loaded.plays||S.errs.plays)return '';let c;try{c=compute();S.chart=c}catch(e){return ''}
+  const t=(k,v,d)=>'<div class="p3S"><div class="k">'+esc(k)+'</div><div class="v">'+v+'</div><div class="d">'+esc(d)+'</div></div>';
+  let h='<div class="p3Strip">'+t('Playing today',nf(c.todayP),'unique players, UTC day')+t('New players',nf(c.newp),'in the last '+S.range+' days')
+    +t('Came back next day',pct(c.r1,c.c1),c.r1+' of '+c.c1)+t('Still playing after a week',pct(c.r7,c.c7),c.r7+' of '+c.c7)+t('Minutes a day',c.avg,'per player')
+    +'<button class="p3S p3SBtn" data-act="p3Chart" aria-expanded="'+S.p3.chart+'">'+ic('chart')+'<span>'+(S.p3.chart?'Hide the chart':'Players per day')+'</span></button></div>';
+  if(S.p3.chart){S.cw=chartWidth();h+='<div class="card p3Chart"><div class="ph"><div><h2>Players per day</h2><div class="sub">Tap a column for details. Days are UTC days: a new one starts at '+esc(resetTime())+' your time.</div></div>'+rangeHTML()+'</div><div class="chart" id="chart">'+columns(c)+'<div class="tip" id="tip" hidden></div></div></div>'}
+  return h}
+{const r0=render;render=function(){const r=r0.apply(this,arguments);try{if(S.tab==='profiles'&&S.p3.chart&&$('#chart'))bindChart()}catch(e){}return r}}
+
+/* ---------- the list: who is open, banned players, and a Banned filter ---------- */
+{const p0=plCardHTML;plCardHTML=function(){let h=p0.apply(this,arguments);try{const n=(S.bans||[]).length;
+    h=h.replace(/(<div class="fbar" id="plFbar"[^>]*>[\s\S]*?)(<\/div>)/,'$1<button class="'+(S.ov2.plF==='ban'?'on':'')+'" data-act="plF" data-v="ban">Banned<span class="n">'+(S.loaded.bans?n:'…')+'</span></button>$2')}catch(e){}return h}}
+{const l0=plListHTML;plListHTML=function(){if(S.ov2.plF==='ban')return p3BanRows();return p3Rows(l0.apply(this,arguments))}}
+function p3Rows(h){const by={};(S.pl||[]).forEach(x=>{by[x.uid]=x});const cur=S.prof&&S.prof.uid;
+  return h.replace(/<button class="plrow" data-act="profOpen" data-v="([^"]+)">([\s\S]*?)<\/button>/g,(m,u,inner)=>{const x=by[u]||{};const nm=x.name||x.cs||'Guest';
+    if(banOf(u))inner=inner.replace('</b>','</b> <span class="chip p3Ban">Banned</span>');
+    return '<button class="plrow p3Row'+(u===cur?' on':'')+'" data-act="profOpen" data-v="'+u+'"'+(u===cur?' aria-current="true"':'')+'>'+p3Av(u,nm)+'<span class="p3Rt">'+inner+'</span></button>'})}
+function p3BanRows(){if(!S.loaded.bans)return '<div class="load">Loading…</div>';const L=S.bans||[];if(!L.length)return '<div class="empty sm">Nobody is banned.</div>';const cur=S.prof&&S.prof.uid;
+  return L.map(x=>{const d=x.data||{},u=x.id;return '<button class="plrow p3Row'+(u===cur?' on':'')+'" data-act="profOpen" data-v="'+esc(u)+'">'+p3Av(u,d.name||'?')+'<span class="p3Rt"><span class="pln"><b>'+(d.name?esc(d.name):'<span class="cs">(no name)</span>')+'</b> <span class="chip p3Ban">Banned</span></span><span class="plm">'+esc(rel(+d.at||0))+(d.by==='phone'?' · banned phone':'')+(d.why?' · “'+esc(String(d.why).slice(0,60))+'”':'')+'</span></span></button>'}).join('')}
+
+/* ---------- a profile ---------- */
+// the old profile's sections, taken apart so each can go in its own fold
+function p3Parts(){const t=document.createElement('template');t.innerHTML=profHTML();const sec={};
+  for(const s of t.content.querySelectorAll('section.pcard')){const h=s.querySelector(':scope>h3');if(!h)continue;const k=h.firstChild&&h.textContent.replace(h.querySelector('small')?h.querySelector('small').textContent:'','').trim();h.remove();sec[k]=s}
+  return {sec,tag:t.content.querySelector('#tagProf')}}
+function p3Body(s){return s?s.innerHTML:''}
+function p3Fold(k,icon,title,digest,body,open0){const open=k in S.p3.open?S.p3.open[k]:!!open0;
+  return '<details class="p3F" data-k="'+k+'"'+(open?' open':'')+'><summary><span class="p3Fi">'+ic(icon)+'</span><b>'+esc(title)+'</b><span class="p3Fd">'+digest+'</span><span class="p3Fc" aria-hidden="true">'+ic('down')+'</span></summary><div class="p3Fb">'+body+'</div></details>'}
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('p3F')){S.p3.open[d.dataset.k]=d.open;if(d.open&&d.dataset.k==='sw'&&!LVC)lvCat().then(()=>{if(S.tab==='profiles')render()})}},true);
+function p3ProfHTML(){const P=S.prof;if(!P)return '';
+  const back='<button class="btn sm sec p3Back" data-act="profClose">'+ic('back')+'All players</button>';
+  if(P.loading)return '<div class="p3">'+back+'<div class="card p3Top"><div class="load">Loading the save…</div></div></div>';
+  const g=P.g;if(!g)return '<div class="p3">'+back+'<div class="card p3Top"><div class="p3Id">'+p3Av(P.uid,'?',true)+'<div><div class="p3Nm">No cloud save</div><div class="p3Meta mono">'+esc(P.uid)+'</div></div></div>'+(P.errs?'<div class="warn" style="display:block">'+esc(P.errs[0])+'</div>':'')+p3ActHTML(P,'')+'</div></div>';
+  const pf=g.pf||{},c=pf.c||{},st=g.stats||{},doc=P.doc||{};const N=p3Name(P);const v=g.appVer||doc.version||'?';const old=verLt(v,'1.21.0');const flags=profFlags(g);
+  const parts=p3Parts(),sec=parts.sec;const lic=!!(g.bought&&g.bought.lic);
+  // who they are
+  let chips='';if(P.ban)chips+='<span class="chip p3Ban">Banned</span>';if(lic)chips+='<span class="chip lic">Commander License</span>';if(flags.length)chips+='<span class="chip flag">'+flags.length+' flag'+(flags.length>1?'s':'')+'</span>';
+  if(P.hid)chips+='<span class="chip p3Mu">Off the leaderboards</span>';if(v!=='?'&&verLt(v,GAME_VER))chips+='<span class="chip p3Mu">Old version</span>';
+  try{const w=S.tags.who[P.uid];if(w&&w.t)for(const id of w.t){const d=S.tags.defs.find(x=>x.id===id);if(d)chips+='<span class="chip p3Tg" style="--tc:'+esc(d.c)+'">'+esc(d.n)+'</span>'}}catch(e){}
+  let h='<div class="p3">'+back+'<div class="card p3Top"><div class="p3Id">'+p3Av(P.uid,N.t,true)+'<div class="p3IdT"><div class="p3Nm">'+(N.cs?'<span class="cs">'+esc(N.t)+'</span>':esc(N.t))+'</div><div class="p3Chips">'+chips+'</div>'
+    +'<div class="p3Meta">Lv '+lvOf(g.cmd&&g.cmd.xp)+' · v'+esc(v)+' · last save '+esc(doc.updatedAt?rel(doc.updatedAt):'—')+' · started '+esc(g.createdAt?new Date(g.createdAt).toLocaleDateString():'—')+'</div>'
+    +'<div class="p3Meta mono p3Uid">'+esc(P.uid)+' <button class="ib xs" data-act="copyUid" data-v="'+esc(P.uid)+'" aria-label="Copy uid">'+ic('copy')+'</button></div></div></div>'+p3ActHTML(P,N.cs?'':N.t)+'</div>';
+  if(P.ban)h+='<div class="p3Alert bad">'+ic('userx')+'<div><b>Banned '+esc(rel(+P.ban.at||0))+'</b>'+(P.ban.why?' · “'+esc(P.ban.why)+'”':'')+(P.ban.by?' · by '+esc(P.ban.by==='phone'?'their banned phone':P.ban.by):'')+'<div class="sub">Their game shows the ban screen; the server refuses their saves, purchases and scores.</div></div></div>';
+  if(P.hid)h+='<div class="p3Alert">'+ic('trophy')+'<div>'+(P.hid.why==='ver'?'Off the leaderboards until they update ('+(P.hid.v?'was on '+esc(P.hid.v)+', ':'')+'since '+esc(rel(P.hid.at||0))+')':'Kept off the leaderboards since '+esc(rel(P.hid.at||0)))+'</div></div>';
+  if(old)h+='<div class="p3Alert">'+ic('alert')+'<div>They\'re on '+esc(v)+'. Shop, video and gift history start with 1.21, and changes you send apply once they update.</div></div>';
+  if(flags.length)h+='<div class="p3Alert bad">'+ic('flag')+'<div><b>Checks</b><ul class="flags">'+flags.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul></div></div>';
+  // the wallet: every balance with its own Change
+  const inv=g.inv||{};const W=[['cash','Cash','$'+fmtBig(g.cash||0)],['dm','Dark Matter',nf(g.dm||0)],['sh','Star Shards',nf(g.shards||0)],['cr','Credits',nf(g.credits||0)],['key','Crate keys',nf(inv.crate_key||0)]];
+  if(g.relic)W.push(['rl','Relics',nf(g.relic.n||0),nf(g.relic.got||0)+' ever']);W.push(['lic','Commander License',lic?'Owned':'No',lic?'':'not bought']);
+  h+='<div class="p3Wal">'+W.map(w=>'<div class="p3W'+(S.p3.chg===w[0]?' on':'')+'"><span class="k">'+esc(w[1])+'</span><span class="v">'+w[2]+'</span>'+(w[3]?'<span class="d">'+esc(w[3])+'</span>':'')+'<button class="p3WB" data-act="p3Chg" data-v="'+w[0]+'">'+ic('edit')+(w[0]==='lic'?(lic?'Take away':'Give'):'Change')+'</button></div>').join('')+'</div>';
+  if(S.p3.chg)h+=p3ChgHTML(P);
+  // at a glance
+  const plays=(S.plays||[]).filter(p=>pf.iid&&p.iid===pf.iid);const gl=[['Played',hrs(st.playSec)],['Sessions',nf(pf.sess&&pf.sess.n||0)],['Days (last 35)',nf(plays.length)],['Planets',nf((g.planets||[]).length)],['Star systems',nf((g.maxSys||0)+1)],['Galaxy value','$'+fmtBig(doc.gv||0)],['Income','$'+fmtBig(doc.income||0)+'/s'],['Purchases',nf(st.purchases||0)],['Videos',nf(st.ads||0)]];
+  h+='<div class="p3Gl">'+gl.map(x=>'<span><small>'+esc(x[0])+'</small><b>'+esc(x[1])+'</b></span>').join('')+'</div>';
+  // folded: everything else
+  const swL=(P.offu&&P.offu.list)||[];
+  h+=p3Fold('sw','shield','Switches for this player',swL.length?'<span class="p3Hot">'+swL.length+' off</span>':'Everything on',p3SwHTML(P,v),swL.length>0);
+  const ops=P.ops||[],wait=ops.filter(o=>!o.data.done).length;
+  h+=p3Fold('ops','edit','Changes you sent',ops.length?nf(ops.length)+' sent'+(wait?' · <span class="p3Hot">'+wait+' waiting</span>':''):'None yet',p3OpsHTML(P),wait>0);
+  const ev=(pf.ev||[]),ses=ev.filter(e=>e[1]==='open').length;
+  h+=p3Fold('hist','list','History',ev.length?nf(ev.filter(e=>e[1]!=='open'&&e[1]!=='bg').length)+' actions · '+nf(ses)+' session'+(ses===1?'':'s'):'Nothing yet',p3Body(sec['History']));
+  h+=p3Fold('shop','tag','Shop and purchases','Opened '+nf(c.shop||0)+'× · '+nf(st.purchases||0)+' purchase'+((st.purchases||0)===1?'':'s')+(P.pur.length?' · '+P.pur.length+' receipt'+(P.pur.length>1?'s':''):''),p3Body(sec['Shop'])+'<h4 class="p3H4">Purchases</h4>'+p3Body(sec['Purchases']));
+  const today=g.adDay||{};h+=p3Fold('ads','chart','Videos',nf(st.ads||0)+' watched · '+nf(today.n||0)+' today',p3Body(sec['Videos']));
+  const cal=g.cal||{};h+=p3Fold('gifts','gift','Rewards and gifts','Daily day '+((cal.step||0)+1)+' of 7 · '+nf(c.gifts||0)+' message gift'+((c.gifts||0)===1?'':'s')+' · '+nf(c.mail||0)+' mail',p3Body(sec['Rewards and gifts']));
+  const dmIn=sumO(pf.dm&&pf.dm.in),dmOut=sumO(pf.dm&&pf.dm.out);h+=p3Fold('src','chart','Where their Dark Matter comes from',dmIn||dmOut?'In '+fmtBig(dmIn)+' · out '+fmtBig(dmOut):'Nothing recorded',p3Body(sec['Where Dark Matter comes from']));
+  const bk=Object.keys(g.items||{}).filter(k=>g.items[k]>0);h+=p3Fold('boost','gift','Boosters',bk.length?bk.length+' kind'+(bk.length>1?'s':'')+' in stock · '+nf(st.used||0)+' used':'None in stock',p3Body(sec['Boosters'])+'<div class="facts" style="margin-top:10px"><button class="btn sm sec" data-act="p3Chg" data-v="item">'+ic('gift')+'Give a booster</button><button class="btn sm sec" data-act="p3Chg" data-v="items0">Remove all boosters</button></div>');
+  h+=p3Fold('days','chart','Days played',nf(plays.length)+' in the last 35',p3Body(sec['Play'])||'');
+  let tg='No tags';try{const w=S.tags.who[P.uid];if(w&&w.t&&w.t.length)tg=w.t.map(id=>{const d=S.tags.defs.find(x=>x.id===id);return d?esc(d.n):''}).filter(Boolean).join(', ')}catch(e){}
+  h+=p3Fold('tags','tag','Tags and name colour',tg,parts.tag?parts.tag.innerHTML.replace(/<div class="ph">[\s\S]*?<\/div><\/div>/,''):'');
+  return h+'</div>'}
+function p3ActHTML(P,name){const u=esc(P.uid);
+  let h='<div class="p3Act"><button class="btn sm" data-act="supWith" data-v="'+u+'">'+ic('chat')+'Message</button><button class="btn sm sec" data-act="pMsg" data-v="'+u+'">'+ic('gift')+'Gift</button><button class="btn sm sec" data-act="profMail">'+ic('msg')+'Mail</button>'
+    +(P.ban?'<button class="btn sm sec" data-act="banLift" data-v="'+u+'">'+ic('check')+'Unban</button>':'<button class="btn sm dangerP" data-act="banGive" data-v="'+u+'">'+ic('userx')+'Ban</button>');
+  h+='<details class="p3More"><summary class="btn sm sec" aria-label="More">'+ic('more')+'More</summary><div class="p3Menu">'
+    +(name?'<button data-act="pReset" data-v="'+u+'">'+ic('userx')+'Reset name</button>':'')
+    +(P.hid?'<button data-act="lbShow" data-v="'+u+'">'+ic('trophy')+'Put back on the leaderboards</button>':'<button data-act="lbHide" data-v="'+u+'">'+ic('userx')+'Take off the leaderboards</button>')
+    +'<button data-act="profRefresh">'+ic('refresh')+'Refresh</button><button data-act="copyUid" data-v="'+u+'">'+ic('copy')+'Copy Player ID</button></div></details>';
+  return h+'</div>'}
+document.addEventListener('click',e=>{const m=document.querySelector('.p3More[open]');if(!m)return;if(e.target.closest&&e.target.closest('.p3More')===m&&!e.target.closest('.p3Menu button'))return;m.open=false},true);
+// a change, right under the wallet: what (from the tile), how (give, take, set), how much, a note, why
+const P3_NOW={cash:g=>'$'+fmtBig(g.cash||0),dm:g=>nf(g.dm||0),sh:g=>nf(g.shards||0),cr:g=>nf(g.credits||0),key:g=>nf((g.inv||{}).crate_key||0),rl:g=>nf(g.relic&&g.relic.n||0)};
+function p3ChgHTML(P){const F=S.pfF,k=F.k;const g=P.g||{};const isN=k!=='items0'&&k!=='lic';
+  const what=k==='item'?'A booster':k==='items0'?'Remove all boosters':k==='lic'?'Commander License':PK[k];
+  let h='<div class="p3Chg" id="pfOps"><div class="p3ChgH"><b>'+ic('edit')+(k==='items0'||k==='lic'?esc(what):'Change '+esc(what))+'</b>'+(P3_NOW[k]?'<span class="sub">now '+P3_NOW[k](g)+'</span>':'')+'<button class="ib" data-act="p3ChgX" aria-label="Close">'+ic('x')+'</button></div>';
+  if(k!=='items0'&&k!=='lic')h+='<div class="p3Seg" role="group" aria-label="How">'+[['add','Give'],['take','Take'],['set','Set to']].map(o=>'<button class="'+(F.mode===o[0]?'on':'')+'" aria-pressed="'+(F.mode===o[0])+'" data-act="p3Mode" data-v="'+o[0]+'">'+o[1]+'</button>').join('')+'</div>';
+  h+='<div class="row">';
+  if(isN)h+=fld('pf-n','Amount <small>e.g. 500, 2.5M, 1e12</small>','<input class="inp" id="pf-n" data-f="pfN" inputmode="decimal" value="'+esc(F.n)+'" autocomplete="off">','pfN');
+  if(k==='item')h+=fld('pf-id','Booster','<select class="inp" id="pf-id" data-f="pfId">'+BOOST_ALL.map(b=>'<option value="'+b.id+'"'+(F.id===b.id?' selected':'')+'>'+esc(b.n)+'</option>').join('')+'</select>','pfId');
+  h+='</div>'+fld('pf-msg','Note to the player <small>optional, shown in the game</small>','<input class="inp" id="pf-msg" data-f="pfMsg" maxlength="80" value="'+esc(F.msg)+'" placeholder="e.g. Sorry about your purchase. Here it is!">','pfMsg')
+    +fld('pf-note','Why <small>for you only</small>','<input class="inp" id="pf-note" data-f="pfNote" maxlength="200" value="'+esc(F.note)+'" placeholder="e.g. bought the Galaxy Bundle, never received it">','pfNote');
+  h+='<div class="p3ChgF"><p class="hint" id="pfPv">'+esc(pfPreview(F))+'</p><button class="btn sec sm" data-act="p3ChgX">Cancel</button><button class="btn" data-act="p3Send" id="pfSendBtn">Send change</button></div>'
+    +'<p class="note" style="margin:6px 0 0">Their game applies it the next time it\'s open (game 1.21+) and saves it; it shows under Changes you sent with the before and after.</p>';
+  return h+'</div>'}
+function p3OpsHTML(P){const ops=P.ops||[];if(!ops.length)return '<div class="sub">Nothing sent yet. Use Change on a balance above.</div>';
+  return '<div class="tw"><table class="tbl"><thead><tr><th>Sent</th><th>Change</th><th>Status</th><th></th></tr></thead><tbody>'+ops.map(o=>{const d=o.data;const r=d.res||{};
+    return '<tr><td>'+esc(rel(d.at||0))+'</td><td>'+esc(opTxt(d))+(d.note?'<div class="sub">'+esc(d.note)+'</div>':'')+'</td><td>'+(d.done?(r.error?'<span class="chip flag">'+esc(r.error)+'</span>':'<span class="chip st live">Done</span> '+(r.before!=null?esc(fmtBig(r.before))+' → '+esc(fmtBig(r.after)):'')):'<span class="chip st sched">Waiting for the game</span>')+'</td><td>'+(d.done?'':'<button class="btn sm sec" data-act="pfCancel" data-v="'+esc(o.id)+'">Cancel</button>')+'</td></tr>'}).join('')+'</tbody></table></div>'}
+
+/* ---------- switches for one player ---------- */
+{const f0=profFetch;profFetch=async function(uid){const r=await f0.apply(this,arguments);try{const d=await DB.get('offu/'+uid).catch(()=>null);if(S.prof&&S.prof.uid===uid){S.prof.offu={list:lvOff(d&&d.list).list,up:d&&d.up||0};render()}}catch(e){}return r}}
+function p3SwHTML(P,v){const L=(P.offu&&P.offu.list)||[];const W=S.p3.sw;let h='';
+  if(v&&v!=='?'&&verLt(v,'1.24.4'))h+='<div class="p3Alert">'+ic('alert')+'<div>They\'re on '+esc(v)+': switches for one player work from game 1.24.4. Set them now and they apply once they update.</div></div>';
+  h+='<p class="sub" style="margin:10px 0">Switch something off for this player only, to see if it\'s how they\'re doing something. They see it locked, and a tap says “Not available now”. Nothing they have is taken away.</p>';
+  if(L.length)h+='<div class="lvOffL">'+L.map(sw=>'<div class="lvOffR"><span class="lvLk">'+ic('shield')+'</span><div class="grow"><b>'+esc(sw.n)+'</b><span class="sub">'+esc(offWhat(sw))+'</span></div><button class="btn sm" data-act="p3SwOn" data-v="'+esc(sw.id)+'"'+(S.p3.busy?' disabled':'')+'>Turn back on</button></div>').join('')+'</div>'
+    +(L.length>1?'<div class="facts" style="margin:8px 0 4px"><button class="btn sm sec" data-act="p3SwAllOn">Turn everything back on</button></div>':'');
+  if(!LVC)return h+'<div class="load">Loading the list of everything in the game…</div>';
+  const G=LVC.off;h+='<div class="lvChips p3SwG" role="group" aria-label="What">'+G.map(g=>'<button class="cxChip" data-act="p3SwGrp" data-v="'+g.g+'" aria-pressed="'+(W.grp===g.g)+'">'+esc(g.n)+'</button>').join('')+'<button class="cxChip" data-act="p3SwGrp" data-v="btn" aria-pressed="'+(W.grp==='btn')+'">Any button</button></div>';
+  if(W.grp==='btn'){const r=W.code.trim()?lvBtn(W.code.trim()):null;
+    h+='<p class="sub lvD">Any button by its code (from the game\'s Test panel → Button finder). Leave out "a", "b" or "c" to switch it off wherever it is.</p><textarea class="inp mono lvCode" data-p3="code" rows="2" spellcheck="false" placeholder=\'{"act":"spin","a":"gem"}\' aria-label="Button code">'+esc(W.code)+'</textarea><div id="p3SwBtn">'+p3SwBtnChk(r)+'</div>';return h}
+  const g=G.find(x=>x.g===W.grp)||G[0];
+  h+='<label class="cxSearch lvSearch">'+ic('search')+'<input class="inp" data-p3="q" placeholder="Search '+esc(g.n.toLowerCase())+'" value="'+esc(W.q)+'" aria-label="Search"></label><div id="p3SwRes">'+p3SwRes(g,L)+'</div>';
+  return h}
+function p3SwRes(g,L){const W=S.p3.sw,q=W.q.trim().toLowerCase();const on=new Set(L.map(x=>x.id));
+  const R=g.items.filter(x=>!q||x.n.toLowerCase().includes(q)||x.id.toLowerCase().includes(q)||(x.sub||'').toLowerCase().includes(q));if(!R.length)return '<div class="empty sm">Nothing here.</div>';
+  return '<div class="lvPick">'+R.slice(0,W.lim).map(x=>{const off=on.has(x.id);return '<div class="lvPickR'+(off?' off':'')+'"><div class="grow"><b>'+esc(x.n)+'</b>'+(x.sub?'<span class="sub">'+esc(x.sub)+'</span>':'')+'</div>'
+    +(off?'<span class="chip lvOffC">Off</span><button class="btn sm sec" data-act="p3SwOn" data-v="'+esc(x.id)+'">Turn on</button>':'<button class="btn sm" data-act="p3SwOff" data-v="'+esc(x.id)+'"'+(S.p3.busy?' disabled':'')+'>Switch off</button>')+'</div>'}).join('')+'</div>'
+    +(R.length>W.lim?'<button class="btn sec sm cxMore" data-act="p3SwMore">Show more ('+(R.length-W.lim)+')</button>':'')}
+function p3SwBtnChk(r){if(!r)return '';if(r.err)return '<div class="cxErr">'+ic('alert')+'<span>'+esc(r.err)+'</span></div>';return '<div class="btnrow"><button class="btn sm" data-act="p3SwBtn"'+(S.p3.busy?' disabled':'')+'>'+ic('shield')+'Switch off for them: '+esc(r.sw.n)+'</button></div>'}
+async function p3SwWrite(fn,msg){const P=S.prof;if(!P||S.p3.busy)return false;const uid=P.uid,path='offu/'+uid;S.p3.busy=true;render();
+  try{const ops=await DB.tx([path],cur=>{const c=lvOff(cur[path]&&cur[path].list);const list=fn(c.list.slice());return [{op:'set',path,data:{list,up:Date.now(),by:S.user&&S.user.email||''}}]});
+    if(S.prof&&S.prof.uid===uid)S.prof.offu={list:lvOff(ops[0].data.list).list,up:Date.now()};toast(msg);return true}
+  catch(e){toast(fsErr(e),'err');return false}finally{S.p3.busy=false;render()}}
+document.addEventListener('input',e=>{const t=e.target;if(!t||!t.dataset||!t.dataset.p3)return;const W=S.p3.sw;
+  if(t.dataset.p3==='q'){W.q=t.value;W.lim=30;const g=LVC&&LVC.off.find(x=>x.g===W.grp);const r=$('#p3SwRes');if(g&&r)r.innerHTML=p3SwRes(g,(S.prof&&S.prof.offu&&S.prof.offu.list)||[])}
+  else if(t.dataset.p3==='code'){W.code=t.value;const r=$('#p3SwBtn');if(r)r.innerHTML=p3SwBtnChk(W.code.trim()?lvBtn(W.code.trim()):null)}});
+Object.assign(ACT,{
+  p3Chart:()=>{S.p3.chart=!S.p3.chart;render()},
+  p3Chg:el=>{const k=el.dataset.v;const P=S.prof;const lic=!!(P&&P.g&&P.g.bought&&P.g.bought.lic);
+    if(S.p3.chg===k&&S.pfF.k===k){S.p3.chg=null;render();return}
+    S.pfF={k,mode:k==='lic'?(lic?'take':'add'):k==='items0'?'set':'add',n:k==='items0'?'0':'',id:(S.pfF&&S.pfF.id)||'mine_rare',msg:'',note:''};S.p3.chg=k;render();
+    const i=$('#pf-n')||$('#pfSendBtn');if(i)try{i.focus({preventScroll:true});$('#pfOps').scrollIntoView({block:'nearest'})}catch(e){}},
+  p3ChgX:()=>{S.p3.chg=null;render()},
+  p3Mode:el=>{S.pfF.mode=el.dataset.v;render();const i=$('#pf-n');if(i)try{i.focus({preventScroll:true});const n=i.value.length;i.setSelectionRange(n,n)}catch(e){}},
+  p3Send:async()=>{const before=S.prof&&S.prof.ops&&S.prof.ops.length;await pfSend();const P=S.prof;if(P&&!P.loading&&(P.ops||[]).length!==before){S.p3.chg=null;S.p3.open.ops=true;render()}},
+  p3SwGrp:el=>{S.p3.sw.grp=el.dataset.v;S.p3.sw.q='';S.p3.sw.lim=30;render()},
+  p3SwMore:()=>{S.p3.sw.lim+=30;const g=LVC.off.find(x=>x.g===S.p3.sw.grp);const r=$('#p3SwRes');if(g&&r)r.innerHTML=p3SwRes(g,(S.prof.offu&&S.prof.offu.list)||[])},
+  p3SwOff:async el=>{const x=offFind(el.dataset.v);if(!x)return;const nm=S.prof?p3Name(S.prof).t:'them';await p3SwWrite(L=>L.filter(s=>s.id!==x.id).concat([{id:x.id,n:x.n,r:x.r}]),x.n+' is off for '+nm)},
+  p3SwBtn:async()=>{const r=lvBtn(S.p3.sw.code.trim());if(!r||r.err)return;if(await p3SwWrite(L=>L.filter(s=>s.id!==r.sw.id).concat([r.sw]),'Switched off for this player')){S.p3.sw.code='';render()}},
+  p3SwOn:async el=>{const id=el.dataset.v;const sw=((S.prof&&S.prof.offu&&S.prof.offu.list)||[]).find(s=>s.id===id);await p3SwWrite(L=>L.filter(s=>s.id!==id),(sw?sw.n:'It')+' is back on for this player')},
+  p3SwAllOn:async()=>{await p3SwWrite(()=>[],'Everything is back on for this player')}});
+// opening another player starts with nothing being changed
+{const o0=profOpen;profOpen=async function(uid){if(!S.prof||S.prof.uid!==uid){S.p3.chg=null}return o0.apply(this,arguments)}}
+ACT.profOpen=el=>profOpen(el.dataset.v);
+if(!ICP.down)ICP.down='<path d="m6 9 6 6 6-6"/>';if(!ICP.back)ICP.back='<path d="m15 18-6-6 6-6"/>';if(!ICP.more)ICP.more='<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>';if(!ICP.edit)ICP.edit='<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>';
+{const st=document.createElement('style');st.textContent=`
+.p3Strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.p3S{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.p3S .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mu2);font-weight:800}
+.p3S .v{font:800 22px/1.15 var(--display);margin-top:3px}
+.p3S .d{font-size:12px;color:var(--mu);margin-top:1px}
+.p3SBtn{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ac);font-weight:800;cursor:pointer;font-family:inherit;font-size:13.5px}
+.p3SBtn:hover{border-color:var(--ac)}
+.p3SBtn svg{width:18px;height:18px}
+.p3Chart{margin-bottom:14px}
+.p3Wrap{display:grid;grid-template-columns:minmax(290px,350px) minmax(0,1fr);gap:16px;align-items:start}
+.p3L{position:sticky;top:calc(var(--hh) + 14px);min-width:0}
+.p3L #plCard{margin:0;display:flex;flex-direction:column;max-height:calc(100vh - var(--hh) - 30px);padding:12px}
+.p3L #plCard .tools{display:flex;gap:8px;flex-wrap:wrap}.p3L #plCard .tools .srch{flex:1 1 160px;min-width:0}.p3L #plCard .tools select{flex:1 1 120px}
+.p3L .fbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-12px;padding-right:12px}.p3L .fbar::-webkit-scrollbar{display:none}.p3L .fbar button{flex:none}
+.p3L #plList{overflow:auto;margin:6px -6px 0;padding:0 6px;min-height:0}
+.p3Row{flex-direction:row!important;align-items:center!important;gap:10px!important;padding:9px 8px!important;border-radius:10px;border-top:0!important;margin:1px 0}
+.p3Row:hover{background:rgba(255,255,255,.04)}
+.p3Row.on{background:rgba(56,225,198,.12);box-shadow:inset 3px 0 0 var(--ac)}
+.p3Rt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.p3Rt .plm{font-size:12px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p3Av{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:15px;font:800 22px/1 var(--display);color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.p3Av.sm{width:34px;height:34px;border-radius:10px;font-size:15px}
+.chip.p3Ban{background:rgba(255,92,122,.18);color:#ffa3b4;border:1px solid rgba(255,92,122,.5)}
+.chip.p3Mu{background:rgba(255,255,255,.07);color:var(--mu);border:1px solid var(--line2)}
+.chip.p3Tg{background:color-mix(in srgb,var(--tc) 16%,transparent);color:var(--tc);border:1px solid color-mix(in srgb,var(--tc) 45%,transparent)}
+.p3R{min-width:0}
+.p3Empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:48px 16px;text-align:center;color:var(--mu)}
+.p3Empty svg{width:34px;height:34px;opacity:.6}.p3Empty b{color:var(--tx);font-size:16px}
+.p3{display:flex;flex-direction:column;gap:12px;min-width:0}
+.p3Back{display:none;align-self:flex-start}
+.p3Top{margin:0;padding:18px;background:radial-gradient(120% 140% at 0% 0%,rgba(56,225,198,.12),transparent 55%),var(--card)}
+.p3Id{display:flex;gap:14px;align-items:flex-start;min-width:0}
+.p3IdT{min-width:0;flex:1}
+.p3Nm{font:800 24px/1.15 var(--display);overflow-wrap:anywhere}
+.p3Chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.p3Chips .chip{margin:0}
+.p3Meta{color:var(--mu);font-size:13px;margin-top:4px}
+.p3Uid{font-size:11.5px;opacity:.8;display:flex;align-items:center;gap:4px;overflow-wrap:anywhere}
+.p3Act{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+.p3More{position:relative}
+.p3More>summary{list-style:none;cursor:pointer}.p3More>summary::-webkit-details-marker{display:none}
+.p3Menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:240px;background:var(--card3);border:1px solid var(--line2);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.p3Menu button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:0;background:none;color:var(--tx);font:inherit;font-size:14px;border-radius:8px;text-align:left;cursor:pointer}
+.p3Menu button:hover{background:rgba(255,255,255,.07)}.p3Menu svg{width:16px;height:16px;opacity:.8}
+@media (max-width:560px){.p3Menu{left:0;right:auto}}
+.p3Alert{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:rgba(255,209,102,.07);border:1px solid rgba(255,209,102,.3);font-size:13.5px}
+.p3Alert>svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--yl)}
+.p3Alert.bad{background:rgba(255,92,122,.08);border-color:rgba(255,92,122,.4)}.p3Alert.bad>svg{color:var(--rd)}
+.p3Alert .flags{margin:4px 0 0;padding-left:18px}.p3Alert .sub{margin-top:2px}
+.p3Wal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.p3W{position:relative;display:flex;flex-direction:column;gap:2px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;min-width:0}
+.p3W .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mu2);font-weight:800}
+.p3W .v{font:800 20px/1.2 var(--display);overflow-wrap:anywhere}
+.p3W .d{font-size:11.5px;color:var(--mu)}
+.p3WB{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--tx);font:700 12.5px/1 inherit;cursor:pointer}
+.p3WB svg{width:13px;height:13px}.p3WB:hover{border-color:var(--ac);color:var(--ac)}
+.p3W.on{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+.p3Chg{background:var(--card2);border:1px solid color-mix(in srgb,var(--ac) 55%,transparent);border-radius:14px;padding:14px}
+.p3ChgH{display:flex;align-items:center;gap:10px;margin-bottom:10px}.p3ChgH b{display:inline-flex;align-items:center;gap:7px;font-size:15px}.p3ChgH b svg{width:16px;height:16px;color:var(--ac)}.p3ChgH .ib{margin-left:auto}
+.p3Seg{display:inline-flex;gap:3px;padding:3px;border-radius:11px;background:var(--inp);border:1px solid var(--line2);margin-bottom:10px}
+.p3Seg button{padding:7px 14px;border-radius:8px;border:0;background:none;color:var(--mu);font:700 13.5px/1 inherit;cursor:pointer}
+.p3Seg button.on{background:var(--ac);color:var(--acd)}
+.p3Chg .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.p3ChgF{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:6px}.p3ChgF .hint{flex:1 0 100%;margin:0 0 4px;color:var(--tx);font-weight:600}
+.p3Gl{display:flex;flex-wrap:wrap;gap:8px}
+.p3Gl span{display:flex;flex-direction:column;padding:7px 11px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--line);min-width:0}
+.p3Gl small{font-size:10.5px;color:var(--mu2);text-transform:uppercase;letter-spacing:.07em;font-weight:800}.p3Gl b{font-size:14px}
+.p3F{background:var(--card);border:1px solid var(--line);border-radius:12px;min-width:0}
+.p3F>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;min-width:0;border-radius:12px}
+.p3F>summary::-webkit-details-marker{display:none}
+.p3F>summary:hover{background:rgba(255,255,255,.025)}
+.p3F>summary b{white-space:nowrap}
+.p3Fi{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.05);flex:none}.p3Fi svg{width:15px;height:15px;color:var(--mu)}
+.p3Fd{margin-left:auto;color:var(--mu);font-size:13px;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p3Fc{flex:none;display:grid;place-items:center;transition:transform .15s}.p3Fc svg{width:16px;height:16px;color:var(--mu2)}
+.p3F[open]>summary .p3Fc{transform:rotate(180deg)}
+.p3F[open]>summary{border-bottom:1px solid var(--line);border-radius:12px 12px 0 0}
+.p3Fb{padding:12px 14px 14px;min-width:0}
+.p3Fb .fbar{margin-top:0}
+.p3Hot{color:var(--yl);font-weight:800}
+.p3H4{margin:14px 0 6px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.07em}
+@media (max-width:1099px){.p3Page.has .p3Strip,.p3Page.has .p3Chart{display:none}.p3Wrap{grid-template-columns:minmax(0,1fr)}.p3Wrap.has .p3L{display:none}.p3L{position:static}.p3L #plCard{max-height:none}.p3Wrap:not(.has) .p3R{display:none}.p3Back{display:inline-flex}}
+@media (max-width:560px){.p3Top{padding:14px}.p3Av{width:44px;height:44px;font-size:19px;border-radius:13px}.p3Nm{font-size:20px}.p3Wal{grid-template-columns:repeat(2,minmax(0,1fr))}.p3Strip{display:flex;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}.p3Strip::-webkit-scrollbar{display:none}.p3Strip>*{flex:0 0 136px}.p3Fd{max-width:46%}.p3F>summary b{white-space:normal}}
+`;document.head.appendChild(st)}
+
 /* ---------- boot ---------- */
 S.tab=pageFor(location.hash.slice(1)||'home');
 render();
