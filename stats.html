@@ -1152,6 +1152,12 @@ function lvNum(kind,v){const K=LV_KIND[kind];if(!K||v===''||v==null||typeof v===
 // the economy document's changes, checked: {o, bad:[where]}
 function lvEcon(o){const out={},bad=[];if(!o||typeof o!=='object'||Array.isArray(o))return {o:out,bad};let n=0;
   for(const p of Object.keys(o)){if(++n>6000)break;const k=lvKindOf(p);const v=k?lvNum(k,o[p]):null;if(v==null)bad.push(p);else out[p]=v}return {o:out,bad}}
+// a switch (or a set of economy numbers) for some game versions only (1.24.5): {op: lt|le|eq|ge|gt, ver: "1.24.4"}.
+// Games before 1.24.5 don't read it: the Command Center puts what they must apply where they read it, and the rest
+// where they don't (config/off list2, config/econ vo).
+function lvVer(v){if(!v||typeof v!=='object')return null;const op=String(v.op||'');const ver=String(v.ver||'');if(!/^(lt|le|eq|ge|gt)$/.test(op)||!/^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ver))return null;return {op,ver}}
+function lvVerCmp(a,b){const x=String(a).split('.').map(n=>+n||0),y=String(b).split('.').map(n=>+n||0);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)<(y[i]||0)?-1:1}return 0}
+function lvVerOk(v,ver){v=lvVer(v);if(!v)return true;const c=lvVerCmp(ver,v.ver);return v.op==='lt'?c<0:v.op==='le'?c<=0:v.op==='eq'?c===0:v.op==='ge'?c>=0:c>0}
 // the switches, checked: {list, bad: how many were left out}
 const LV_ACT=/^[a-zA-Z][a-zA-Z0-9_]{1,29}$/;
 function lvRule(r){if(!r||typeof r!=='object')return null;const s=v=>typeof v==='string'||typeof v==='number'?String(v).slice(0,60):null;const id=v=>{v=s(v);return v&&/^[a-zA-Z0-9_.:-]{1,60}$/.test(v)?v:null};
@@ -1162,7 +1168,7 @@ function lvRule(r){if(!r||typeof r!=='object')return null;const s=v=>typeof v===
 function lvOff(list){const out=[];let bad=0;if(!Array.isArray(list))return {list:out,bad};const seen=new Set();
   for(const x of list.slice(0,300)){if(!x||typeof x!=='object'){bad++;continue}const id=typeof x.id==='string'&&/^[a-zA-Z0-9_.:|-]{1,80}$/.test(x.id)?x.id:null;
     const r=(Array.isArray(x.r)?x.r:[]).slice(0,16).map(lvRule);if(!id||!r.length||r.some(v=>!v)||seen.has(id)){bad++;continue}seen.add(id);
-    out.push({id,n:typeof x.n==='string'?x.n.slice(0,80):id,r})}
+    const sw={id,n:typeof x.n==='string'?x.n.slice(0,80):id,r};const v=lvVer(x.v);if(v)sw.v=v;out.push(sw)}
   return {list:out,bad}}
 // "any button" switches: the code the game's button finder shows ({"act":"mUp","a":"refined","c":"spd"}), as a switch
 function lvBtn(code){let o=code;if(typeof code==='string'){try{o=JSON.parse(code)}catch(e){return {err:'That isn\'t a button code: it looks like {"act":"spin","a":"gem"}'}}}
@@ -4760,6 +4766,161 @@ if(!ICP.trash)ICP.trash='<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 
 .p3Alert>.btn{margin-left:auto;align-self:center;flex:none}
 .p3Wipe{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:-2px}.p3Wipe .p3WB{margin-top:0}.p3Wipe .sub{font-size:12px}
 .p3WBd{color:#ffb3c1;border-color:rgba(255,92,122,.5)}.p3WBd:hover{color:#fff;border-color:var(--rd);background:rgba(255,92,122,.15)}
+`;document.head.appendChild(st)}
+
+/* =====================================================================
+   VERSIONS AND ONE PLAYER (Nov 17, 2026 · game 1.24.5)
+   Joe: "going forward, just make it so I can disable it based off of version ... if the hacker does get around the
+   forced update, I can disable all their buttons via the cloud ... just make it so I can just choose in the switches,
+   global switches ... And also same for the economy. I can change the economy for a specific player. And then I can
+   also change the do it based off of version."
+   - Switches (Live ops › Switches, and a player's Switches for this player): "Who gets it": every version, a version
+     and older, older than a version, only one version, or a version and newer. The switch carries the range
+     (v = {op, ver}); games 1.24.5 and newer check their own version against it. Games before 1.24.5 can't: a switch
+     whose range takes in all of them goes where they read it (list), so they apply it too; one that leaves any of them
+     out goes where they don't (list2).
+   - Economy (Live ops › Economy): "Whose numbers": everyone (config/econ.o, every game 1.23+), some versions
+     (config/econ.vo, games 1.24.5+), or one player (econu/{uid}, game 1.24.5+; from their profile). For a player:
+     everyone's numbers, then their version's, then their own.
+   ===================================================================== */
+const VS_OLD='1.24.4';// the newest game that can't check a switch's version (it reads list only, and applies all of it)
+const VS_OPS=[['all','Every version'],['le','This version and older'],['lt','Older than this version'],['eq','Only this version'],['ge','This version and newer']];
+function vsVers(){const set=new Set(['1.24.5',VS_OLD]);try{for(const p of S.plays||[]){const v=String(p.v||'').replace(/^v/,'');if(/^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(v))set.add(v)}}catch(e){}return [...set].sort((a,b)=>lvVerCmp(b,a))}
+function vsTxt(v){v=lvVer(v);if(!v)return 'Every version';return {le:v.ver+' and older',lt:'older than '+v.ver,eq:'only '+v.ver,ge:v.ver+' and newer',gt:'newer than '+v.ver}[v.op]}
+// does the range take in every game that can't check it (so it must go where they read it)?
+function vsAllOld(v){v=lvVer(v);if(!v)return true;const c=lvVerCmp(v.ver,VS_OLD);return v.op==='lt'?c>0:v.op==='le'?c>=0:false}
+// …or some of them (they'd ignore it: worth saying)
+function vsSomeOld(v){v=lvVer(v);if(!v)return true;const c=lvVerCmp(v.ver,VS_OLD);return v.op==='lt'||v.op==='le'||(v.op==='eq'&&c<=0)||((v.op==='ge'||v.op==='gt')&&c<=0)}
+function vsState(k){const o=k==='g'?S.off:k==='p'?S.p3.sw:S.ec;if(!o.vs)o.vs={op:'all',ver:VS_OLD};return o.vs}
+function vsOf(k){const s=vsState(k);return s.op==='all'?null:lvVer(s)}
+function vsHint(k){const v=vsOf(k);const what=k==='e'?'these numbers':'it';if(!v)return 'Every player gets '+what+(k==='e'?' (games 1.23 and newer).':'.');
+  if(k==='e')return 'Only players on '+vsTxt(v)+' get '+what+'. Games before 1.24.5 don\'t check versions and ignore numbers set for some versions.';
+  if(vsAllOld(v))return 'Only players on '+vsTxt(v)+'. Games before 1.24.5 can\'t check versions, and they\'re all in this range, so they get it too.';
+  return 'Only players on '+vsTxt(v)+'.'+(vsSomeOld(v)?' Games before 1.24.5 can\'t check versions: they won\'t get it.':'')}
+function vsHTML(k,label){const s=vsState(k);const vers=vsVers();if(s.op!=='all'&&vers.indexOf(s.ver)<0)vers.unshift(s.ver);
+  return '<div class="vsRow" data-vsk="'+k+'"><span class="vsL">'+esc(label||'Who gets it')+'</span><select class="inp vsOp" data-vs="'+k+'" data-vsf="op" aria-label="Which versions">'+VS_OPS.map(o=>'<option value="'+o[0]+'"'+(s.op===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'
+    +'<select class="inp vsVer" data-vs="'+k+'" data-vsf="ver" aria-label="Version"'+(s.op==='all'?' hidden':'')+'>'+vers.map(v=>'<option value="'+esc(v)+'"'+(s.ver===v?' selected':'')+'>'+esc(v)+'</option>').join('')+'</select><p class="vsH">'+esc(vsHint(k))+'</p></div>'}
+document.addEventListener('change',e=>{const t=e.target;const k=t&&t.dataset&&t.dataset.vs;if(!k)return;const s=vsState(k);s[t.dataset.vsf]=t.value;
+  if(k==='e'){ecTgtFromVs();render();return}
+  const row=t.closest('.vsRow');if(row){const ver=row.querySelector('.vsVer');if(ver)ver.hidden=s.op==='all';const h=row.querySelector('.vsH');if(h)h.textContent=vsHint(k)}});
+// a switch for a range: its own id (the same thing can be off for several ranges), the range, the same rules
+const VS_SUF=/\|V(lt|le|eq|ge|gt)[0-9.]+$/;
+function vsBase(id){return String(id).replace(VS_SUF,'')}
+function vsSwitch(sw,v){if(!v)return {id:sw.id,n:sw.n,r:sw.r};return {id:vsBase(sw.id).slice(0,64)+'|V'+v.op+v.ver,n:sw.n,r:sw.r,v}}
+function vsSplit(L){const list=[],list2=[];for(const sw of L)(vsAllOld(sw.v)?list:list2).push(sw);return {list,list2}}
+function vsChip(sw){return sw.v?' <span class="chip vsC">'+esc(vsTxt(sw.v))+'</span>':''}
+/* ---------- everyone's switches ---------- */
+LOAD.off=()=>Promise.all([DB.get('config/off'),lvCat()]).then(([d])=>{const a=lvOff(d&&d.list),b=lvOff(d&&d.list2);S.off.list=a.list.concat(b.list);S.off.bad=a.bad+b.bad});
+offWrite=async function(fn,msg){if(S.off.busy)return false;S.off.busy=true;render();
+  try{const ops=await DB.tx(['config/off'],cur=>{const d=cur['config/off']||{};const L=lvOff(d.list).list.concat(lvOff(d.list2).list);const P=vsSplit(fn(L));return [{op:'set',path:'config/off',data:{list:P.list,list2:P.list2,up:Date.now()}}]});
+    S.off.list=lvOff(ops[0].data.list).list.concat(lvOff(ops[0].data.list2).list);S.off.busy=false;toast(msg);return true}
+  catch(e){S.off.busy=false;toast(fsErr(e),'err');return false}finally{render()}};
+{const o0=ACT.offSet;ACT.offSet=async el=>{const x=offFind(el.dataset.v);if(!x)return;const v=vsOf('g');if(!v)return o0(el);
+  if(!await ask({title:'Switch off '+esc(x.n)+' for '+esc(vsTxt(v))+'?',body:esc(vsHint('g'))+' They see it locked within a minute, and a tap says “Not available now”.',ok:'Switch it off'}))return;
+  const sw=vsSwitch(x,v);await offWrite(L=>L.filter(s=>s.id!==sw.id).concat([sw]),x.n+' is switched off for '+vsTxt(v))}}
+{const o0=ACT.offBtn;ACT.offBtn=async()=>{const v=vsOf('g');if(!v)return o0();const r=lvBtn(S.off.code.trim());if(!r||r.err)return;
+  if(!await ask({title:'Switch off this button for '+esc(vsTxt(v))+'?',body:esc(r.sw.n)+'. '+esc(vsHint('g')),ok:'Switch it off'}))return;
+  const sw=vsSwitch(r.sw,v);if(await offWrite(L=>L.filter(s=>s.id!==sw.id).concat([sw]),'Switched off for '+vsTxt(v))){S.off.code='';render()}}}
+// the page: who gets it, above what to switch off; each switch says which versions
+{const v0=VIEWS.switches;VIEWS.switches=()=>{let h=v0();
+  h=h.replace('<h2>'+ic('plus')+' Switch something off</h2></div>','<h2>'+ic('plus')+' Switch something off</h2></div>'+vsHTML('g'));
+  return h.replace(/(<div class="lvOffR">[\s\S]*?<b>)([^<]*)(<\/b>)([\s\S]*?data-act="offOn" data-v=")([^"]+)"/g,(m,a,n,b,c,id)=>{const sw=S.off.list.find(s=>s.id===id);return a+n+b+(sw?vsChip(sw):'')+c+id+'"'})}}
+// in the list of things to switch off: "Off" when it's off for the versions picked (or every version)
+{const r0=offResHTML;offResHTML=function(g){const v=vsOf('g'),keep=S.off.list;try{S.off.list=keep.filter(s=>!s.v||(v&&s.v.op===v.op&&s.v.ver===v.ver)).map(s=>s.v?Object.assign({},s,{id:vsBase(s.id)}):s);
+    let h=r0.apply(this,arguments);
+    // "Turn on" there turns on the one for these versions
+    if(v)h=h.replace(/data-act="offOn" data-v="([^"]+)"/g,(m,id)=>'data-act="offOn" data-v="'+esc(vsSwitch({id:id},v).id)+'"');return h}finally{S.off.list=keep}}}
+/* ---------- one player's switches ---------- */
+p3SwWrite=async function(fn,msg){const P=S.prof;if(!P||S.p3.busy)return false;const uid=P.uid,path='offu/'+uid;S.p3.busy=true;render();
+  try{const ops=await DB.tx([path],cur=>{const d=cur[path]||{};const L=lvOff(d.list).list.concat(lvOff(d.list2).list);const X=vsSplit(fn(L));return [{op:'set',path,data:{list:X.list,list2:X.list2,up:Date.now(),by:S.user&&S.user.email||''}}]});
+    if(S.prof&&S.prof.uid===uid)S.prof.offu={list:lvOff(ops[0].data.list).list.concat(lvOff(ops[0].data.list2).list),up:Date.now()};toast(msg);return true}
+  catch(e){toast(fsErr(e),'err');return false}finally{S.p3.busy=false;render()}};
+{const f0=profFetch;profFetch=async function(uid){const r=await f0.apply(this,arguments);try{const [d,e]=await Promise.all([DB.get('offu/'+uid).catch(()=>null),DB.get('econu/'+uid).catch(()=>null)]);
+    if(S.prof&&S.prof.uid===uid){S.prof.offu={list:lvOff(d&&d.list).list.concat(lvOff(d&&d.list2).list),up:d&&d.up||0};S.prof.econu=lvEcon(e&&e.o).o;render()}}catch(x){}return r}}
+Object.assign(ACT,{
+  p3SwOff:async el=>{const x=offFind(el.dataset.v);if(!x)return;const v=vsOf('p');const nm=S.prof?p3Name(S.prof).t:'them';const sw=vsSwitch(x,v);
+    await p3SwWrite(L=>L.filter(s=>s.id!==sw.id).concat([sw]),x.n+' is off for '+nm+(v?' on '+vsTxt(v):''))},
+  p3SwBtn:async()=>{const r=lvBtn(S.p3.sw.code.trim());if(!r||r.err)return;const v=vsOf('p');const sw=vsSwitch(r.sw,v);
+    if(await p3SwWrite(L=>L.filter(s=>s.id!==sw.id).concat([sw]),'Switched off for this player'+(v?' on '+vsTxt(v):''))){S.p3.sw.code='';render()}}});
+// (redrawn with the versions: the list on top shows every switch with its versions; the picker, the ones for the versions picked)
+p3SwHTML=function(P,v){const L=(P.offu&&P.offu.list)||[];const W=S.p3.sw;let h='';
+  if(v&&v!=='?'&&verLt(v,'1.24.4'))h+='<div class="p3Alert">'+ic('alert')+'<div>They\'re on '+esc(v)+': switches for one player work from game 1.24.4 (and for some versions only, from 1.24.5). Set them now and they apply once they update.</div></div>';
+  h+='<p class="sub" style="margin:10px 0">Switch something off for this player only, to see if it\'s how they\'re doing something. They see it locked, and a tap says “Not available now”. Nothing they have is taken away.</p>';
+  if(L.length)h+='<div class="lvOffL">'+L.map(sw=>'<div class="lvOffR"><span class="lvLk">'+ic('shield')+'</span><div class="grow"><b>'+esc(sw.n)+'</b>'+vsChip(sw)+'<span class="sub">'+esc(offWhat(sw))+'</span></div><button class="btn sm" data-act="p3SwOn" data-v="'+esc(sw.id)+'"'+(S.p3.busy?' disabled':'')+'>Turn back on</button></div>').join('')+'</div>'
+    +(L.length>1?'<div class="facts" style="margin:8px 0 4px"><button class="btn sm sec" data-act="p3SwAllOn">Turn everything back on</button></div>':'');
+  if(!LVC)return h+'<div class="load">Loading the list of everything in the game…</div>';
+  h+=vsHTML('p');const G=LVC.off;
+  h+='<div class="lvChips p3SwG" role="group" aria-label="What">'+G.map(g=>'<button class="cxChip" data-act="p3SwGrp" data-v="'+g.g+'" aria-pressed="'+(W.grp===g.g)+'">'+esc(g.n)+'</button>').join('')+'<button class="cxChip" data-act="p3SwGrp" data-v="btn" aria-pressed="'+(W.grp==='btn')+'">Any button</button></div>';
+  if(W.grp==='btn'){const r=W.code.trim()?lvBtn(W.code.trim()):null;
+    return h+'<p class="sub lvD">Any button by its code (from the game\'s Test panel → Button finder). Leave out "a", "b" or "c" to switch it off wherever it is.</p><textarea class="inp mono lvCode" data-p3="code" rows="2" spellcheck="false" placeholder=\'{"act":"spin","a":"gem"}\' aria-label="Button code">'+esc(W.code)+'</textarea><div id="p3SwBtn">'+p3SwBtnChk(r)+'</div>'}
+  const g=G.find(x=>x.g===W.grp)||G[0];
+  return h+'<label class="cxSearch lvSearch">'+ic('search')+'<input class="inp" data-p3="q" placeholder="Search '+esc(g.n.toLowerCase())+'" value="'+esc(W.q)+'" aria-label="Search"></label><div id="p3SwRes">'+p3SwRes(g,L)+'</div>'};
+p3SwRes=function(g,L){const W=S.p3.sw,q=W.q.trim().toLowerCase(),v=vsOf('p');
+  const off=new Set(L.filter(s=>v?(s.v&&s.v.op===v.op&&s.v.ver===v.ver):!s.v).map(s=>vsBase(s.id)));
+  const R=g.items.filter(x=>!q||x.n.toLowerCase().includes(q)||x.id.toLowerCase().includes(q)||(x.sub||'').toLowerCase().includes(q));if(!R.length)return '<div class="empty sm">Nothing here.</div>';
+  return '<div class="lvPick">'+R.slice(0,W.lim).map(x=>{const o=off.has(x.id);return '<div class="lvPickR'+(o?' off':'')+'"><div class="grow"><b>'+esc(x.n)+'</b>'+(x.sub?'<span class="sub">'+esc(x.sub)+'</span>':'')+'</div>'
+    +(o?'<span class="chip lvOffC">Off</span><button class="btn sm sec" data-act="p3SwOn" data-v="'+esc(vsSwitch(x,v).id)+'">Turn on</button>':'<button class="btn sm" data-act="p3SwOff" data-v="'+esc(x.id)+'"'+(S.p3.busy?' disabled':'')+'>Switch off</button>')+'</div>'}).join('')+'</div>'
+    +(R.length>W.lim?'<button class="btn sec sm cxMore" data-act="p3SwMore">Show more ('+(R.length-W.lim)+')</button>':'')};
+// a switch's kind, for one that's off for some versions too
+{const w0=offWhat;offWhat=function(sw){return w0({id:vsBase(sw.id)})}}
+/* ---------- the economy: everyone, some versions, or one player ---------- */
+S.ec.base={};S.ec.vo=[];S.ec.tgt=null;
+LOAD.econ=()=>Promise.all([DB.get('config/econ'),lvCat()]).then(([d])=>{const c=lvEcon(d&&d.o);S.ec.base=c.o;S.ec.bad=c.bad;S.ec.vo=ecVoClean(d&&d.vo);return ecTgtLoad()});
+function ecVoClean(vo){const out=[];for(const x of (Array.isArray(vo)?vo:[]).slice(0,40)){const v=lvVer(x);if(v)out.push(Object.assign(v,{o:lvEcon(x&&x.o).o}))}return out}
+function ecTgtKey(){const t=S.ec.tgt;return !t?'all':t.k==='u'?'u:'+t.uid:'v:'+t.op+':'+t.ver}
+// what's shown and changed: the target's own numbers
+async function ecTgtLoad(){const t=S.ec.tgt;if(!t){S.ec.o=Object.assign({},S.ec.base);return}
+  if(t.k==='v'){const x=S.ec.vo.find(e=>e.op===t.op&&e.ver===t.ver);S.ec.o=Object.assign({},x?x.o:{});return}
+  const d=await DB.get('econu/'+t.uid).catch(()=>null);if(S.ec.tgt===t)S.ec.o=lvEcon(d&&d.o).o}
+function ecTgtFromVs(){const s=vsState('e');S.ec.draft={};S.ec.tgt=s.op==='all'?null:{k:'v',op:s.op,ver:s.ver};ecTgtLoad()}
+ecWrite=async function(fn,msg){if(S.ec.busy)return false;S.ec.busy=true;ecPaintBar();const t=S.ec.tgt;
+  try{if(t&&t.k==='u'){const path='econu/'+t.uid;const ops=await DB.tx([path],cur=>{const o=fn(Object.assign({},lvEcon(cur[path]&&cur[path].o).o));return [{op:'set',path,data:{o,up:Date.now(),by:S.user&&S.user.email||''}}]});S.ec.o=lvEcon(ops[0].data.o).o}
+    else{const ops=await DB.tx(['config/econ'],cur=>{const d=cur['config/econ']||{};const base=lvEcon(d.o).o;let vo=ecVoClean(d.vo);
+        if(!t)return [{op:'set',path:'config/econ',data:{o:fn(Object.assign({},base)),vo,up:Date.now()}}];
+        const i=vo.findIndex(e=>e.op===t.op&&e.ver===t.ver);const o=fn(Object.assign({},i>=0?vo[i].o:{}));
+        if(i>=0)vo.splice(i,1);if(Object.keys(o).length)vo.push({op:t.op,ver:t.ver,o});return [{op:'set',path:'config/econ',data:{o:base,vo,up:Date.now()}}]});
+      const d=ops[0].data;S.ec.base=lvEcon(d.o).o;S.ec.vo=ecVoClean(d.vo);await ecTgtLoad()}
+    S.ec.busy=false;toast(msg);return true}
+  catch(e){S.ec.busy=false;toast(fsErr(e),'err');return false}finally{render()}};
+{const p0=ACT.ecPublish;ACT.ecPublish=async()=>{const t=S.ec.tgt;if(!t)return p0();const P=ecPending();if(!P.length||P.some(x=>!x.ok))return;
+  const who=t.k==='u'?(t.name||'this player')+' only':'players on '+vsTxt(t);
+  const lines=P.slice(0,8).map(x=>x.f.it+' · '+x.f.l+': '+(x.back?'as everyone\'s':lvFmt(x.v))).join('\n')+(P.length>8?'\n… and '+(P.length-8)+' more':'');
+  if(!await ask({title:'Publish '+P.length+' change'+(P.length>1?'s':'')+' for '+esc(who)+'?',body:esc(lines).replace(/\n/g,'<br>')+'<br><br>'+(t.k==='u'?'Their game (1.24.5 or newer) gets '+(P.length>1?'them':'it')+' within moments; nobody else\'s changes.':esc(vsHint('e'))),ok:'Publish'}))return;
+  const ok=await ecWrite(o=>{for(const x of P){if(x.back)delete o[x.p];else o[x.p]=x.v}return o},'Published for '+who);if(ok){S.ec.draft={};render()}}}
+// the page: whose numbers, above the rest
+{const v0=VIEWS.economy;VIEWS.economy=()=>{const t=S.ec.tgt;let h=v0();if(secState('econ')||!LVC)return h;
+  let bar='<section class="card ecWho"><div class="ph"><h2>'+ic('users')+' Whose numbers</h2></div><div class="lvChips" role="group" aria-label="Whose numbers">'
+    +'<button class="cxChip" data-act="ecWho" data-v="all" aria-pressed="'+(!t)+'">Everyone</button><button class="cxChip" data-act="ecWho" data-v="ver" aria-pressed="'+(!!t&&t.k==='v')+'">Some versions</button>'
+    +(t&&t.k==='u'?'<button class="cxChip" aria-pressed="true">'+esc(t.name||shortUid(t.uid))+' only</button>':'')+'</div>';
+  if(t&&t.k==='v')bar+=vsHTML('e','Players on');
+  if(t&&t.k==='u')bar+='<p class="vsH">Only '+esc(t.name||'this player')+'. Their game (1.24.5 or newer) uses everyone\'s numbers, then their version\'s, then these. Open someone\'s profile → Economy for this player to change theirs.</p>';
+  if(!t)bar+='<p class="vsH">Every player, games 1.23 and newer.'+(S.ec.vo.length?' Numbers for some versions: '+S.ec.vo.map(x=>'<button class="p3Lnk" data-act="ecVoOpen" data-v="'+x.op+':'+x.ver+'">'+esc(vsTxt(x))+' ('+Object.keys(x.o).length+')</button>').join(', ')+'.':'')+'</p>';
+  bar+='</section>';
+  // the list of changed numbers says whose they are
+  if(t)h=h.replace(ic('coins')+' Changed now',ic('coins')+' Changed for '+esc(t.k==='u'?(t.name||'this player'):vsTxt(t))).replace('Nothing: the economy is as built in.',t.k==='u'?'Nothing of their own: they get everyone\'s numbers.':'Nothing for these versions: they get everyone\'s numbers.');
+  return h.replace('<div id="ecBar">',bar+'<div id="ecBar">')}}
+Object.assign(ACT,{
+  ecWho:async el=>{const k=el.dataset.v;S.ec.draft={};if(k==='all'){S.ec.tgt=null}else{const s=vsState('e');if(s.op==='all'){s.op='le';s.ver=VS_OLD}S.ec.tgt={k:'v',op:s.op,ver:s.ver}}await ecTgtLoad();render()},
+  ecVoOpen:async el=>{const [op,ver]=el.dataset.v.split(':');const s=vsState('e');s.op=op;s.ver=ver;S.ec.draft={};S.ec.tgt={k:'v',op,ver};await ecTgtLoad();render()},
+  ecForMe:async el=>{const P=S.prof;if(!P)return;S.ec.draft={};S.ec.tgt={k:'u',uid:P.uid,name:p3Name(P).t};go('economy');await ecTgtLoad();render()}});
+// a player's profile: their own numbers
+{const h0=p3ProfHTML;p3ProfHTML=function(){let h=h0.apply(this,arguments);const P=S.prof;if(!P||P.loading||!P.g)return h;try{const o=P.econu||{};const ks=Object.keys(o);
+    const v=P.g.appVer||(P.doc&&P.doc.version)||'0';
+    const body=(verLt(v,'1.24.5')?'<div class="p3Alert">'+ic('alert')+'<div>They\'re on '+esc(v)+': numbers for one player work from game 1.24.5. Set them now and they apply once they update.</div></div>':'')
+      +(ks.length?'<div class="lvOffL">'+ks.map(p=>{const f=LVF&&LVF[p];return '<div class="lvOffR"><div class="grow"><b>'+esc(f?f.it+' · '+f.l:p)+'</b><span class="sub">'+lvFmt(o[p])+(f?' (built in '+lvFmt(f.v)+')':'')+'</span></div></div>'}).join('')+'</div>':'<p class="sub" style="margin:0 0 8px">They get everyone\'s numbers (and their version\'s).</p>')
+      +'<button class="btn sm sec" data-act="ecForMe">'+ic('coins')+'Change their economy</button>';
+    const fold=p3Fold('econ','coins','Economy for this player',ks.length?'<span class="p3Hot">'+ks.length+' number'+(ks.length>1?'s':'')+' of their own</span>':'Everyone\'s',body,false);
+    h=h.replace('<details class="p3F" data-k="ops"',fold+'<details class="p3F" data-k="ops"')}catch(e){console.error(e)}return h}}
+// the Economy page needs the catalog's names for a profile's numbers
+NEEDS.profiles=[...new Set((NEEDS.profiles||[]).concat(['econ']))];
+if(!ICP.coins)ICP.coins='<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/>';
+{const st=document.createElement('style');st.textContent=`
+.vsRow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+.vsRow .vsL{font-weight:700;font-size:13.5px;color:var(--mu)}
+.vsRow select{width:auto;min-width:0;flex:0 1 auto}
+.vsH{flex:1 0 100%;margin:0;color:var(--mu);font-size:13px}
+.chip.vsC{background:rgba(90,169,255,.14);color:#9cc8ff;border:1px solid rgba(90,169,255,.45)}
+.ecWho .lvChips{margin-bottom:10px}
 `;document.head.appendChild(st)}
 
 /* ---------- boot ---------- */
