@@ -3371,6 +3371,47 @@ function plOld(x){return !!(x.v&&verLt(x.v,GAME_VER))}
   S.pl=L;try{let h=l0.apply(this,arguments);if(F!=='all'&&keep&&keep.length)h='<div class="note" style="margin:0 0 8px">Showing '+L.length+' of the '+keep.length+' most recently active. Show more loads older players.</div>'+h;return h}finally{S.pl=keep}}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='plSort'){S.ov2.plSort=e.target.value;const L=$('#plList');if(L)L.innerHTML=plListHTML()}});
 
+/* ---------- Every buyer, not just the 40 loaded (Nov 22) ----------
+   Joe (Nov 22 09:35, Play Console: a Commander License order GPA.3325-1931-4398-82540, charged 9:17): "I don't see any player
+   on the command center that has a commander's license." The list loads the 40 most recently active, and the License
+   filter only looked through those. Now:
+   - License: "Look through every player" reads every cloud save (100 at a time, a bar shows how far) and adds anyone with
+     the License (or any purchase) to the list, so the filter shows them all.
+   - The search box takes a Google Play order ID (GPA.…): "Find this order" looks at the purchases of every player who has
+     bought something; if it isn't there, "Check every player's purchases" looks at everyone's. The player opens. */
+S.buy={busy:false,done:false,n:0,found:[],err:null,ord:null,ordBusy:false,ordAll:false};
+function buyRender(){const L=$('#plList');if(L)L.innerHTML=plListHTML();const b=$('#plFbar button[data-v=lic] .n');if(b)b.textContent=(S.pl||[]).filter(x=>x.lic).length}
+async function buyScan(){if(S.buy.busy)return S.buy.found;S.buy=Object.assign(S.buy,{busy:true,done:false,n:0,found:[],err:null});buyRender();
+  try{let after=null;for(let pg=0;pg<500;pg++){const r=await DB.query('users',{byId:true,after,limit:100});if(!r.length)break;after=r[r.length-1].id;
+      for(const row of r){S.buy.n++;const g=parseSave(row.data||{})||{};const lic=!!(g.bought&&g.bought.lic),pc=+(g.stats&&g.stats.purchases)||0;
+        if(lic||pc>0){const x=plSummary(row);x.pc=pc;S.buy.found.push(x)}}
+      buyRender();if(r.length<100)break}
+    const names=await Promise.all(S.buy.found.map(x=>DB.get('dn/'+x.uid).then(d=>d&&d.name||'',()=>'')));S.buy.found.forEach((x,i)=>{x.name=names[i]});
+    // into the list, so the License filter (and the search) find them
+    const have=new Map((S.pl||[]).map(x=>[x.uid,x]));for(const x of S.buy.found){const o=have.get(x.uid);if(o){o.lic=o.lic||x.lic;o.pc=x.pc}else{S.pl=(S.pl||[]).concat([x])}}
+    S.buy.done=true}catch(e){S.buy.err=fsErr?fsErr(e):String(e&&e.message||e)}finally{S.buy.busy=false;buyRender()}return S.buy.found}
+function buyOrdQ(){const q=(S.plQ||'').trim();return /^GPA\.[0-9-]{8,}$/i.test(q)?q.toUpperCase():''}
+async function buyFindOrder(all){const q=buyOrdQ();if(!q||S.buy.ordBusy)return;S.buy.ordBusy=true;S.buy.ord={q,hit:null,looked:0,all:!!all};buyRender();
+  try{let uids;if(all){uids=[];let after=null;for(let pg=0;pg<500;pg++){const r=await DB.query('users',{byId:true,after,limit:200});if(!r.length)break;after=r[r.length-1].id;uids.push(...r.map(x=>x.id));if(r.length<200)break}}
+    else uids=(S.buy.done?S.buy.found:await buyScan()).map(x=>x.uid);
+    for(let i=0;i<uids.length&&!S.buy.ord.hit;i+=10){const part=uids.slice(i,i+10);
+      const res=await Promise.all(part.map(u=>DB.query('users/'+u+'/purchases',{limit:200}).then(r=>({u,r}),()=>({u,r:[]}))));
+      for(const {u,r} of res){S.buy.ord.looked++;const m=r.find(p=>String(p.data&&p.data.orderId||'').toUpperCase()===q);if(m){S.buy.ord.hit={uid:u,p:m.data};break}}buyRender()}
+    if(S.buy.ord.hit)profOpen(S.buy.ord.hit.uid)}catch(e){S.buy.err=fsErr?fsErr(e):String(e&&e.message||e)}finally{S.buy.ordBusy=false;buyRender()}}
+Object.assign(ACT,{buyScan:()=>{buyScan()},buyOrd:()=>{buyFindOrder(false)},buyOrdAll:()=>{buyFindOrder(true)}});
+{const l0=plListHTML;plListHTML=function(){let h=l0.apply(this,arguments);try{const B=S.buy,F=S.ov2.plF,q=buyOrdQ();let top='';
+    if(q){const O=B.ord&&B.ord.q===q?B.ord:null;
+      if(B.ordBusy)top='<div class="note buyNote">'+ic('search')+' Looking for order <b>'+esc(q)+'</b>… '+(O?O.looked+' players checked':'')+'</div>';
+      else if(O&&O.hit)top='<div class="note buyNote ok">'+ic('check')+' Order <b>'+esc(q)+'</b>: '+esc(skuName(O.hit.p.sku))+(O.hit.p.at?' · '+esc(new Date(+O.hit.p.at).toLocaleString()):'')+' <button class="btn sm" data-act="profOpen" data-v="'+esc(O.hit.uid)+'">'+ic('users')+'Open the player</button></div>';
+      else if(O)top='<div class="note buyNote">'+'Order <b>'+esc(q)+'</b> wasn\'t in '+(O.all?'anyone\'s purchases ('+O.looked+' players). It\'s recorded only when the buyer\'s game reached the cloud after buying; their save may still show the License (use License › Look through every player).':'the purchases of the '+O.looked+' player'+(O.looked===1?'':'s')+' who bought something. ')+(O.all?'':'<button class="btn sm sec" data-act="buyOrdAll">Check every player\'s purchases</button>')+'</div>';
+      else top='<div class="note buyNote">That looks like a Google Play order ID. <button class="btn sm" data-act="buyOrd">'+ic('search')+'Find this order</button></div>'}
+    if(F==='lic'||q){if(B.busy)top+='<div class="note buyNote">'+ic('search')+' Looking through every player… <b>'+B.n+'</b> so far, <b>'+B.found.filter(x=>x.lic).length+'</b> with the License</div>';
+      else if(B.err)top+='<div class="warn" style="display:block">'+esc(B.err)+'</div>';
+      else if(B.done&&F==='lic')top+='<div class="note buyNote ok">Looked through all <b>'+B.n+'</b> players: <b>'+B.found.filter(x=>x.lic).length+'</b> with the License, <b>'+B.found.length+'</b> who bought something.</div>';
+      else if(F==='lic'&&!B.done)top+='<div class="note buyNote">This only looks at the players loaded below (the most recently active). <button class="btn sm" data-act="buyScan">'+ic('search')+'Look through every player</button></div>'}
+    if(top)h=top+h}catch(e){}return h}}
+(function(){const st=document.createElement('style');st.textContent='.buyNote{display:block;margin:0 0 8px;line-height:1.5}.buyNote .i{width:15px;height:15px;vertical-align:-3px}.buyNote .btn{margin:4px 0 0 6px;vertical-align:middle}.buyNote.ok{border-color:color-mix(in srgb,#36d399 45%,transparent)}';document.head.appendChild(st)})();
+
 /* =====================================================================
    INBOX
    ===================================================================== */
