@@ -1437,6 +1437,7 @@ function mockUsers(D,t,rnd){const uids=Object.keys(D).filter(k=>k.indexOf('dn/')
       pf:{v:1,first,last:seen,iid:'inst'+i,sess:{n:3+i*2},c:{shop:2+i,shopAt:seen-3*HOUR,tabs:{bundles:2,gems:1+i},iapStart:{of_commander_license:1+i%2},iapCancel:{of_commander_license:1+i%2},adStart:{gems:3,skip:2},adDone:{gems:3,skip:1},adQuit:{skip:1},daily:2+i,gifts:i%3,needDm:i%2},
         dm:{in:{ad:30,daily:60,gift:50,other:i===4?47000:15},out:{pack:20}},sh:{in:{daily:5},out:{}},big:i===4?[[seen-2*DAY,'dm',45000,47900]]:[],clock:i===4?1:0,ev,gifts:[[seen-DAY,'daily','Day 2 of the supply calendar'],[seen-2*HOUR,'message','A gift for every commander · 50 DM']],adm:{}}};
     if(i===0)g.active={trade:{until:t+20*MIN,mult:5}};
+    if(i%2===0)g.af={tier:Math.min(10,Math.floor(lv/6)),runs:12+i*3,ext:8+i*2,lost:4+i,lv:{hull:40+i*5,gun:50+i*4,shd:20,arm:15,cargo:30},w:i%4===0?{seeker:1,nova:1}:{},sv:{best:{w:6+i,s:300+i*40},wk:weekId(t),wkBest:{w:5+i,s:280+i*30}},stk:{d:new Date(t).getFullYear()+'-'+(new Date(t).getMonth()+1)+'-'+new Date(t).getDate(),n:i%3}};
     D['users/'+uid]={save:JSON.stringify(g),updatedAt:seen,version:g.appVer,dm,shards:sh,gv:Math.round(Math.pow(10,3+lv/3)),income:Math.round(Math.pow(10,1+lv/5)),sys:g.maxSys,created:g.createdAt};
     if(i===0){D['users/'+uid+'/purchases/p1']={sku:'of_commander_license',pack:'of_commander_license',at:seen-5*DAY,orderId:'GPA.3312-0000-1111-22222'};D['users/'+uid+'/purchases/p2']={sku:'of_bundle_galaxy',pack:'of_bundle_galaxy',at:seen-DAY,orderId:'GPA.3312-0000-1111-33333'};
       D['adm/'+uid+'/ops/opdone1']={k:'dm',mode:'add',n:250,at:seen-3*DAY,by:'pixelsnapgames@gmail.com',note:'Purchase did not arrive',done:true,doneAt:seen-3*DAY+60e3,res:{before:120,after:370}}}})}
@@ -1462,7 +1463,8 @@ function mockSeed(){const D={},t=Date.now();let r=11;const rnd=()=>{r=(r*9301+49
     const xp=Math.round(Math.pow(1-i/24,2.2)*140000+rnd()*900),lv=Math.max(1,Math.min(60,Math.round(xp/2400)+1));
     D['lb/'+u]={c1,c2,n,lv,xp,cr:Math.round(xp*37*(.6+rnd())),pr:xp>90000?1:0,ch:i<3?1:0,up:t-Math.floor(rnd()*DAY),dn:name};
     if(i!==4)D['lbw_'+wk+'/'+u]={c1,c2,n,lv,wg:Math.round(Math.pow(10,6+rnd()*3.2)),ch:i<3?1:0,up:t-Math.floor(rnd()*DAY),dn:name};
-    D['lbw_'+lw+'/'+u]={c1,c2,n,lv:Math.max(1,lv-1),wg:Math.round(Math.pow(10,6+rnd()*3.4)),ch:0,up:t-7*DAY,dn:name}}
+    D['lbw_'+lw+'/'+u]={c1,c2,n,lv:Math.max(1,lv-1),wg:Math.round(Math.pow(10,6+rnd()*3.4)),ch:0,up:t-7*DAY,dn:name};
+    if(i<14){const sw=Math.max(1,Math.round(Math.pow(1-i/16,1.6)*34)),ss=Math.round(sw*(26+rnd()*20));D['svw_'+wk+'/'+u]={c1,c2,n,lv,sw,ss,sv:sw*100000+ss,ch:0,up:t-Math.floor(rnd()*DAY),dn:name}}}
   /* 2 reported players, 3 reports (ore_baron twice, Zed 42 once) */
   const R=(by,hold,name,why,ago)=>{D['reports/'+by+'_'+hold]={uid:hold,name,why,by,at:t-ago}};
   R(U[14],U[2],'ore_baron','offensive',2*HOUR);R(U[15],U[2],'ore_baron','offensive',26*HOUR);R(U[16],U[9],'Zed 42','impersonation',5*HOUR);
@@ -1473,7 +1475,7 @@ function mockSeed(){const D={},t=Date.now();let r=11;const rnd=()=>{r=(r*9301+49
    STATE + LOADING
    ===================================================================== */
 const TABS=[['overview','Overview','chart'],['messages','Messages','msg'],['library','Library','book'],['events','Events','comet'],['store','Store','tag'],['players','Players','users'],['feedback','Feedback','chat']];
-const S={ready:false,user:null,admin:false,err:null,tab:'overview',range:14,table:false,plays:[],fb:[],motd:[],stat:{},live:{events:[],sales:[]},dn:[],dnQ:'',dnLimit:40,dnMore:false,blk:[],hid:[],mail:null,rep:[],repDn:{},lib:{st:'loading'},libCat:'all',libQ:'',lb:[],lbw:[],imgs:{},loaded:{},errs:{},draft:null,pv:null,evForm:null,saForm:null,busy:false,flash:null,openEnded:false,fallback:''};
+const S={ready:false,user:null,admin:false,err:null,tab:'overview',range:14,table:false,plays:[],fb:[],motd:[],stat:{},live:{events:[],sales:[]},dn:[],dnQ:'',dnLimit:40,dnMore:false,blk:[],hid:[],mail:null,rep:[],repDn:{},lib:{st:'loading'},libCat:'all',libQ:'',lb:[],lbw:[],svw:[],imgs:{},loaded:{},errs:{},draft:null,pv:null,evForm:null,saForm:null,busy:false,flash:null,openEnded:false,fallback:''};
 const WANT_MOCK=/[?&]mock\b/.test(location.search)||!!window.__ccMock;
 let DB=WANT_MOCK?mockDB():fireDB();
 const LBL={pl:'player saves',plays:'play stats',feedback:'feedback',motd:'messages',stat:'message counters',live:'config/live',dn:'display names',lb:'the all-time board',lbw:'this week\'s board',blk:'blocked names',rep:'reports',hid:'players kept off the boards'};
@@ -1492,6 +1494,7 @@ const LOAD={
     return Promise.all(uids.map(u=>DB.get('dn/'+u).then(d=>[u,d||{}],()=>[u,null]))).then(a=>{const o={};a.forEach(x=>{o[x[0]]=x[1]});S.repDn=o})}),
   lb:()=>DB.query('lb',{order:['xp','desc'],limit:10}).then(r=>{S.lb=r}),
   lbw:()=>DB.query('lbw_'+weekId(),{order:['wg','desc'],limit:10}).then(r=>{S.lbw=r}),
+  svw:()=>DB.query('svw_'+weekId(),{order:['sv','desc'],limit:10}).then(r=>{S.svw=r;S.svwOff=false},e=>{if(/permission/i.test(String(e&&(e.code||e.message)||e))){S.svw=[];S.svwOff=true;return}throw e}),
   hid:()=>DB.query('lbhide',{limit:200}).then(r=>{S.hid=r.sort((a,b)=>(b.data.at||0)-(a.data.at||0))})
 };
 function fetchDn(){const q=nameKey(S.dnQ),lim=S.dnLimit;const p=q?DB.query('dn',{where:[['key','>=',q],['key','<=',q+'']],order:['key','asc'],limit:lim+1}):DB.query('dn',{order:['at','desc'],limit:lim+1});
@@ -2158,15 +2161,21 @@ VIEWS.players=()=>{let h=head('Players','Reports, display names, personal mail a
   h+=plCardHTML();
   h+='<div class="card"><div class="ph"><div><h2>Display names</h2><div class="sub">Newest first. Search matches the start of the name (spaces, _ . - ignored).</div></div></div><div class="srch">'+ic('search')+'<input class="inp" id="dnQ" data-f="dnQ" value="'+esc(S.dnQ)+'" placeholder="Search names, e.g. star" aria-label="Search display names" autocomplete="off"></div><div id="dnList">'+dnListHTML()+'</div></div>';
   h+='<div class="card" id="blkCard"><div class="ph"><div><h2>Blocked names</h2><div class="sub">Names taken away by a reset (names/{key} with uid “blocked”). Nobody can pick them, including the player who had it. Newest first.</div></div></div><div id="blkList">'+blockedHTML()+'</div></div>';
-  h+='<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div></div>'+hidHTML()+'</div>';
+  h+='<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div><div><h3>Survival · this week · top 10 by wave <small>svw_'+weekId()+'</small></h3>'+lbTable('svw')+'</div></div>'+hidHTML()+'</div>';
   return h};
 function dnListHTML(){const st=secState('dn');if(st)return st;if(!S.dn.length)return '<div class="empty">'+(S.dnQ?'No display name starts with “'+esc(S.dnQ)+'”.':'No display names yet.')+'</div>';
   return S.dn.map(x=>{const d=x.data,uid=x.id,u=esc(uid),nm=d.name||'';return '<div class="prow" data-uid="'+u+'"><div class="pmain"><div class="pn">'+(nm?esc(nm):'<span class="noname">(no name)</span>')+(d.rs===true?'<span class="chip paused">reset</span>':'')+(d.key?'<span class="pk mono">'+esc(d.key)+'</span>':'')+'</div><div class="pmeta"><span class="u"><span class="mono" title="'+u+'">'+esc(shortUid(uid))+'</span><button class="ib xs" data-act="copyUid" data-v="'+u+'" aria-label="Copy uid" title="Copy uid">'+ic('copy')+'</button></span><span>set '+esc(d.n||0)+'×</span>'+(d.at?'<span>changed '+esc(rel(d.at))+'</span>':'')+'</div></div><div class="pacts"><button class="btn sm" data-act="profOpen" data-v="'+u+'">'+ic('users')+'<span>Profile</span></button><button class="btn sm sec" data-act="pMail" data-v="'+u+'">'+ic('msg')+'<span>Mail</span></button><button class="btn sm sec" data-act="pMsg" data-v="'+u+'">'+ic('gift')+'<span>Message / gift</span></button><button class="btn sm danger" data-act="pReset" data-v="'+u+'"'+(nm?'':' disabled')+'>'+ic('userx')+'<span>Reset name</span></button></div></div>'}).join('')
     +(S.dnMore?'<div style="text-align:center;margin-top:10px"><button class="btn sm sec" data-act="dnMore">Show more</button></div>':'')}
 function blockedHTML(){const st=secState('blk');if(st)return st;if(!S.blk.length)return '<div class="empty sm">No blocked names.</div>';
   return S.blk.map(x=>{const k=esc(x.id);return '<div class="prow" data-key="'+k+'"><div class="pmain"><div class="pn mono">'+k+'</div><div class="pmeta">'+(x.data.at?'<span>blocked '+esc(rel(x.data.at))+'</span>':'<span>blocked</span>')+'</div></div><div class="pacts"><button class="btn sm sec" data-act="unblock" data-v="'+k+'" aria-label="Unblock '+k+'">'+ic('x')+'<span>Unblock</span></button></div></div>'}).join('')}
-function lbTable(k){const st=secState(k);if(st)return st;const rows=S[k];if(!rows.length)return '<div class="empty sm">Nobody on this board yet.</div>';
-  return '<div class="tw"><table class="tbl lbt"><thead><tr><th>#</th><th style="text-align:left">Name</th><th>Lv</th><th>'+(k==='lb'?'XP':'Value')+'</th><th></th></tr></thead><tbody>'+rows.map((x,i)=>{const d=x.data;return '<tr class="'+(i===0?'p1':'')+'"><td class="rk">'+(i+1)+'</td><td class="nm" style="text-align:left" title="'+esc(x.id)+'">'+(d.dn?esc(d.dn):'<span class="cs">'+esc(csName(d.c1,d.c2,d.n)||'Commander')+'</span>')+(d.ch>0?' <span title="Weekly champion">👑</span>':'')+'</td><td>'+esc(d.lv||'')+'</td><td>'+(k==='lb'?nf(d.xp):'$'+fmtBig(d.wg))+'</td><td><button class="ib xs" data-act="lbHide" data-v="'+esc(x.id)+'" title="Take off the leaderboards" aria-label="Take '+esc(d.dn||csName(d.c1,d.c2,d.n)||'this player')+' off the leaderboards">'+ic('userx')+'</button></td></tr>'}).join('')+'</tbody></table></div>'}
+/* 1.26 Salvage: Survival's weekly board (svw_<week>: wave sw, seconds ss, sv = sw*100000+ss to sort by) */
+// Survival entries are written on their own and may fail quietly: until the 1.26 rules (the svw block) are published,
+// Firestore refuses them, and that must not stop a ban, a take-off, a name reset or a deletion from going through.
+async function batchSv(ops){const a=[],b=[];for(const o of ops)(/^svw_/.test(o.path)?b:a).push(o);for(let i=0;i<a.length;i+=400)await DB.batch(a.slice(i,i+400));
+  for(let i=0;i<b.length;i+=400){try{await DB.batch(b.slice(i,i+400))}catch(e){console.warn('[cc] svw (rules not published yet?)',e)}}}
+function svT(s){s=Math.floor(+s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function lbTable(k){const st=secState(k);if(st)return st;const rows=S[k];if(k==='svw'&&S.svwOff)return '<div class="empty sm">Not live yet: publish the 1.26 rules (the <b>svw</b> block in firestore.rules) in Firebase → Firestore → Rules.</div>';if(!rows.length)return '<div class="empty sm">Nobody on this board yet.</div>';
+  return '<div class="tw"><table class="tbl lbt"><thead><tr><th>#</th><th style="text-align:left">Name</th><th>Lv</th><th>'+(k==='lb'?'XP':k==='svw'?'Run':'Value')+'</th><th></th></tr></thead><tbody>'+rows.map((x,i)=>{const d=x.data;return '<tr class="'+(i===0?'p1':'')+'"><td class="rk">'+(i+1)+'</td><td class="nm" style="text-align:left" title="'+esc(x.id)+'">'+(d.dn?esc(d.dn):'<span class="cs">'+esc(csName(d.c1,d.c2,d.n)||'Commander')+'</span>')+(d.ch>0?' <span title="Weekly champion">👑</span>':'')+'</td><td>'+esc(d.lv||'')+'</td><td>'+(k==='lb'?nf(d.xp):k==='svw'?'Wave '+nf(d.sw)+' · '+svT(d.ss):'$'+fmtBig(d.wg))+'</td><td><button class="ib xs" data-act="lbHide" data-v="'+esc(x.id)+'" title="Take off the leaderboards" aria-label="Take '+esc(d.dn||csName(d.c1,d.c2,d.n)||'this player')+' off the leaderboards">'+ic('userx')+'</button></td></tr>'}).join('')+'</tbody></table></div>'}
 function paintDn(){const el=$('#dnList');if(el)el.innerHTML=dnListHTML()}
 /* ---------- kept off the leaderboards: lbhide/{uid} (the developer's own account, cheaters). The rules stop their game
    posting to any board (it retries quietly, their own rank shows "—"); taking them off also deletes their entries on the
@@ -2176,8 +2185,8 @@ function hidName(uid){const r=S.dn.find(x=>x.id===uid);if(r&&r.data.name)return 
 function hidHTML(){if(secState('hid')||!S.hid.length)return '';return '<h3 style="margin-top:16px">Kept off the leaderboards</h3>'+S.hid.map(x=>'<div class="prow"><div class="pmain"><div class="pn">'+esc(x.data.name||shortUid(x.id))+'</div><div class="pmeta"><span class="mono">'+esc(shortUid(x.id))+'</span><span>since '+esc(rel(x.data.at||0))+'</span></div></div><div class="pacts"><button class="btn sm sec" data-act="lbShow" data-v="'+esc(x.id)+'">Put back</button></div></div>').join('')}
 async function lbHide(uid){const nm=hidName(uid);
   if(!await ask({title:'Take “'+nm+'” off the leaderboards?',body:'Their entries come off the all-time board, this week\'s and last week\'s, and their game can no longer post a score (their own rank shows “—”). Their game and progress are not touched. You can put them back any time.',ok:'Take off the boards',danger:true}))return;
-  const ops=[{op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm).slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid}];
-  try{await DB.batch(ops);toast('“'+nm+'” is off the leaderboards');await load(['lb','lbw','hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid)}catch(e){toast(fsErr(e),'err')}}
+  const ops=[{op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm).slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid},{op:'delete',path:'svw_'+weekId()+'/'+uid},{op:'delete',path:'svw_'+weekId(Date.now()-7*DAY)+'/'+uid}];
+  try{await batchSv(ops);toast('“'+nm+'” is off the leaderboards');await load(['lb','lbw','svw','hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid)}catch(e){toast(fsErr(e),'err')}}
 async function lbShow(uid){const nm=hidName(uid);if(!await ask({title:'Put “'+nm+'” back on the leaderboards?',body:'Their game posts their score again within a few minutes of playing.',ok:'Put back'}))return;
   try{await DB.del('lbhide/'+uid);toast('“'+nm+'” can be on the leaderboards again');await load(['hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid)}catch(e){toast(fsErr(e),'err')}}
 /* ---------- PLAYER PROFILES (game 1.21+) ----------
@@ -2235,6 +2244,10 @@ function evTxt(e){const f=EV_TXT[e[1]];let d=e[2]||'';if(f)return f(d);try{const
 function srcTbl(o,label){const iN=sumO(o&&o.in),oN=sumO(o&&o.out);if(!iN&&!oN)return '<div class="sub">No '+label+' movements recorded yet (game 1.21+).</div>';
   const rows=(side,obj)=>Object.keys(obj||{}).sort((a,b)=>obj[b]-obj[a]).map(k=>'<tr><td>'+side+'</td><td>'+esc(k)+'</td><td class="num">'+fmtBig(obj[k])+'</td></tr>').join('');
   return '<div class="tw"><table class="tbl"><thead><tr><th>'+label+'</th><th>Source</th><th class="num">Amount</th></tr></thead><tbody>'+rows('In',o.in)+rows('Out',o.out)+'</tbody></table></div>'}
+function salvHTML(g){const a=g&&g.af;if(!a)return '';const lv=a.lv||{};const lvs=Object.values(lv).reduce((t,v)=>t+(+v||0),0);const w=Object.keys(a.w||{});const sv=a.sv||{};const S=a.stk||{};
+  return '<section class="pcard"><h3>'+ic('star')+'Salvage</h3>'+pRow('Expedition tiers cleared',a.tier?'Tier '+nf(a.tier)+' of 10':'none')+pRow('Runs',nf(a.runs||0)+' · '+nf(a.ext||0)+' got out · '+nf(a.lost||0)+' lost')
+    +pRow('Survival best',sv.best?'Wave '+nf(sv.best.w)+' · '+svT(sv.best.s):'—')+pRow('Survival this week',sv.wkBest&&sv.wk?'Wave '+nf(sv.wkBest.w)+' ('+esc(sv.wk)+')':'—')
+    +pRow('Upgrade levels',nf(lvs)+' over '+nf(Object.keys(lv).length)+' upgrades')+pRow('Weapons owned',w.length?esc(w.join(', ')):'Blaster only')+(S.d?pRow('Stakes on '+esc(S.d),nf(S.n||0)+' of 3'):'')+'</section>'}
 function profHTML(){const P=S.prof;if(!P)return '';const head='<div class="card prof" id="profCard"><div class="ph"><div><h2>Player profile</h2><div class="sub mono">'+esc(P.uid)+' <button class="ib xs" data-act="copyUid" data-v="'+esc(P.uid)+'" aria-label="Copy uid">'+ic('copy')+'</button></div></div><div class="facts"><button class="btn sm sec" data-act="profRefresh">Refresh</button><button class="ib" data-act="profClose" aria-label="Close the profile">'+ic('x')+'</button></div></div>';
   if(P.loading)return head+'<div class="load">Loading the save…</div></div>';
   const g=P.g;if(!g)return head+(P.errs?'<div class="warn" style="display:block">'+esc(P.errs[0])+'</div>':'')+'<div class="empty">No cloud save for this player.</div></div>';
@@ -2250,6 +2263,7 @@ function profHTML(){const P=S.prof;if(!P)return '';const head='<div class="card 
     +pRow('Star systems',nf((g.maxSys||0)+1))+pRow('Planets',nf((g.planets||[]).length))+pRow('Galaxy value','$'+fmtBig(doc.gv||0))+pRow('Income','$'+fmtBig(doc.income||0)+'/s')
     +(plays.length?'<div class="minis">'+plays.slice(0,14).map(p=>'<span title="'+esc(p.day)+'"><i style="height:'+Math.min(100,Math.round(p.min/2))+'%"></i><small>'+esc(p.day.slice(5))+'</small><b>'+p.min+'m</b></span>').join('')+'</div>':'')+'</section>';
   h+='<section class="pcard"><h3>'+ic('tag')+'Wallet</h3>'+pRow('Cash','$'+fmtBig(g.cash))+pRow('Dark Matter (gems)',nf(g.dm))+pRow('Star Shards',nf(g.shards))+pRow('Credits',nf(g.credits))+pRow('Crate keys',nf(g.inv&&g.inv.crate_key))+(g.relic?pRow('Relics',nf(g.relic.n||0)+' in hand · '+nf(Object.values(g.relic.p||{}).reduce((a,o)=>a+(+o.mine||0)+(+o.speed||0)+(+o.cargo||0),0))+' given to planets · '+nf(g.relic.got||0)+' ever'):'')+(g.candy?pRow('Candy',nf(g.candy)):'')+'</section>';
+  h+=salvHTML(g);
   const items=Object.keys(g.items||{}).filter(k=>g.items[k]>0).sort((a,b)=>g.items[b]-g.items[a]);const act=Object.keys(g.active||{}).filter(k=>g.active[k]&&g.active[k].until>Date.now());
   h+='<section class="pcard"><h3>'+ic('gift')+'Boosters</h3>'+(items.length?items.map(k=>pRow(esc(bName(k)),nf(g.items[k]))).join(''):'<div class="sub">No boosters in stock.</div>')+(act.length?'<div class="sub" style="margin-top:6px">Running: '+act.map(k=>esc(k)+' ×'+esc(g.active[k].mult||'')+' for '+esc(dur(g.active[k].until-Date.now()))).join(', ')+'</div>':'')+pRow('Boosters used',nf(st.used||0))+'</section>';
   const skus=Array.from(new Set(Object.keys(c.iapStart||{}).concat(Object.keys(c.iapDone||{}),Object.keys(c.iapCancel||{}),Object.keys(c.iapFail||{}))));
@@ -2304,15 +2318,16 @@ function pfQuick(k){S.pfF=k==='items0'?{k:'items0',mode:'set',n:'0',id:S.pfF.id,
 async function resetName(uid,opt){opt=opt||{};const row=S.dn.find(x=>x.id===uid),cur0=row?row.data:(S.repDn[uid]||{}),nm=cur0.name||'',k0=cur0.key||'';
   if(!await ask({title:'Reset and block “'+(nm||uid)+'”?',body:'Their name is cleared: they show as their callsign until they pick a new one, which they can do right away. The name '+(k0?'<b>'+esc(k0)+'</b> ':'')+'is also <b>blocked</b>, so nobody can take it again, including this player (you can unblock it under Blocked names). It is cleared from the all-time board and this week\'s board too.'+(opt.reports?' Then their '+opt.reports+' report'+(opt.reports===1?' is':'s are')+' deleted.':''),ok:'Reset and block',danger:true}))return false;
   const wk='lbw_'+weekId();let info=null;
-  try{await DB.tx(['dn/'+uid,'lb/'+uid,wk+'/'+uid],cur=>{const dn=cur['dn/'+uid];if(!dn)throw new Error('No display name document for this player');const key=dn.key||'';
+  const svk='svw_'+weekId();try{await DB.tx(['dn/'+uid,'lb/'+uid,wk+'/'+uid],cur=>{const dn=cur['dn/'+uid];if(!dn)throw new Error('No display name document for this player');const key=dn.key||'';
       info={name:dn.name||'',key,boards:!!(cur['lb/'+uid]||cur[wk+'/'+uid])};
       const ops=[{op:'update',path:'dn/'+uid,data:{name:'',key:'',rs:true}}];
       if(key)ops.push({op:'set',path:'names/'+key,data:{uid:'blocked',at:DB.serverTime()}});
       if(cur['lb/'+uid])ops.push({op:'update',path:'lb/'+uid,data:{dn:''}});
       if(cur[wk+'/'+uid])ops.push({op:'update',path:wk+'/'+uid,data:{dn:''}});
       return ops});
+    try{const sv=await DB.get(svk+'/'+uid);if(sv&&sv.dn)await DB.batch([{op:'update',path:svk+'/'+uid,data:{dn:''}}])}catch(e){console.warn('[cc] svw name (rules not published yet?)',e)}
     toast('Name reset'+(info.name?': “'+info.name+'”':'')+(info.key?', “'+info.key+'” is blocked':'')+(info.boards?', cleared from the boards':''));
-    if(!opt.reports)await load(['dn','lb','lbw','blk','rep']);return true}catch(e){toast(fsErr(e),'err');return false}}
+    if(!opt.reports)await load(['dn','lb','lbw','svw','blk','rep']);return true}catch(e){toast(fsErr(e),'err');return false}}
 async function unblock(key){if(!await ask({title:'Unblock “'+key+'”?',body:'Anyone, including the player who had it, can pick this name again.',ok:'Unblock'}))return;
   try{await DB.del('names/'+key);toast('Unblocked “'+key+'”');await load(['blk'])}catch(e){toast(fsErr(e),'err')}}
 function msgPlayer(uid){const x=S.dn.find(r=>r.id===uid),name=(x&&x.data.name)||(S.mail&&S.mail.uid===uid?S.mail.name:'')||(S.repDn[uid]&&S.repDn[uid].name)||'';const d=newDraft('gift');d.mode='one';d.to={uid,name};d.t=('A gift for you'+(name?', '+name:'')).slice(0,LIM.t);d.b='Thanks for playing Orbital Forge! Here is a little something from the developer.';d.prio=0;d.dirty=false;openComposer(d)}
@@ -2338,7 +2353,7 @@ async function clearReports(uid,known){const ids=new Set(known||[]);try{(await D
   const all=Array.from(ids);for(let i=0;i<all.length;i+=450)await DB.batch(all.slice(i,i+450).map(id=>({op:'delete',path:'reports/'+id})));return all.length}
 async function repReset(uid){const G=repGroup(uid);if(!G)return;if(!await resetName(uid,{reports:G.ids.length}))return;
   try{const n=await clearReports(uid,G.ids);toast(n+' report'+(n===1?'':'s')+' cleared')}catch(e){toast('The name was reset, but the reports could not be deleted: '+fsErr(e),'err')}
-  await load(['rep','dn','lb','lbw','blk'])}
+  await load(['rep','dn','lb','lbw','svw','blk'])}
 async function repDismiss(uid){const G=repGroup(uid);if(!G)return;const nm=G.names[0]||shortUid(uid),n=G.ids.length;
   if(!await ask({title:'Dismiss '+n+' report'+(n===1?'':'s')+' about “'+nm+'”?',body:'The name stays as it is. The reports are deleted.',ok:'Dismiss'}))return;
   try{const k=await clearReports(uid,G.ids);toast('Dismissed '+k+' report'+(k===1?'':'s')+' about “'+nm+'”');await load(['rep'])}catch(e){toast(fsErr(e),'err')}}
@@ -3042,7 +3057,7 @@ VIEWS.players=()=>{let h=head('Players','Profiles, the leaderboards, display nam
   h+='<div class="plSecs" role="tablist">'+PL_SECS.map(([k,n,i])=>'<button role="tab" data-act="plSec" data-v="'+k+'" aria-selected="'+(sec===k)+'"'+(sec===k?' class="on"':'')+'>'+ic(i)+'<span>'+n+'</span>'+(k==='reports'&&S.rep.length?'<span class="cnt">'+S.rep.length+'</span>':'')+'</button>').join('')+'</div>';
   h+=profHTML();if(S.mail)h+=mailPanelHTML();
   if(sec==='profiles')h+=plCardHTML();
-  else if(sec==='boards')h+=ovCardHTML()+'<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div></div>'+hidHTML()+'</div>';
+  else if(sec==='boards')h+=ovCardHTML()+'<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div><div><h3>Survival · this week · top 10 by wave <small>svw_'+weekId()+'</small></h3>'+lbTable('svw')+'</div></div>'+hidHTML()+'</div>';
   else if(sec==='names'){h+='<div class="card"><div class="ph"><div><h2>Display names</h2><div class="sub">Newest first. Search matches the start of the name (spaces, _ . - ignored).</div></div></div><div class="srch">'+ic('search')+'<input class="inp" id="dnQ" data-f="dnQ" value="'+esc(S.dnQ)+'" placeholder="Search names, e.g. star" aria-label="Search display names" autocomplete="off"></div><div id="dnList">'+dnListHTML()+'</div></div>';
     h+='<div class="card" id="blkCard"><div class="ph"><div><h2>Blocked names</h2><div class="sub">Names taken away by a reset (names/{key} with uid “blocked”). Nobody can pick them, including the player who had it. Newest first.</div></div></div><div id="blkList">'+blockedHTML()+'</div></div>'}
   else h+=repCardHTML();
@@ -3075,10 +3090,10 @@ async function ovRemove(){if(S.ov.busy)return;S.ov.busy=true;soonRender();
     const many=old.length>1;
     if(!await ask({title:'Take '+old.length+' player'+(many?'s':'')+' off the leaderboards?',body:(many?'They play':'They play')+' a version older than 1.22. Their entries come off the all-time board, this week\'s and last week\'s, and they\'re marked “Needs update”, so their game can\'t post a score. Their game and progress aren\'t touched. Once they update, “Put updated players back” returns them.',ok:'Take them off',danger:true}))return;
     ovSay('Taking them off…');const at=Date.now(),by=S.user&&S.user.email||'',ops=[];
-    old.forEach(o=>{ops.push({op:'set',path:'lbhide/'+o.uid,data:{at,by,name:String(nameOf[o.uid]||'').slice(0,40),why:'ver',v:String(o.v||'').slice(0,12)}},{op:'delete',path:'lb/'+o.uid},{op:'delete',path:'lbw_'+wk+'/'+o.uid},{op:'delete',path:'lbw_'+lw+'/'+o.uid})});
-    for(let i=0;i<ops.length;i+=400)await DB.batch(ops.slice(i,i+400));
+    old.forEach(o=>{ops.push({op:'set',path:'lbhide/'+o.uid,data:{at,by,name:String(nameOf[o.uid]||'').slice(0,40),why:'ver',v:String(o.v||'').slice(0,12)}},{op:'delete',path:'lb/'+o.uid},{op:'delete',path:'lbw_'+wk+'/'+o.uid},{op:'delete',path:'lbw_'+lw+'/'+o.uid},{op:'delete',path:'svw_'+wk+'/'+o.uid},{op:'delete',path:'svw_'+lw+'/'+o.uid})});
+    await batchSv(ops);
     toast(old.length+' player'+(many?'s are':' is')+' off the leaderboards until they update','good');
-    await load(['lb','lbw','hid'])
+    await load(['lb','lbw','svw','hid'])
   }catch(e){toast(fsErr(e),'err')}finally{S.ov.busy=false;ovSay('');soonRender()}}
 async function ovBack(){if(S.ov.busy)return;S.ov.busy=true;soonRender();
   try{ovSay('Reading the players marked “Needs update”…');const hid=(await ovAll('lbhide')).filter(ovIsVer);
@@ -3353,7 +3368,7 @@ document.addEventListener('toggle',e=>{if(e.target&&e.target.id==='tplBox')S.ov2
 VIEWS.profiles=()=>{let h=head('Profiles','Everyone with a cloud save, most recently active first. Open one for their wallet, play time, purchases and gifts, to message them, or to change their account.');
   h+=profHTML();if(S.mail)h+=mailPanelHTML();return h+plCardHTML().replace(/(<h2>Player profiles<\/h2>)<div class="sub">[\s\S]*?<\/div>/,'$1')};
 VIEWS.boards=()=>head('Leaderboards','The all-time and weekly boards, players kept off them, and players on old versions.')+ovCardHTML()
-  +'<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div></div>'+hidHTML()+'</div>';
+  +'<div class="card"><div class="ph"><div><h2>Leaderboards</h2><div class="sub">Names show the display name, or the callsign (italic) when there is none.</div></div><button class="btn sm sec" data-act="annTop">'+ic('trophy')+'Announce last week\'s top 3</button></div><div class="lbg"><div><h3>All time · top 10 by XP <small>lb</small></h3>'+lbTable('lb')+'</div><div><h3>This week · top 10 by galaxy value <small>lbw_'+weekId()+'</small></h3>'+lbTable('lbw')+'</div><div><h3>Survival · this week · top 10 by wave <small>svw_'+weekId()+'</small></h3>'+lbTable('svw')+'</div></div>'+hidHTML()+'</div>';
 VIEWS.names=()=>head('Names','Display names players picked, and names you took away.')
   +'<div class="card"><div class="ph"><div><h2>Display names</h2><div class="sub">Newest first. Search matches the start of the name (spaces, _ . - ignored).</div></div></div><div class="srch">'+ic('search')+'<input class="inp" id="dnQ" data-f="dnQ" value="'+esc(S.dnQ)+'" placeholder="Search names, e.g. star" aria-label="Search display names" autocomplete="off"></div><div id="dnList">'+dnListHTML()+'</div></div>'
   +'<div class="card" id="blkCard"><div class="ph"><div><h2>Blocked names</h2><div class="sub">Names taken away by a reset. Nobody can pick them, including the player who had it. Newest first.</div></div></div><div id="blkList">'+blockedHTML()+'</div></div>';
@@ -3397,12 +3412,15 @@ async function buyFindOrder(all){const q=buyOrdQ();if(!q||S.buy.ordBusy)return;S
     for(let i=0;i<uids.length&&!S.buy.ord.hit;i+=10){const part=uids.slice(i,i+10);
       const res=await Promise.all(part.map(u=>DB.query('users/'+u+'/purchases',{limit:200}).then(r=>({u,r}),()=>({u,r:[]}))));
       for(const {u,r} of res){S.buy.ord.looked++;const m=r.find(p=>String(p.data&&p.data.orderId||'').toUpperCase()===q);if(m){S.buy.ord.hit={uid:u,p:m.data};break}}buyRender()}
-    if(S.buy.ord.hit)profOpen(S.buy.ord.hit.uid)}catch(e){S.buy.err=fsErr?fsErr(e):String(e&&e.message||e)}finally{S.buy.ordBusy=false;buyRender()}}
+    if(S.buy.ord.hit)profOpen(S.buy.ord.hit.uid);else if(all&&!S.buy.done){S.buy.ordBusy=false;await buyScan()}}catch(e){S.buy.err=fsErr?fsErr(e):String(e&&e.message||e)}finally{S.buy.ordBusy=false;buyRender()}}
 Object.assign(ACT,{buyScan:()=>{buyScan()},buyOrd:()=>{buyFindOrder(false)},buyOrdAll:()=>{buyFindOrder(true)}});
 {const l0=plListHTML;plListHTML=function(){let h=l0.apply(this,arguments);try{const B=S.buy,F=S.ov2.plF,q=buyOrdQ();let top='';
     if(q){const O=B.ord&&B.ord.q===q?B.ord:null;
       if(B.ordBusy)top='<div class="note buyNote">'+ic('search')+' Looking for order <b>'+esc(q)+'</b>… '+(O?O.looked+' players checked':'')+'</div>';
       else if(O&&O.hit)top='<div class="note buyNote ok">'+ic('check')+' Order <b>'+esc(q)+'</b>: '+esc(skuName(O.hit.p.sku))+(O.hit.p.at?' · '+esc(new Date(+O.hit.p.at).toLocaleString()):'')+' <button class="btn sm" data-act="profOpen" data-v="'+esc(O.hit.uid)+'">'+ic('users')+'Open the player</button></div>';
+      else if(O&&O.all&&B.done){const L=B.found.filter(x=>x.lic).sort((x,y)=>y.at-x.at);
+        top='<div class="note buyNote">Order <b>'+esc(q)+'</b> isn\'t in any of the '+O.looked+' players\' purchase records. '+(L.length?'Players whose save has the License (most recently seen first; the buyer was playing when they bought):':'No cloud save has the License either, so the buyer plays without a cloud save: the License is on their phone and Google Play keeps it (a reinstall gets it back), but the Command Center can\'t see them.')+'</div>'
+          +(L.length?'<div class="buyHits">'+L.slice(0,6).map(x=>'<button class="plrow" data-act="profOpen" data-v="'+esc(x.uid)+'"><span class="pln"><b>'+(x.name?esc(x.name):'<span class="cs">'+esc(x.cs||'Guest')+'</span>')+'</b> <span class="chip lic">License</span></span><span class="plm">seen '+esc(x.at?new Date(x.at).toLocaleString():'—')+' · Lv '+x.lv+' · v'+esc(x.v||'?')+'</span></button>').join('')+'</div>':'')}
       else if(O)top='<div class="note buyNote">'+'Order <b>'+esc(q)+'</b> wasn\'t in '+(O.all?'anyone\'s purchases ('+O.looked+' players). It\'s recorded only when the buyer\'s game reached the cloud after buying; their save may still show the License (use License › Look through every player).':'the purchases of the '+O.looked+' player'+(O.looked===1?'':'s')+' who bought something. ')+(O.all?'':'<button class="btn sm sec" data-act="buyOrdAll">Check every player\'s purchases</button>')+'</div>';
       else top='<div class="note buyNote">That looks like a Google Play order ID. <button class="btn sm" data-act="buyOrd">'+ic('search')+'Find this order</button></div>'}
     if(F==='lic'||q){if(B.busy)top+='<div class="note buyNote">'+ic('search')+' Looking through every player… <b>'+B.n+'</b> so far, <b>'+B.found.filter(x=>x.lic).length+'</b> with the License</div>';
@@ -3410,7 +3428,7 @@ Object.assign(ACT,{buyScan:()=>{buyScan()},buyOrd:()=>{buyFindOrder(false)},buyO
       else if(B.done&&F==='lic')top+='<div class="note buyNote ok">Looked through all <b>'+B.n+'</b> players: <b>'+B.found.filter(x=>x.lic).length+'</b> with the License, <b>'+B.found.length+'</b> who bought something.</div>';
       else if(F==='lic'&&!B.done)top+='<div class="note buyNote">This only looks at the players loaded below (the most recently active). <button class="btn sm" data-act="buyScan">'+ic('search')+'Look through every player</button></div>'}
     if(top)h=top+h}catch(e){}return h}}
-(function(){const st=document.createElement('style');st.textContent='.buyNote{display:block;margin:0 0 8px;line-height:1.5}.buyNote .i{width:15px;height:15px;vertical-align:-3px}.buyNote .btn{margin:4px 0 0 6px;vertical-align:middle}.buyNote.ok{border-color:color-mix(in srgb,#36d399 45%,transparent)}';document.head.appendChild(st)})();
+(function(){const st=document.createElement('style');st.textContent='.buyNote{display:block;margin:0 0 8px;line-height:1.5}.buyNote .i{width:15px;height:15px;vertical-align:-3px}.buyNote .btn{margin:4px 0 0 6px;vertical-align:middle}.buyHits{margin:0 0 10px}.buyNote.ok{border-color:color-mix(in srgb,#36d399 45%,transparent)}';document.head.appendChild(st)})();
 
 /* =====================================================================
    INBOX
@@ -3778,8 +3796,8 @@ function histSeedMock(){if(DB.mode!=='mock')return Promise.resolve();const all=D
 const CORE=['plays','motd','stat','live','rep','sup','ver','fbN'];
 const NEEDS={home:[],stats:['plays'],retention:['plays'],funnel:['plays'],goals:['plays'],sessions:['plays'],activity:[],shop:[],perf:['motd','stat'],
   messages:['motd','stat'],library:['motd'],events:['live'],store:['live'],monuments:['mon'],updates:['motd','ver','mon','tags','plays'],
-  profiles:['pl','tags','plays'],boards:['lb','lbw','hid','dn'],names:['dn','blk'],tags:['tags'],support:['sup'],feedback:['feedback'],reports:['rep']};
-Object.assign(LBL,{fbN:'new feedback'});S.busyK={};S.fbN=[];
+  profiles:['pl','tags','plays'],boards:['lb','lbw','svw','hid','dn'],names:['dn','blk'],tags:['tags'],support:['sup'],feedback:['feedback'],reports:['rep']};
+Object.assign(LBL,{fbN:'new feedback',svw:'this week\'s Survival board'});S.busyK={};S.fbN=[];
 // feedback from the last day, for the Inbox badge and Home (the full list loads when you open Feedback)
 LOAD.fbN=()=>DB.query('feedback',{where:[['at','>',new Date(Date.now()-DAY)]],limit:100}).then(r=>{S.fbN=r.map(x=>x.data)});
 fbNew=function(){const t=Date.now();return (S.loaded.feedback?S.fb:S.fbN||[]).filter(f=>(+f.at||0)>t-DAY).length};
@@ -4414,8 +4432,8 @@ async function banGive(uid){uid=String(uid||'').trim();if(!/^[A-Za-z0-9_-]{6,128
   let ds=[];try{const d=await DB.get('devs/'+uid);ds=(d&&Array.isArray(d.ds)?d.ds:[]).filter(x=>typeof x==='string'&&/^[0-9a-f]{8,64}$/.test(x)).slice(0,5)}catch(e){}
   const ops=[{op:'set',path:'bans/'+uid,data:{uid,why,at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},
     ...ds.map(d=>({op:'set',path:'bandev/'+d,data:{uid,why,at:Date.now(),by:S.user&&S.user.email||''}})),
-    {op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid}];
-  try{await DB.batch(ops);toast((nm?'“'+nm+'”':'They')+' can\'t play now');await load(['bans','lb','lbw','hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid);render()}catch(e){toast(fsErr(e),'err')}}
+    {op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid},{op:'delete',path:'svw_'+weekId()+'/'+uid},{op:'delete',path:'svw_'+weekId(Date.now()-7*DAY)+'/'+uid}];
+  try{await batchSv(ops);toast((nm?'“'+nm+'”':'They')+' can\'t play now');await load(['bans','lb','lbw','svw','hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid);render()}catch(e){toast(fsErr(e),'err')}}
 async function banLift(uid){let nm='';try{nm=hidName(uid)}catch(e){}
   if(!await ask({title:'Unban '+(nm?'“'+nm+'”':'this player')+'?',body:'Their game comes back at once (it reloads by itself if it\'s open), with everything as it was. They stay off the leaderboards until you put them back from their profile.',ok:'Unban'}))return;
   try{const cur=await DB.get('bans/'+uid).catch(()=>null);await DB.del('bans/'+uid);
@@ -4549,6 +4567,7 @@ function p3ProfHTML(){const P=S.prof;if(!P)return '';
   const cal=g.cal||{};h+=p3Fold('gifts','gift','Rewards and gifts','Daily day '+((cal.step||0)+1)+' of 7 · '+nf(c.gifts||0)+' message gift'+((c.gifts||0)===1?'':'s')+' · '+nf(c.mail||0)+' mail',p3Body(sec['Rewards and gifts']));
   const dmIn=sumO(pf.dm&&pf.dm.in),dmOut=sumO(pf.dm&&pf.dm.out);h+=p3Fold('src','chart','Where their Dark Matter comes from',dmIn||dmOut?'In '+fmtBig(dmIn)+' · out '+fmtBig(dmOut):'Nothing recorded',p3Body(sec['Where Dark Matter comes from']));
   const bk=Object.keys(g.items||{}).filter(k=>g.items[k]>0);h+=p3Fold('boost','gift','Boosters',bk.length?bk.length+' kind'+(bk.length>1?'s':'')+' in stock · '+nf(st.used||0)+' used':'None in stock',p3Body(sec['Boosters'])+'<div class="facts" style="margin-top:10px"><button class="btn sm sec" data-act="p3Chg" data-v="item">'+ic('gift')+'Give a booster</button><button class="btn sm sec" data-act="p3Chg" data-v="items0">Remove all boosters</button></div>');
+  {const af=g.af;h+=p3Fold('salv','star','Salvage (1.26)',af?'Tier '+nf(af.tier||0)+' cleared · Survival '+(af.sv&&af.sv.best?'wave '+nf(af.sv.best.w):'—')+' · '+nf(af.runs||0)+' runs':'Not played yet',p3Body(sec['Salvage'])||'<div class="sub">Not played yet.</div>')}
   h+=p3Fold('days','chart','Days played',nf(plays.length)+' in the last 35',p3Body(sec['Play'])||'');
   let tg='No tags';try{const w=S.tags.who[P.uid];if(w&&w.t&&w.t.length)tg=w.t.map(id=>{const d=S.tags.defs.find(x=>x.id===id);return d?esc(d.n):''}).filter(Boolean).join(', ')}catch(e){}
   h+=p3Fold('tags','tag','Tags and name colour',tg,parts.tag?parts.tag.innerHTML.replace(/<div class="ph">[\s\S]*?<\/div><\/div>/,''):'');
@@ -4749,8 +4768,8 @@ async function delPurge(uid){const ops=[];const del=p=>ops.push({op:'delete',pat
   const [pur,mail,supm,adm,dn]=await Promise.all([DB.query('users/'+uid+'/purchases',{limit:400}).catch(()=>[]),DB.query('mail/'+uid+'/m',{limit:400}).catch(()=>[]),DB.query('sup/'+uid+'/m',{limit:400}).catch(()=>[]),DB.query('adm/'+uid+'/ops',{limit:400}).catch(()=>[]),DB.get('dn/'+uid).catch(()=>null)]);
   pur.forEach(x=>del('users/'+uid+'/purchases/'+x.id));mail.forEach(x=>del('mail/'+uid+'/m/'+x.id));supm.forEach(x=>del('sup/'+uid+'/m/'+x.id));adm.forEach(x=>del('adm/'+uid+'/ops/'+x.id));
   if(dn&&dn.key){const c=await DB.get('names/'+dn.key).catch(()=>null);if(c&&c.uid===uid)del('names/'+dn.key)}
-  ['users/'+uid,'dn/'+uid,'lb/'+uid,'lbw_'+weekId()+'/'+uid,'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid,'sup/'+uid,'supmute/'+uid,'offu/'+uid,'devs/'+uid,'lbhide/'+uid].forEach(del);
-  for(let i=0;i<ops.length;i+=400)await DB.batch(ops.slice(i,i+400));
+  ['users/'+uid,'dn/'+uid,'lb/'+uid,'lbw_'+weekId()+'/'+uid,'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid,'svw_'+weekId()+'/'+uid,'svw_'+weekId(Date.now()-7*DAY)+'/'+uid,'sup/'+uid,'supmute/'+uid,'offu/'+uid,'devs/'+uid,'lbhide/'+uid].forEach(del);
+  await batchSv(ops);
   const m=S.ccdel[uid]||{};await DB.del('ccdel/'+uid);delete S.ccdel[uid];S.p3.purged.push(m.name||shortUid(uid));
   if(S.pl)S.pl=S.pl.filter(x=>x.uid!==uid);if(S.prof&&S.prof.uid===uid)S.prof=null}
 // the Command Center shows none of them while hidden: the lists are filtered while a page is drawn
@@ -4969,7 +4988,7 @@ S.tab=pageFor(location.hash.slice(1)||'home');
 render();
 loadLibrary();
 DB.init().catch(e=>{if(DB.mode!=='live')throw e;console.warn('[cc] Firebase unavailable, using preview data',e);S.fallback=e&&e.message||String(e);DB=mockDB();return DB.init()}).then(()=>{
-  S.ready=true;if(DB.mode==='mock')window.__cc={get DB(){return DB},S:S,LIM:LIM,fn:{supSend,giftClean,giftText,giftParts,emptyGift,GF,pfSend,profOpen,render}};
+  S.ready=true;if(DB.mode==='mock')window.__cc={get DB(){return DB},S:S,LIM:LIM,fn:{supSend,giftClean,giftText,giftParts,emptyGift,GF,pfSend,profOpen,render,load}};
   DB.onAuth(u=>{S.user=u;S.admin=!!(u&&ADMINS.indexOf(u.email)>=0);S.err=null;render();if(S.admin)loadAll()})
 },e=>{S.ready=true;S.err=e;render()});
 })();
