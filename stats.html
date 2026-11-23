@@ -1142,7 +1142,12 @@ const LV_PATHS=[
   [/^boost\.[a-z]{1,12}\.(common|rare|epic|ultra)$/,'cost'],
   [/^gup\.all\.x$/,'x'],
   // 1.24: relics (older games don't know these and leave them out)
-  [/^relic\.price$/,'cost'],[/^relic\.(every|sure|bulk)$/,'streak'],[/^relic\.chance$/,'pct']];
+  [/^relic\.price$/,'cost'],[/^relic\.(every|sure|bulk)$/,'streak'],[/^relic\.chance$/,'pct'],
+  // 1.26: Salvage (older games don't know these and leave them out): who has it (% of players), a run's numbers (×),
+  // hull repair (% a second), stakes a day; each upgrade (first price, growth, max), each weapon (gems), each Expedition tier
+  [/^sal\.open$/,'pct'],[/^sal\.(cargo|haul|spawn|tough|upx|wx|keys|relics)$/,'x'],[/^sal\.repair$/,'pct'],[/^sal\.stakes$/,'maxs'],
+  [new RegExp('^salup\\.'+LV_ID+'\\.cost$'),'cost'],[new RegExp('^salup\\.'+LV_ID+'\\.grow$'),'grow'],[new RegExp('^salup\\.'+LV_ID+'\\.max$'),'max'],
+  [new RegExp('^salw\\.'+LV_ID+'\\.price$'),'cost'],[/^saltier\.([1-9]|10)\.mult$/,'x']];
 // a room's effect stays sensible at every level: one that makes things cheaper or faster ("d") never reaches 5% or below 0
 function lvRoomOk(t,base,per,max){base=+base;per=+per;max=+max;if(!(base>=.05))return false;return t==='m'||base-per*Math.max(0,max-1)>=.05}
 function lvKindOf(path){if(typeof path!=='string'||path.length>140||/(^|\.)(__proto__|prototype|constructor)(\.|$)/.test(path))return null;for(const [re,k] of LV_PATHS)if(re.test(path))return k;return null}
@@ -2174,7 +2179,7 @@ function blockedHTML(){const st=secState('blk');if(st)return st;if(!S.blk.length
 async function batchSv(ops){const a=[],b=[];for(const o of ops)(/^svw_/.test(o.path)?b:a).push(o);for(let i=0;i<a.length;i+=400)await DB.batch(a.slice(i,i+400));
   for(let i=0;i<b.length;i+=400){try{await DB.batch(b.slice(i,i+400))}catch(e){console.warn('[cc] svw (rules not published yet?)',e)}}}
 function svT(s){s=Math.floor(+s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
-function lbTable(k){const st=secState(k);if(st)return st;const rows=S[k];if(k==='svw'&&S.svwOff)return '<div class="empty sm">Not live yet: publish the 1.26 rules (the <b>svw</b> block in firestore.rules) in Firebase → Firestore → Rules.</div>';if(!rows.length)return '<div class="empty sm">Nobody on this board yet.</div>';
+function lbTable(k){const st=secState(k);if(st)return st;const rows=S[k];if(k==='svw'&&S.svwOff)return '<div class="empty sm">Not live yet: publish the Salvage rules (the <b>svw</b> block in firestore.rules) in Firebase → Firestore → Rules.</div>';if(!rows.length)return '<div class="empty sm">Nobody on this board yet.</div>';
   return '<div class="tw"><table class="tbl lbt"><thead><tr><th>#</th><th style="text-align:left">Name</th><th>Lv</th><th>'+(k==='lb'?'XP':k==='svw'?'Run':'Value')+'</th><th></th></tr></thead><tbody>'+rows.map((x,i)=>{const d=x.data;return '<tr class="'+(i===0?'p1':'')+'"><td class="rk">'+(i+1)+'</td><td class="nm" style="text-align:left" title="'+esc(x.id)+'">'+(d.dn?esc(d.dn):'<span class="cs">'+esc(csName(d.c1,d.c2,d.n)||'Commander')+'</span>')+(d.ch>0?' <span title="Weekly champion">👑</span>':'')+'</td><td>'+esc(d.lv||'')+'</td><td>'+(k==='lb'?nf(d.xp):k==='svw'?'Wave '+nf(d.sw)+' · '+svT(d.ss):'$'+fmtBig(d.wg))+'</td><td><button class="ib xs" data-act="lbHide" data-v="'+esc(x.id)+'" title="Take off the leaderboards" aria-label="Take '+esc(d.dn||csName(d.c1,d.c2,d.n)||'this player')+' off the leaderboards">'+ic('userx')+'</button></td></tr>'}).join('')+'</tbody></table></div>'}
 function paintDn(){const el=$('#dnList');if(el)el.innerHTML=dnListHTML()}
 /* ---------- kept off the leaderboards: lbhide/{uid} (the developer's own account, cheaters). The rules stop their game
@@ -4567,7 +4572,7 @@ function p3ProfHTML(){const P=S.prof;if(!P)return '';
   const cal=g.cal||{};h+=p3Fold('gifts','gift','Rewards and gifts','Daily day '+((cal.step||0)+1)+' of 7 · '+nf(c.gifts||0)+' message gift'+((c.gifts||0)===1?'':'s')+' · '+nf(c.mail||0)+' mail',p3Body(sec['Rewards and gifts']));
   const dmIn=sumO(pf.dm&&pf.dm.in),dmOut=sumO(pf.dm&&pf.dm.out);h+=p3Fold('src','chart','Where their Dark Matter comes from',dmIn||dmOut?'In '+fmtBig(dmIn)+' · out '+fmtBig(dmOut):'Nothing recorded',p3Body(sec['Where Dark Matter comes from']));
   const bk=Object.keys(g.items||{}).filter(k=>g.items[k]>0);h+=p3Fold('boost','gift','Boosters',bk.length?bk.length+' kind'+(bk.length>1?'s':'')+' in stock · '+nf(st.used||0)+' used':'None in stock',p3Body(sec['Boosters'])+'<div class="facts" style="margin-top:10px"><button class="btn sm sec" data-act="p3Chg" data-v="item">'+ic('gift')+'Give a booster</button><button class="btn sm sec" data-act="p3Chg" data-v="items0">Remove all boosters</button></div>');
-  {const af=g.af;h+=p3Fold('salv','star','Salvage (1.26)',af?'Tier '+nf(af.tier||0)+' cleared · Survival '+(af.sv&&af.sv.best?'wave '+nf(af.sv.best.w):'—')+' · '+nf(af.runs||0)+' runs':'Not played yet',p3Body(sec['Salvage'])||'<div class="sub">Not played yet.</div>')}
+  {const af=g.af;h+=p3Fold('salv','star','Salvage',af?'Tier '+nf(af.tier||0)+' cleared · Survival '+(af.sv&&af.sv.best?'wave '+nf(af.sv.best.w):'—')+' · '+nf(af.runs||0)+' runs':'Not played yet',p3Body(sec['Salvage'])||'<div class="sub">Not played yet.</div>')}
   h+=p3Fold('days','chart','Days played',nf(plays.length)+' in the last 35',p3Body(sec['Play'])||'');
   let tg='No tags';try{const w=S.tags.who[P.uid];if(w&&w.t&&w.t.length)tg=w.t.map(id=>{const d=S.tags.defs.find(x=>x.id===id);return d?esc(d.n):''}).filter(Boolean).join(', ')}catch(e){}
   h+=p3Fold('tags','tag','Tags and name colour',tg,parts.tag?parts.tag.innerHTML.replace(/<div class="ph">[\s\S]*?<\/div><\/div>/,''):'');
