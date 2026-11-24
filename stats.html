@@ -1145,7 +1145,10 @@ const LV_PATHS=[
   [/^relic\.price$/,'cost'],[/^relic\.(every|sure|bulk)$/,'streak'],[/^relic\.chance$/,'pct'],
   // 1.26: Salvage (older games don't know these and leave them out): who has it (% of players), a run's numbers (×),
   // hull repair (% a second), stakes a day; each upgrade (first price, growth, max), each weapon (gems), each Expedition tier
-  [/^sal\.open$/,'pct'],[/^sal\.(cargo|haul|spawn|tough|upx|wx|keys|relics)$/,'x'],[/^sal\.repair$/,'pct'],[/^sal\.stakes$/,'maxs'],
+  [/^sal\.open$/,'pct'],[/^sal\.(cargo|haul|spawn|tough|upx|wx|keys|relics)$/,'x'],[/^sal\.repair$/,'pct'],[/^sal\.(stakes|repads)$/,'maxs'],
+  // a Salvage run's time limit and its overtime: seconds (time limit, hunters' wait, keys and relics from); × (rarer crystals,
+  // hunters' strength, how many hunters, crystal bonus a minute, the bonus's top); % a kill (Upgrade Key, relic)
+  [/^sal\.(time|otwait|otloot)$/,'time'],[/^sal\.(otrare|otfoes|othorde|otbonus|otmax|holdgrow|wlvx|repx)$/,'x'],[/^sal\.(otkeys|otrelics|repdrop)$/,'pct'],
   [new RegExp('^salup\\.'+LV_ID+'\\.cost$'),'cost'],[new RegExp('^salup\\.'+LV_ID+'\\.grow$'),'grow'],[new RegExp('^salup\\.'+LV_ID+'\\.max$'),'max'],
   [new RegExp('^salw\\.'+LV_ID+'\\.price$'),'cost'],[/^saltier\.([1-9]|10)\.mult$/,'x']];
 // a room's effect stays sensible at every level: one that makes things cheaper or faster ("d") never reaches 5% or below 0
@@ -1287,14 +1290,15 @@ function actDefault(go){return !go?'':go.indexOf('shop:')===0?'Open the Shop':AC
 function actLabel(go){if(!go)return 'nothing';if(go.indexOf('url:')===0)return go.slice(4);return ACT_NAME[go]||go}
 const SYS=['Sol Verge','Ashmere','Cobalt Reach','Vel Ardent','Frostholm','Nullrift','Emberwake','Lumen Drift','Umbral Deep','Chrona','Zenith Expanse'];
 const MULTS=[2,5,10,25],MULT_C={2:'#5aa9ff',5:'#ff5d5d',10:'#b46bff',25:'#ffd166'},MULT_N={2:'Light',5:'Heavy',10:'Great',25:'Legendary'};
-const SECS={boost:{n:'Boosters',kind:'pct',long:'every booster'},crates:{n:'Crates',kind:'pct',long:'every crate'},perks:{n:'Perks',kind:'pct',long:'every perk'},wheel:{n:'Wheel spins',kind:'pct',long:'wheel spins'},
+/* 1.25 (Nov 24): 'all' takes the % off every Gem or Star Shard price in the Shop (Black Friday); looks, relics and Gem Upgrades on their own too. A sale whose id starts with bf2026 replaces the game's built-in Black Friday (0% stops it). */
+const SECS={all:{n:'Everything (Black Friday)',kind:'pct',long:'everything in the Shop'},looks:{n:'Looks',kind:'pct',long:'every theme, plaque and Hangar look'},relic:{n:'Relics',kind:'pct',long:'relics'},gup:{n:'Gem Upgrades',kind:'pct',long:'every Gem Upgrade'},boost:{n:'Boosters',kind:'pct',long:'every booster'},crates:{n:'Crates',kind:'pct',long:'every crate'},perks:{n:'Perks',kind:'pct',long:'every perk'},wheel:{n:'Wheel spins',kind:'pct',long:'wheel spins'},
   bundles:{n:'Bundles',kind:'bonus',one:'bundle'},gems:{n:'Dark Matter packs',kind:'bonus',one:'Dark Matter pack'},shards:{n:'Star Shard packs',kind:'bonus',one:'Star Shard pack'}};
 const BOOST=[];
 [['mine','Mining'],['prod','Foundry'],['trade','Trade'],['probe','Probe']].forEach(t=>[['common',2],['rare',5],['epic',10],['ultra',25]].forEach(r=>BOOST.push({id:t[0]+'_'+r[0],n:t[1]+' x'+r[1],g:t[1]})));
 [['common',1],['rare',4],['epic',8],['ultra',24]].forEach(r=>BOOST.push({id:'warp_'+r[0],n:'Time Warp '+r[1]+'h',g:'Time Warp'}));
 [['common',1],['rare',4],['epic',12],['ultra',48]].forEach(r=>BOOST.push({id:'cash_'+r[0],n:'Windfall '+r[1]+'h',g:'Windfall'}));
 const BOOSTMAP={};BOOST.forEach(b=>{BOOSTMAP[b.id]=b});
-const GF=[{k:'dm',n:'Dark Matter',max:10000},{k:'sh',n:'Star Shards',max:10000},{k:'uk',n:'Upgrade Keys',max:100},{k:'ck',n:'Crate Keys',max:100},{k:'cash',n:'Income (hours)',max:48,dec:true},{k:'ship',n:'Ship levels',max:3},{k:'rl',n:'Relics (game 1.24+)',max:50}];
+const GF=[{k:'dm',n:'Dark Matter',max:10000},{k:'sh',n:'Star Shards',max:10000},{k:'uk',n:'Upgrade Keys',max:100},{k:'ck',n:'Crate Keys',max:100},{k:'cash',n:'Income (hours)',max:48,dec:true},{k:'ship',n:'Ship levels',max:3},{k:'rl',n:'Relics (game 1.24+)',max:50},{k:'rep',n:'Free ship repairs (game 1.25+)',max:50}];
 const GIFT_ITEM_MAX=50,GIFT_KINDS_MAX=12;
 /* callsigns: copied from src/10-lb.js. NEVER reorder: the game stores positions in these lists */
 const CS1=['Nova','Solar','Lunar','Stellar','Cosmic','Astral','Quantum','Crimson','Azure','Golden','Silent','Iron','Void','Ion','Plasma','Nebula','Comet','Orbit','Rogue','Swift','Neon','Frost','Ember','Shadow','Radiant','Atomic','Polar','Zenith','Echo','Vector','Photon','Titan','Aurora','Onyx','Cobalt','Prism','Drift','Pulsar','Vortex','Halo'];
@@ -1302,12 +1306,12 @@ const CS2=['Falcon','Drifter','Miner','Voyager','Pioneer','Ranger','Forge','Rave
 function csName(c1,c2,n){if(c1==null||c2==null||!CS1[c1]||!CS2[c2])return null;return CS1[c1]+' '+CS2[c2]+(n?' '+n:'')}
 
 function emptyGift(){return {dm:0,sh:0,uk:0,ck:0,cash:0,ship:0,rl:0,items:{}}}
-function giftClean(g){const o={dm:Math.trunc(+g.dm||0),sh:Math.trunc(+g.sh||0),uk:Math.trunc(+g.uk||0),ck:Math.trunc(+g.ck||0),cash:+g.cash||0,ship:Math.trunc(+g.ship||0),items:{}};const rl=Math.max(0,Math.min(50,Math.trunc(+g.rl||0)));if(rl)o.rl=rl;Object.keys(g.items||{}).forEach(id=>{const n=Math.trunc(+g.items[id]||0);if(n>0&&BOOSTMAP[id])o.items[id]=n});return o}
+function giftClean(g){const o={dm:Math.trunc(+g.dm||0),sh:Math.trunc(+g.sh||0),uk:Math.trunc(+g.uk||0),ck:Math.trunc(+g.ck||0),cash:+g.cash||0,ship:Math.trunc(+g.ship||0),items:{}};const rl=Math.max(0,Math.min(50,Math.trunc(+g.rl||0)));if(rl)o.rl=rl;const rep=Math.max(0,Math.min(50,Math.trunc(+g.rep||0)));if(rep)o.rep=rep;Object.keys(g.items||{}).forEach(id=>{const n=Math.trunc(+g.items[id]||0);if(n>0&&BOOSTMAP[id])o.items[id]=n});return o}
 function giftParts(g){if(!g)return [];const p=[];
   /* same labels as the game */
   if(g.dm)p.push(['💎',g.dm+' Dark Matter']);if(g.sh)p.push(['🔷',g.sh+' Star Shards']);
   if(g.uk)p.push(['🔑',g.uk+' Upgrade Keys']);if(g.ck)p.push(['🗝️',g.ck+' Crate Keys']);
-  if(g.cash)p.push(['💰',g.cash+'h of income']);if(g.ship)p.push(['🚀',g.ship+' ship upgrades']);if(g.rl)p.push(['🔮',g.rl+' Relic'+(g.rl>1?'s':'')]);
+  if(g.cash)p.push(['💰',g.cash+'h of income']);if(g.ship)p.push(['🚀',g.ship+' ship upgrades']);if(g.rl)p.push(['🔮',g.rl+' Relic'+(g.rl>1?'s':'')]);if(g.rep)p.push(['🔧',g.rep+' free ship repair'+(g.rep>1?'s':'')]);
   Object.keys(g.items||{}).forEach(id=>{const n=g.items[id];if(n>0)p.push(['⚡',n+'× '+(BOOSTMAP[id]?BOOSTMAP[id].n:id)])});return p}
 function giftText(g){return giftParts(g).map(x=>x[1]).join(' · ')}
 
@@ -1898,7 +1902,7 @@ const CSECS={
       +tgl('pop',d.pop,'Pop up in game','On open, or right away if it goes live while they play. Off: bell inbox only.')+tgl('paused',d.paused,'Paused','Saved but hidden in game until you resume it.'))}
 };
 const CORDER=['tpl','to','look','words','img','cta','gift','when','link','who'];
-function secSelect(id,f,v){return '<select class="inp" id="'+id+'" data-f="'+f+'"><optgroup label="Discount (% off the gem price)">'+['boost','crates','perks','wheel'].map(s=>'<option value="'+s+'"'+(v===s?' selected':'')+'>'+SECS[s].n+'</option>').join('')+'</optgroup><optgroup label="Bonus (% more contents)">'+['bundles','gems','shards'].map(s=>'<option value="'+s+'"'+(v===s?' selected':'')+'>'+SECS[s].n+'</option>').join('')+'</optgroup></select>'}
+function secSelect(id,f,v){return '<select class="inp" id="'+id+'" data-f="'+f+'"><optgroup label="Discount (% off the gem price)">'+['all','boost','crates','perks','wheel','looks','relic','gup'].map(s=>'<option value="'+s+'"'+(v===s?' selected':'')+'>'+SECS[s].n+'</option>').join('')+'</optgroup><optgroup label="Bonus (% more contents)">'+['bundles','gems','shards'].map(s=>'<option value="'+s+'"'+(v===s?' selected':'')+'>'+SECS[s].n+'</option>').join('')+'</optgroup></select>'}
 function toPicker(d){if(d.to)return '<div class="pick" style="margin-top:12px"><div class="who">'+ic('user')+'<div><b>'+esc(d.to.name||'No display name')+'</b><span class="mono">'+esc(d.to.uid)+'</span></div></div><button class="btn sm sec" data-act="seeMail">'+ic('msg')+'See this player\'s mail</button><button class="btn sm sec" data-act="toClear">Change</button></div><p class="hint">Writes mail/'+esc(shortUid(d.to.uid))+'/m/'+esc(d.id)+'. Only this player sees it.</p><div class="err" data-err="to"></div>';
   return '<div class="row" style="margin-top:12px">'+fld('f-toQ','Search display names','<input class="inp" id="f-toQ" data-f="toQ" value="'+esc(S.toQ||'')+'" placeholder="First letters, e.g. star" autocomplete="off">','')+'<label class="fld" for="f-toUid"><span class="lbl">…or paste a uid</span><span class="ig"><input class="inp mono" id="f-toUid" data-f="toUid" placeholder="Firebase uid" autocomplete="off"><button class="btn sm sec" data-act="toUse">Use</button></span></label></div><div class="tores" id="toRes">'+toResHTML()+'</div><div class="err" data-err="to"></div>'}
 function toResHTML(){return (S.toRes||[]).map(x=>'<button data-act="toPick" data-v="'+esc(x.id)+'" data-n="'+esc(x.data.name||'')+'">'+esc(x.data.name||'(reset)')+'<span class="mono">'+esc(shortUid(x.id))+'</span></button>').join('')}
@@ -2176,7 +2180,9 @@ function blockedHTML(){const st=secState('blk');if(st)return st;if(!S.blk.length
 /* 1.26 Salvage: Survival's weekly board (svw_<week>: wave sw, seconds ss, sv = sw*100000+ss to sort by) */
 // Survival entries are written on their own and may fail quietly: until the 1.26 rules (the svw block) are published,
 // Firestore refuses them, and that must not stop a ban, a take-off, a name reset or a deletion from going through.
-async function batchSv(ops){const a=[],b=[];for(const o of ops)(/^svw_/.test(o.path)?b:a).push(o);for(let i=0;i<a.length;i+=400)await DB.batch(a.slice(i,i+400));
+// 1.25: the Overtime board (otw_<week>) and the all-time Salvage records (sva/{uid} Survival, ota/{uid} Overtime) come off too
+function salDel(uid){return ['otw_'+weekId()+'/'+uid,'otw_'+weekId(Date.now()-7*DAY)+'/'+uid,'sva/'+uid,'ota/'+uid].map(path=>({op:'delete',path}))}
+async function batchSv(ops){const a=[],b=[];for(const o of ops)(/^(svw_|otw_|sva\/|ota\/)/.test(o.path)?b:a).push(o);for(let i=0;i<a.length;i+=400)await DB.batch(a.slice(i,i+400));
   for(let i=0;i<b.length;i+=400){try{await DB.batch(b.slice(i,i+400))}catch(e){console.warn('[cc] svw (rules not published yet?)',e)}}}
 function svT(s){s=Math.floor(+s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
 function lbTable(k){const st=secState(k);if(st)return st;const rows=S[k];if(k==='svw'&&S.svwOff)return '<div class="empty sm">Not live yet: publish the Salvage rules (the <b>svw</b> block in firestore.rules) in Firebase → Firestore → Rules.</div>';if(!rows.length)return '<div class="empty sm">Nobody on this board yet.</div>';
@@ -2190,7 +2196,7 @@ function hidName(uid){const r=S.dn.find(x=>x.id===uid);if(r&&r.data.name)return 
 function hidHTML(){if(secState('hid')||!S.hid.length)return '';return '<h3 style="margin-top:16px">Kept off the leaderboards</h3>'+S.hid.map(x=>'<div class="prow"><div class="pmain"><div class="pn">'+esc(x.data.name||shortUid(x.id))+'</div><div class="pmeta"><span class="mono">'+esc(shortUid(x.id))+'</span><span>since '+esc(rel(x.data.at||0))+'</span></div></div><div class="pacts"><button class="btn sm sec" data-act="lbShow" data-v="'+esc(x.id)+'">Put back</button></div></div>').join('')}
 async function lbHide(uid){const nm=hidName(uid);
   if(!await ask({title:'Take “'+nm+'” off the leaderboards?',body:'Their entries come off the all-time board, this week\'s and last week\'s, and their game can no longer post a score (their own rank shows “—”). Their game and progress are not touched. You can put them back any time.',ok:'Take off the boards',danger:true}))return;
-  const ops=[{op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm).slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid},{op:'delete',path:'svw_'+weekId()+'/'+uid},{op:'delete',path:'svw_'+weekId(Date.now()-7*DAY)+'/'+uid}];
+  const ops=[{op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm).slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid},{op:'delete',path:'svw_'+weekId()+'/'+uid},{op:'delete',path:'svw_'+weekId(Date.now()-7*DAY)+'/'+uid},...salDel(uid)];
   try{await batchSv(ops);toast('“'+nm+'” is off the leaderboards');await load(['lb','lbw','svw','hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid)}catch(e){toast(fsErr(e),'err')}}
 async function lbShow(uid){const nm=hidName(uid);if(!await ask({title:'Put “'+nm+'” back on the leaderboards?',body:'Their game posts their score again within a few minutes of playing.',ok:'Put back'}))return;
   try{await DB.del('lbhide/'+uid);toast('“'+nm+'” can be on the leaderboards again');await load(['hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid)}catch(e){toast(fsErr(e),'err')}}
@@ -3095,7 +3101,7 @@ async function ovRemove(){if(S.ov.busy)return;S.ov.busy=true;soonRender();
     const many=old.length>1;
     if(!await ask({title:'Take '+old.length+' player'+(many?'s':'')+' off the leaderboards?',body:(many?'They play':'They play')+' a version older than 1.22. Their entries come off the all-time board, this week\'s and last week\'s, and they\'re marked “Needs update”, so their game can\'t post a score. Their game and progress aren\'t touched. Once they update, “Put updated players back” returns them.',ok:'Take them off',danger:true}))return;
     ovSay('Taking them off…');const at=Date.now(),by=S.user&&S.user.email||'',ops=[];
-    old.forEach(o=>{ops.push({op:'set',path:'lbhide/'+o.uid,data:{at,by,name:String(nameOf[o.uid]||'').slice(0,40),why:'ver',v:String(o.v||'').slice(0,12)}},{op:'delete',path:'lb/'+o.uid},{op:'delete',path:'lbw_'+wk+'/'+o.uid},{op:'delete',path:'lbw_'+lw+'/'+o.uid},{op:'delete',path:'svw_'+wk+'/'+o.uid},{op:'delete',path:'svw_'+lw+'/'+o.uid})});
+    old.forEach(o=>{ops.push({op:'set',path:'lbhide/'+o.uid,data:{at,by,name:String(nameOf[o.uid]||'').slice(0,40),why:'ver',v:String(o.v||'').slice(0,12)}},{op:'delete',path:'lb/'+o.uid},{op:'delete',path:'lbw_'+wk+'/'+o.uid},{op:'delete',path:'lbw_'+lw+'/'+o.uid},{op:'delete',path:'svw_'+wk+'/'+o.uid},{op:'delete',path:'svw_'+lw+'/'+o.uid},...salDel(o.uid))});
     await batchSv(ops);
     toast(old.length+' player'+(many?'s are':' is')+' off the leaderboards until they update','good');
     await load(['lb','lbw','svw','hid'])
@@ -4192,6 +4198,44 @@ document.addEventListener('input',e=>{const el=e.target;const f=el&&el.dataset&&
 {const s0=monSum;monSum=function(m){const L=s0.apply(this,arguments);try{if(m.from||m.to)L.unshift(m.from&&m.from===m.to?'On '+cxWhen(m.from)+' only':(m.from?cxWhen(m.from):'…')+' to '+(m.to?cxWhen(m.to):'…'))}catch(e){}return L}}
 (function(){const st=document.createElement('style');st.textContent='.glBox{margin:4px 0 12px;padding:10px 12px;border-radius:12px;background:rgba(255,209,102,.05);box-shadow:inset 0 0 0 1px rgba(255,209,102,.2)}.glBox .lbl{display:block;margin-bottom:6px}.glBox .lbl small{font-weight:500;color:var(--mu2);margin-left:4px}.glBox .facts{justify-content:flex-start}';document.head.appendChild(st)})();
 
+/* ---------- 1.25: NEW MONUMENTS, AND ARROWS TO THEM (Joe, Nov 24 08:00) ----------
+   "Allow me to make it so other monuments can be marked as new for players." A monument can be marked NEW: game 1.25
+   shows a NEW tag over it, and an arrow at the edge of the screen pointing to it while it's off screen, until each player
+   has opened it. Marking it NEW again later (a fresh mark) shows it to everyone again. A monument can also keep an arrow
+   pointing to it for good. The Salvage Gate is built into the game (not in this list): its arrow and NEW are on unless
+   switched off at the top of this page (config/mon.gate; the Firestore rules must allow "gate" on config/mon). */
+S.mon.gate=null;
+LOAD.mon=()=>monSeedMock().then(()=>DB.get('config/mon')).then(d=>{S.mon.list=d&&Array.isArray(d.list)?d.list:[];S.mon.gate=d&&d.gate&&typeof d.gate==='object'?d.gate:null});
+function monGateNow(){const g=S.mon.gate||{};return {arrow:g.arrow!==false,isNew:g.isNew!==false,newAt:String(g.newAt||'g125').slice(0,40)}}
+function monNewStamp(){return new Date().toISOString().slice(0,16)}
+monSaveList=function(L,msg,gate){S.mon.busy=true;render();const ids=new Set();const clean=L.map((m,i)=>monCleanForSave(m,i,ids));const doc={list:clean,up:DB.serverTime()};const g=gate||S.mon.gate;if(g)doc.gate={arrow:g.arrow!==false,isNew:g.isNew!==false,newAt:String(g.newAt||'g125').slice(0,40)};
+  return DB.set('config/mon',doc).then(()=>{S.mon.list=clean;if(doc.gate)S.mon.gate=doc.gate;S.mon.busy=false;S.mon.edit=null;S.mon.idx=-1;toast(msg||'Saved: players see it within a minute');render()},e=>{S.mon.busy=false;render();toast(fsErr(e),'err')})};
+{const c0=monCleanForSave;monCleanForSave=function(m){const o=c0.apply(this,arguments);try{if(m.isNew){o.isNew=true;o.newAt=String(m.newAt||monNewStamp()).slice(0,40)}if(m.arrow)o.arrow=true}catch(e){}return o}}
+{const s0=monSum;monSum=function(m){const L=s0.apply(this,arguments);try{if(m.arrow&&!m.isNew)L.unshift('Arrow points to it');if(m.isNew)L.unshift('NEW (since '+String(m.newAt||'').replace('T',' ')+')')}catch(e){}return L}}
+// the editor: the two switches, under "Show it in the game"
+{const m0=monEditHTML;monEditHTML=function(){let h=m0.apply(this,arguments);try{const d=S.mon.edit;const tg=(f,on,t,sm)=>'<label class="tgl"><span class="sw2"><input type="checkbox" data-monx="'+f+'"'+(on?' checked':'')+'><i></i></span><span>'+t+(sm?'<small>'+sm+'</small>':'')+'</span></label>';
+    let x='<div class="moNewBox">'+tg('isNew',!!d.isNew,'Mark it NEW','A NEW tag over it in every player\'s galaxy, and an arrow at the edge of the screen pointing to it while it\'s off screen, until they open it (game 1.25 and newer).');
+    if(d.isNew&&d.newAt)x+='<div class="facts" style="margin:-4px 0 10px"><span class="chip soft">NEW since '+esc(String(d.newAt).replace('T',' '))+'</span><button class="btn sm sec" data-act="monNewAgain">'+ic('refresh')+'NEW again for everyone</button></div>';
+    x+=tg('arrow',!!d.arrow,'Always point to it','An arrow at the edge of the screen whenever it\'s off screen, NEW or not.')+'</div>';
+    const k=h.indexOf('<label class="fld"><span>Star system</span>');if(k>0)h=h.slice(0,k)+x+h.slice(k)}catch(e){console.error(e)}return h}}
+document.addEventListener('change',e=>{const el=e.target;const f=el&&el.dataset&&el.dataset.monx;if(!f||!S.mon.edit)return;const d=S.mon.edit;
+  if(f==='isNew'){d.isNew=el.checked;if(el.checked&&!d.newAt)d.newAt=monNewStamp();if(!el.checked)delete d.newAt;render()}
+  if(f==='arrow'){d.arrow=el.checked}});
+Object.assign(ACT,{
+  monNewAgain:()=>{const d=S.mon.edit;if(!d)return;d.isNew=true;d.newAt=monNewStamp();toast('Save to show it NEW again to every player');render()},
+  monGate:async el=>{const g=monGateNow();const f=el.dataset.v;if(f==='again'){g.isNew=true;g.newAt=monNewStamp()}else g[f]=!g[f];
+    return monSaveList(S.mon.list,f==='again'?'The Salvage Gate is NEW again for every player':'Saved: players see it within a minute',g)}});
+// the Salvage Gate's own switches, at the top of the page
+{const v0=VIEWS.monuments;VIEWS.monuments=()=>{let h=v0();try{if(S.mon.edit||secState('mon'))return h;const g=monGateNow();
+    const sw=(f,on,t,sm)=>'<label class="tgl"><span class="sw2"><input type="checkbox" data-mongate="'+f+'"'+(on?' checked':'')+'><i></i></span><span>'+t+'<small>'+sm+'</small></span></label>';
+    const card='<div class="card moGate"><div class="ph"><h2>'+ic('rocket')+' Salvage Gate <small>built into the game (1.25)</small></h2></div>'
+      +sw('arrow',g.arrow,'Point to it','An arrow at the edge of the galaxy while it\'s off screen (tap it: the camera flies there).')
+      +sw('isNew',g.isNew,'NEW tag','Over it until each player has opened it once.')
+      +'<div class="facts"><span class="chip soft">'+(g.newAt==='g125'?'NEW since 1.25':'NEW since '+esc(g.newAt.replace('T',' ')))+'</span><button class="btn sm sec" data-act="monGate" data-v="again"'+(S.mon.busy?' disabled':'')+'>'+ic('refresh')+'NEW again for everyone</button></div></div>';
+    const k=h.indexOf('<div class="facts" style="margin-bottom:14px">');if(k>0)h=h.slice(0,k)+card+h.slice(k);else h+=card}catch(e){console.error(e)}return h}}
+document.addEventListener('change',e=>{const el=e.target;const f=el&&el.dataset&&el.dataset.mongate;if(!f)return;const g=monGateNow();g[f]=el.checked;monSaveList(S.mon.list,'Saved: players see it within a minute',g)});
+(function(){const st=document.createElement('style');st.textContent='.moNewBox{margin:2px 0 12px;padding:10px 12px 2px;border-radius:12px;background:rgba(255,61,110,.06);box-shadow:inset 0 0 0 1px rgba(255,61,110,.25)}.moGate{margin-bottom:14px}.moGate h2 small{font-weight:500;color:var(--mu2);margin-left:6px;font-size:12px}';document.head.appendChild(st)})();
+
 /* ---------- SWITCHES AND ECONOMY (game 1.23+) ----------
    config/off {list:[{id, n, r:[rule]}], up}: what's switched off. config/econ {o:{"<where>":number}, up}: only the economy
    numbers changed from the built-in ones. lv_core.js (the same file the game uses) checks both; lv_cat.js (made from the
@@ -4437,7 +4481,7 @@ async function banGive(uid){uid=String(uid||'').trim();if(!/^[A-Za-z0-9_-]{6,128
   let ds=[];try{const d=await DB.get('devs/'+uid);ds=(d&&Array.isArray(d.ds)?d.ds:[]).filter(x=>typeof x==='string'&&/^[0-9a-f]{8,64}$/.test(x)).slice(0,5)}catch(e){}
   const ops=[{op:'set',path:'bans/'+uid,data:{uid,why,at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},
     ...ds.map(d=>({op:'set',path:'bandev/'+d,data:{uid,why,at:Date.now(),by:S.user&&S.user.email||''}})),
-    {op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid},{op:'delete',path:'svw_'+weekId()+'/'+uid},{op:'delete',path:'svw_'+weekId(Date.now()-7*DAY)+'/'+uid}];
+    {op:'set',path:'lbhide/'+uid,data:{at:Date.now(),by:S.user&&S.user.email||'',name:String(nm||'').slice(0,40)}},{op:'delete',path:'lb/'+uid},{op:'delete',path:'lbw_'+weekId()+'/'+uid},{op:'delete',path:'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid},{op:'delete',path:'svw_'+weekId()+'/'+uid},{op:'delete',path:'svw_'+weekId(Date.now()-7*DAY)+'/'+uid},...salDel(uid)];
   try{await batchSv(ops);toast((nm?'“'+nm+'”':'They')+' can\'t play now');await load(['bans','lb','lbw','svw','hid']);if(S.prof&&S.prof.uid===uid)profFetch(uid);render()}catch(e){toast(fsErr(e),'err')}}
 async function banLift(uid){let nm='';try{nm=hidName(uid)}catch(e){}
   if(!await ask({title:'Unban '+(nm?'“'+nm+'”':'this player')+'?',body:'Their game comes back at once (it reloads by itself if it\'s open), with everything as it was. They stay off the leaderboards until you put them back from their profile.',ok:'Unban'}))return;
@@ -4773,7 +4817,7 @@ async function delPurge(uid){const ops=[];const del=p=>ops.push({op:'delete',pat
   const [pur,mail,supm,adm,dn]=await Promise.all([DB.query('users/'+uid+'/purchases',{limit:400}).catch(()=>[]),DB.query('mail/'+uid+'/m',{limit:400}).catch(()=>[]),DB.query('sup/'+uid+'/m',{limit:400}).catch(()=>[]),DB.query('adm/'+uid+'/ops',{limit:400}).catch(()=>[]),DB.get('dn/'+uid).catch(()=>null)]);
   pur.forEach(x=>del('users/'+uid+'/purchases/'+x.id));mail.forEach(x=>del('mail/'+uid+'/m/'+x.id));supm.forEach(x=>del('sup/'+uid+'/m/'+x.id));adm.forEach(x=>del('adm/'+uid+'/ops/'+x.id));
   if(dn&&dn.key){const c=await DB.get('names/'+dn.key).catch(()=>null);if(c&&c.uid===uid)del('names/'+dn.key)}
-  ['users/'+uid,'dn/'+uid,'lb/'+uid,'lbw_'+weekId()+'/'+uid,'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid,'svw_'+weekId()+'/'+uid,'svw_'+weekId(Date.now()-7*DAY)+'/'+uid,'sup/'+uid,'supmute/'+uid,'offu/'+uid,'devs/'+uid,'lbhide/'+uid].forEach(del);
+  ['users/'+uid,'dn/'+uid,'lb/'+uid,'lbw_'+weekId()+'/'+uid,'lbw_'+weekId(Date.now()-7*DAY)+'/'+uid,'svw_'+weekId()+'/'+uid,'svw_'+weekId(Date.now()-7*DAY)+'/'+uid,'otw_'+weekId()+'/'+uid,'otw_'+weekId(Date.now()-7*DAY)+'/'+uid,'sva/'+uid,'ota/'+uid,'sup/'+uid,'supmute/'+uid,'offu/'+uid,'devs/'+uid,'lbhide/'+uid].forEach(del);
   await batchSv(ops);
   const m=S.ccdel[uid]||{};await DB.del('ccdel/'+uid);delete S.ccdel[uid];S.p3.purged.push(m.name||shortUid(uid));
   if(S.pl)S.pl=S.pl.filter(x=>x.uid!==uid);if(S.prof&&S.prof.uid===uid)S.prof=null}
@@ -4987,6 +5031,68 @@ if(!ICP.coins)ICP.coins='<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 
 .chip.vsC{background:rgba(90,169,255,.14);color:#9cc8ff;border:1px solid rgba(90,169,255,.45)}
 .ecWho .lvChips{margin-bottom:10px}
 `;document.head.appendChild(st)}
+
+/* ---------- BLACK FRIDAY (game 1.25+), Nov 24 ----------
+   Joe: "make sure ... when Black Friday hits, it's ready, and it's all also controllable in the command center. So if I want
+   to continue the Black Friday sell, I can ... extend it out." The game has Black Friday built in (Fri Nov 27 to the end of
+   Mon Nov 30, midnight on each phone): twice the Gems and Star Shards in every pack, bundle and the Weekly Deal, the
+   License with 5,000 Gems, every menu black with the glitch. Nothing costs less unless a % off is set here.
+   One entry in config/live.sales, {sec:'bf', start, until, pct, bonus, lic, note}, replaces the built-in dates and numbers
+   (older games drop it). Ending it: the entry with an end now. Back to built in: no entry. */
+const BF_DEF={start:new Date(2026,10,27).getTime(),until:new Date(2026,11,1).getTime(),pct:0,bonus:100,lic:5000};
+function bfNorm(x){if(!x)return null;const start=+x.start||0,until=+x.until||0;if(!(until>start))return null;
+  return {id:'bf2026',sec:'bf',start,until,pct:ladInt(x.pct,0,90,0),bonus:ladInt(x.bonus,0,200,100),lic:ladInt(x.lic,0,50000,5000),note:typeof x.note==='string'&&x.note?x.note.slice(0,60):'Black Friday'}}
+{const n0=liveNorm;liveNorm=function(d){const L=n0.apply(this,arguments);try{const all=d&&Array.isArray(d.sales)?d.sales:[];L.sales=L.sales.filter(x=>!(x&&x.sec==='bf'));L.bf=bfNorm(all.filter(x=>x&&x.sec==='bf').pop())}catch(e){}return L}}
+{const o0=liveOut;liveOut=function(L){const out=o0.apply(this,arguments);if(L.bf){if(out.sales.length>=LIM.list){const t=Date.now();const ended=out.sales.filter(x=>x.until<=t&&x.sec!=='ladder'&&x.sec!=='licboost').sort((a,b)=>a.until-b.until);while(out.sales.length>=LIM.list&&ended.length)out.sales.splice(out.sales.indexOf(ended.shift()),1)}
+  if(out.sales.length>=LIM.list)throw new Error('config/live already holds '+LIM.list+' sales. Delete an ended one first.');out.sales.push(L.bf)}return out}}
+function bfCur(){return (S.live&&S.live.bf)||null}
+function bfF(){const c=bfCur()||BF_DEF;return S.bfF||(S.bfF={start:c.start,until:c.until,pct:c.pct,bonus:c.bonus,lic:c.lic})}
+function bfOk(F){return isFinite(F.start)&&isFinite(F.until)&&F.until>F.start&&Number.isInteger(F.pct)&&F.pct>=0&&F.pct<=90&&Number.isInteger(F.bonus)&&F.bonus>=0&&F.bonus<=200&&Number.isInteger(F.lic)&&F.lic>=0&&F.lic<=50000}
+function bfGives(x){const L=[];if(x.bonus>0)L.push(x.bonus===100?'twice the Gems and Star Shards in every pack, bundle and the Weekly Deal':'+'+x.bonus+'% Gems and Star Shards in every pack, bundle and the Weekly Deal');
+  if(x.lic>2000)L.push('the License comes with '+x.lic.toLocaleString()+' Gems (normally 2,000)');L.push(x.pct>0?x.pct+'% off everything bought with Gems or Star Shards':'nothing costs less');return L.join('; ')}
+function bfCardHTML(){const t=Date.now(),c=bfCur(),F=bfF(),x=c||BF_DEF;const st=x.until<=t?['ended','Ended']:x.start>t?['sched',c?'Scheduled':'Built in · scheduled']:['live',c?'Live':'Built in · live'];
+  const days=d=>'<button class="qb" data-act="bfQ" data-v="'+d+'">'+d+'</button>';
+  return '<section class="card" id="bfCard" aria-labelledby="bfT" style="border-color:#ff2a55;box-shadow:-2px 0 0 #ff2a55,2px 0 0 #2de2e6"><div class="ph"><h2 id="bfT">Black Friday</h2><span class="chip st '+st[0]+'">'+st[1]+'</span></div>'
+  +'<p class="hint" style="margin-top:0">'+(c?'Your Black Friday: ':'Built into game 1.25: Fri Nov 27 to the end of Mon Nov 30, midnight on each phone. ')+'<b>'+esc(span(x.start,x.until))+'</b>. It gives '+esc(bfGives(x))+'. Every menu in the game turns black with the glitch while it runs. Older games don\'t have it.</p>'
+  +'<div class="row">'+fld('bf-start','Starts','<input class="inp" type="datetime-local" id="bf-start" data-bf="start" value="'+toInp(F.start)+'">','bfStart')+fld('bf-until','Ends','<input class="inp" type="datetime-local" id="bf-until" data-bf="until" value="'+toInp(F.until)+'">','bfUntil')+'</div>'
+  +'<div class="qrow"><span class="qk">Extend the end</span><button class="qb" data-act="bfQ" data-v="1d">+1 day</button><button class="qb" data-act="bfQ" data-v="2d">+2 days</button><button class="qb" data-act="bfQ" data-v="7d">+1 week</button><button class="qb" data-act="bfQ" data-v="dec7">Through Sun Dec 6</button></div>'
+  +'<div class="row">'+fld('bf-bonus','More in every pack <small>% · 100 = twice</small>','<input class="inp" type="number" inputmode="numeric" id="bf-bonus" data-bf="bonus" min="0" max="200" step="10" value="'+F.bonus+'">','bfBonus')
+  +fld('bf-lic','License Gems <small>normally 2,000</small>','<input class="inp" type="number" inputmode="numeric" id="bf-lic" data-bf="lic" min="0" max="50000" step="500" value="'+F.lic+'">','bfLic')
+  +fld('bf-pct','% off Gem and Shard prices <small>0 = none</small>','<input class="inp" type="number" inputmode="numeric" id="bf-pct" data-bf="pct" min="0" max="90" step="5" value="'+F.pct+'">','bfPct')+'</div>'
+  +'<p class="hint" id="bfPv">'+esc(bfPreview(F))+'</p>'
+  +'<div class="facts">'+(c?'<button class="btn sec" data-act="bfReset">Back to built in</button>':'')+(x.start<=t&&x.until>t?'<button class="btn sec" data-act="bfEnd">'+ic('stop')+'<span>End it now</span></button>':x.start>t?'<button class="btn sec" data-act="bfEnd">Cancel it</button>':'')
+  +'<button class="btn lg" data-act="bfSave" id="bfSaveBtn"'+(bfOk(F)&&F.until>t?'':' disabled')+'>Save</button></div>'
+  +'<p class="note">Saved times are the same moment for everyone (shown in your time). Games pick it up within a minute.</p></section>'}
+function bfPreview(F){if(!bfOk(F))return 'Pick an end after the start. More in packs 0–200%, License Gems 0–50,000, % off 0–90.';if(F.until<=Date.now())return 'That end is already past: pick a later one, or use End it now.';
+  return 'Runs '+span(F.start,F.until)+' ('+Math.round((F.until-F.start)/HOUR)+' hours): '+bfGives(F)+'.'}
+function bfPaint(){const F=bfF();const p=$('#bfPv');if(p)p.textContent=bfPreview(F);const b=$('#bfSaveBtn');if(b)b.disabled=!(bfOk(F)&&F.until>Date.now());
+  const a=$('#bf-start'),z=$('#bf-until');if(a&&document.activeElement!==a)a.value=toInp(F.start);if(z&&document.activeElement!==z)z.value=toInp(F.until)}
+document.addEventListener('input',e=>{const el=e.target,k=el&&el.dataset&&el.dataset.bf;if(!k)return;const F=bfF();
+  if(k==='start'||k==='until')F[k]=fromInp(el.value);else{const v=el.value===''?NaN:Number(el.value);F[k]=Number.isInteger(v)?v:NaN}bfPaint()});
+function bfQuick(v){const F=bfF();const base=isFinite(F.until)?F.until:BF_DEF.until;if(v==='1d')F.until=base+DAY;else if(v==='2d')F.until=base+2*DAY;else if(v==='7d')F.until=base+7*DAY;else if(v==='dec7')F.until=new Date(2026,11,7).getTime();bfPaint()}
+async function bfSave(){const F=bfF();if(!bfOk(F)||F.until<=Date.now()||S.busy){toast('Fix Black Friday: an end after the start that is still to come','err');return}
+  S.busy=true;try{await liveTx(L=>{L.bf=bfNorm(Object.assign({note:'Black Friday'},F))});S.bfF=null;toast('Black Friday saved: '+span(F.start,F.until));render()}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
+async function bfEndNow(){const x=bfCur()||BF_DEF,t=Date.now();const live=x.start<=t;if(!await ask({title:live?'End Black Friday now?':'Cancel Black Friday?',body:live?'Packs go back to normal and the menus to their colours within a minute. You can start it again by saving a later end.':'It won\'t start on '+when(x.start)+'. You can bring it back with Back to built in, or by saving dates.',ok:live?'End it':'Cancel it'}))return;
+  S.busy=true;try{await liveTx(L=>{const s=Math.min(x.start,t-2);L.bf=bfNorm(Object.assign({},x,{start:s,until:Math.max(s+1,t-1)}))});S.bfF=null;toast(live?'Black Friday ended':'Black Friday cancelled');render()}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
+async function bfReset(){if(!await ask({title:'Back to the built-in Black Friday?',body:'Fri Nov 27 to the end of Mon Nov 30 (midnight on each phone): twice the Gems and Shards in packs, the License with 5,000 Gems, nothing cheaper.',ok:'Back to built in'}))return;
+  S.busy=true;try{await liveTx(L=>{L.bf=null});S.bfF=null;toast('Black Friday: back to built in');render()}catch(e){toast(fsErr(e),'err')}finally{S.busy=false}}
+Object.assign(ACT,{bfQ:el=>bfQuick(el.dataset.v),bfSave:()=>bfSave(),bfEnd:()=>bfEndNow(),bfReset:()=>bfReset()});
+{const v0=VIEWS.store;VIEWS.store=function(){let h=v0.apply(this,arguments);try{if(!secState('live')){const c=bfCardHTML();const i=h.indexOf('<section class="card" id="ladCard"');h=i>=0?h.slice(0,i)+c+h.slice(i):h+c}}catch(e){console.error(e)}return h}}
+
+/* ---------- THE FIRESTORE RULES, to copy (Nov 24) ----------
+   Joe: "make sure that the new Firestore rules are in the command center, so I can copy and paste it from the command
+   center there." Game updates → Firestore rules: the whole file for game 1.25 (fs_rules.js, made from the game's
+   firebase/firestore.rules), a Copy button and where to paste it. */
+function fsRulesLoad(){if(window.FS_RULES||S.fsrLoading)return;S.fsrLoading=true;const s=document.createElement('script');s.src='fs_rules.js?v='+Date.now().toString(36).slice(0,-4);s.onload=s.onerror=()=>{S.fsrLoading=false;render()};document.head.appendChild(s)}
+function fsRulesHTML(){const R=window.FS_RULES;if(!R)fsRulesLoad();
+  return '<section class="card" id="fsrCard" aria-labelledby="fsrT"><div class="ph"><h2 id="fsrT">Firestore rules</h2><span class="chip st sched">For game '+esc(R?R.v:'1.25')+'</span></div>'
+  +'<p class="hint" style="margin-top:0">Publish these before game '+esc(R?R.v:'1.25')+' goes out: its new parts (the Salvage boards, Survival and Overtime, weekly and all-time; player stats; the Monuments switches) only save once they are in.</p>'
+  +'<ol class="hint" style="margin:0 0 10px 18px;padding:0"><li>Tap <b>Copy the rules</b>.</li><li>Firebase console → your project → Firestore Database → <b>Rules</b>.</li><li>Select everything there, paste, then <b>Publish</b>.</li></ol>'
+  +(R?'<div class="facts" style="justify-content:flex-start"><button class="btn lg" data-act="fsrCopy">'+ic('copy')+'<span>Copy the rules</span></button><span class="sub">'+R.lines+' lines · '+R.txt.length.toLocaleString()+' characters</span></div>'
+    +'<details style="margin-top:10px"><summary class="sub" style="cursor:pointer">Show them</summary><pre style="max-height:420px;overflow:auto;white-space:pre;font:12px/1.45 ui-monospace,Menlo,monospace;background:rgba(0,0,0,.35);padding:10px;border-radius:10px;margin-top:8px">'+esc(R.txt)+'</pre></details>'
+    :'<div class="empty sm">Loading the rules…</div>')+'</section>'}
+Object.assign(ACT,{fsrCopy:()=>{const R=window.FS_RULES;if(!R)return;return copyText(R.txt).then(()=>toast('Copied: paste it in Firebase → Firestore → Rules, then Publish'),()=>toast('Copy failed: open “Show them” and copy by hand','err'))}});
+{const v0=VIEWS.updates;VIEWS.updates=function(){let h=v0.apply(this,arguments);try{const k='</p></div></div>';const i=h.startsWith('<div class="pagehead">')?h.indexOf(k):-1;const c=fsRulesHTML();h=i>=0?h.slice(0,i+k.length)+c+h.slice(i+k.length):c+h}catch(e){console.error(e)}return h}}
 
 /* ---------- boot ---------- */
 S.tab=pageFor(location.hash.slice(1)||'home');
